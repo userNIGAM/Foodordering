@@ -1,35 +1,33 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import AuthPage from "./Components/Auth/AuthPage";
-import Dashboard from "./components/Auth/Dashboard";
-import ProtectedRoute from "./components/Auth/ProtectedRoute";
+import React, { useState } from "react";
+import Navbar from "./Components/pages/Navbar";
+import Dashboard from "./Components/Dashboard";
+import Modal from "./components/Modal";
 import Home from "./Components/pages/Home";
-import { AuthContext } from "./context/AuthContext";
-import { useContext } from "react";
+import { CartProvider } from "./contexts/CartContext";
+import ProductsGrid from "./Components/pages/products/ProductsGrid";
+
 function App() {
-  const { user } = useContext(AuthContext);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [user, setUser] = useState({
+    name: "John Doe",
+    email: "john@example.com",
+    isVerified: true,
+  });
+
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={user ? <Home /> : <Navigate to="/login" replace />}
-        />
-        <Route path="/login" element={<AuthPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+    <CartProvider>
+      {" "}
+      {/* Move CartProvider to wrap ALL components */}
+      <div className="App">
+        <Navbar />
+        <Home /> {/* Home is now inside CartProvider */}
+        <ProductsGrid />
+      </div>
+      {/* Dashboard Modal */}
+      <Modal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}>
+        <Dashboard user={user} onLogout={() => setIsProfileOpen(false)} />
+      </Modal>
+    </CartProvider>
   );
 }
 
