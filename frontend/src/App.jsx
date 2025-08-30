@@ -19,6 +19,8 @@ import ProtectedRoute from "./Components/auth/ProtectedRoute";
 import { Loader2 } from "lucide-react";
 import AnimatedSection from "./components/AnimatedSection"; // Import the new component
 
+import AdminDashboard from "./admin/AdminDashboard";
+
 // App content
 function AppContent() {
   const { user, logout, loading } = useContext(AuthContext);
@@ -66,6 +68,21 @@ function AppContent() {
                     }}
                   >
                     <FoodMenu />
+                  </AnimatedSection>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AnimatedSection
+                    variant={{
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1 },
+                    }}
+                  >
+                    <AdminDashboard />
                   </AnimatedSection>
                 </ProtectedRoute>
               }

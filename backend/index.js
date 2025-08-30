@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import menuRoutes from "./routes/menuRoutes.js";
 import { ConnectDB } from "./config/db.js";
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/menu-items", menuRoutes);
 
 // MongoDB connect
 ConnectDB();

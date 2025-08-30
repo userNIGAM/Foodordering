@@ -28,7 +28,7 @@ const Modal = ({ isOpen, onClose, children, fullWidth = false }) => {
                 className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 transition-colors z-10"
                 aria-label="Close modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 relative left-[-120px] top-[40px]" />
               </button>
               {children}
             </motion.div>
