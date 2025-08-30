@@ -1,34 +1,97 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { CartProvider } from "./contexts/CartContext";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider, AuthContext } from "./context/AuthContext";
+
 import Navbar from "./Components/pages/Navbar";
-import Dashboard from "./Components/Dashboard";
+import Dashboard from "./Components/Auth/Dashboard";
 import Modal from "./components/Modal";
 import Home from "./Components/pages/Home";
-import { CartProvider } from "./contexts/CartContext";
-import ProductsGrid from "./Components/pages/products/ProductsGrid";
+import FoodMenu from "./Components/menu/FoodMenu";
+import AuthPage from "./Components/Auth/AuthPage";
+import ProtectedRoute from "./Components/auth/ProtectedRoute";
+import { Loader2 } from "lucide-react";
+import AnimatedSection from "./components/AnimatedSection"; // Import the new component
 
-function App() {
+// App content
+function AppContent() {
+  const { user, logout, loading } = useContext(AuthContext);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john@example.com",
-    isVerified: true,
-  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
 
   return (
     <CartProvider>
-      {" "}
-      {/* Move CartProvider to wrap ALL components */}
-      <div className="App">
-        <Navbar />
-        <Home /> {/* Home is now inside CartProvider */}
-        <ProductsGrid />
-      </div>
-      {/* Dashboard Modal */}
-      <Modal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)}>
-        <Dashboard user={user} onLogout={() => setIsProfileOpen(false)} />
-      </Modal>
+      <Router>
+        <div className="App">
+          {user && (
+            <Navbar onProfileClick={() => setIsProfileOpen(true)} user={user} />
+          )}
+
+          <Routes>
+            <Route
+              path="/auth"
+              element={user ? <Navigate to="/" replace /> : <AuthPage />}
+            />
+
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home /> {/* Now Home contains all the sections */}
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/menu"
+              element={
+                <ProtectedRoute>
+                  <AnimatedSection
+                    variant={{
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1 },
+                    }}
+                  >
+                    <FoodMenu />
+                  </AnimatedSection>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+
+          <Toaster position="bottom-right" />
+          {user && (
+            <Modal
+              isOpen={isProfileOpen}
+              onClose={() => setIsProfileOpen(false)}
+              fullWidth={true}
+            >
+              <Dashboard user={user} onLogout={logout} />
+            </Modal>
+          )}
+        </div>
+      </Router>
     </CartProvider>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Mail, KeyRound, ArrowLeft, Loader2 } from "lucide-react";
 import Input from "./Input";
 import Card from "./Card";
-import api from "../services/api";
+import api from "../../services/api";
 
 const ForgotPasswordForm = ({ onModeChange }) => {
   const [email, setEmail] = useState("");

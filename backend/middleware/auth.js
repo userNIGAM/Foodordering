@@ -11,9 +11,10 @@ export const protect = async (req, res, next) => {
     }
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Not authorized" });
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, no token",
+      });
     }
 
     // Verify token
@@ -23,15 +24,28 @@ export const protect = async (req, res, next) => {
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Not authorized" });
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, user not found",
+      });
     }
 
     req.user = user;
     next();
   } catch (error) {
     console.error("Auth middleware error:", error);
-    return res.status(401).json({ success: false, message: "Not authorized" });
+
+    // More specific error messages for different JWT errors
+    let message = "Not authorized";
+    if (error.name === "TokenExpiredError") {
+      message = "Token expired";
+    } else if (error.name === "JsonWebTokenError") {
+      message = "Invalid token";
+    }
+
+    return res.status(401).json({
+      success: false,
+      message,
+    });
   }
 };

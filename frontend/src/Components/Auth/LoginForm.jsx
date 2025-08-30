@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, LogIn, Loader2 } from "lucide-react";
@@ -6,29 +6,34 @@ import Input from "./Input";
 import SocialButtons from "./SocialButtons";
 import Divider from "./Divider";
 import Card from "./Card";
-import api from "../services/api";
+import { AuthContext } from "../../context/AuthContext";
 
-const LoginForm = ({ onModeChange, onLoginSuccess }) => {
+const LoginForm = ({ onModeChange }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const { login } = useContext(AuthContext);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      return toast.error("Please fill in all fields");
-    }
+    if (!email || !password) return toast.error("Please fill in all fields");
 
     try {
       setLoading(true);
-      const { data } = await api.post("api/auth/login", { email, password });
-      toast.success("Logged in successfully");
-      if (onLoginSuccess) onLoginSuccess(data?.user);
+      const result = await login(email, password);
+
+      if (result.success) {
+        toast.success("Logged in successfully");
+        // The context will update the user state, which will trigger navigation
+      } else {
+        toast.error(result.message || "Login failed");
+      }
     } catch (err) {
-      const msg = err?.response?.data?.message || "Something went wrong";
-      toast.error(msg);
+      console.error("Login error", err);
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -109,7 +114,6 @@ const LoginForm = ({ onModeChange, onLoginSuccess }) => {
         </motion.button>
 
         <Divider />
-
         <SocialButtons />
 
         <p className="mt-4 text-center text-sm text-slate-600">

@@ -14,7 +14,7 @@ import Input from "./Input";
 import SocialButtons from "./SocialButtons";
 import Divider from "./Divider";
 import Card from "./Card";
-import api from "../services/api";
+import api from "../../services/api";
 
 const SignupForm = ({ onModeChange }) => {
   const [name, setName] = useState("");

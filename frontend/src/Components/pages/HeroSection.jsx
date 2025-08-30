@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, ChevronRight, Star, Clock, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const [loaded, setLoaded] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Trigger animations after component mounts
@@ -10,7 +12,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden" id="home">
       {/* Hero Section */}
       <section className="w-full bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800 py-16 md:py-24 px-6 md:px-12 my-5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
@@ -46,7 +48,10 @@ const HeroSection = () => {
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
 
-              <button className="border border-slate-300 bg-white text-slate-700 px-8 py-4 rounded-xl font-medium shadow-sm hover:shadow-md transition-all mx-auto md:mx-0">
+              <button
+                onClick={() => navigate("/menu")}
+                className="border border-slate-300 bg-white text-slate-700 px-8 py-4 rounded-xl font-medium shadow-sm hover:shadow-md transition-all mx-auto md:mx-0"
+              >
                 View Menu
               </button>
             </div>

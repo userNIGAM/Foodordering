@@ -1,10 +1,13 @@
 // src/contexts/CartContext.jsx
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useReducer, useEffect } from "react";
+import toast from "react-hot-toast";
 
 const CartContext = createContext();
 
 // Cart reducer function
 const cartReducer = (state, action) => {
+  let newState;
+
   switch (action.type) {
     case "ADD_TO_CART":
       // Check if item already exists in cart
@@ -13,7 +16,7 @@ const cartReducer = (state, action) => {
       );
 
       if (existingItem) {
-        const newState = {
+        newState = {
           ...state,
           items: state.items.map((item) =>
             item.id === action.payload.id
@@ -21,19 +24,16 @@ const cartReducer = (state, action) => {
               : item
           ),
         };
-        console.log("Updated cart state:", newState);
-        return newState;
       } else {
-        const newState = {
+        newState = {
           ...state,
           items: [...state.items, { ...action.payload, quantity: 1 }],
         };
-        console.log("Updated cart state:", newState);
-        return newState;
       }
+      return newState;
 
     case "INCREASE_QTY":
-      return {
+      newState = {
         ...state,
         items: state.items.map((item) =>
           item.id === action.payload
@@ -41,9 +41,10 @@ const cartReducer = (state, action) => {
             : item
         ),
       };
+      return newState;
 
     case "DECREASE_QTY":
-      return {
+      newState = {
         ...state,
         items: state.items.map((item) =>
           item.id === action.payload && item.quantity > 1
@@ -51,17 +52,27 @@ const cartReducer = (state, action) => {
             : item
         ),
       };
+      return newState;
 
     case "REMOVE_ITEM":
-      return {
+      newState = {
         ...state,
         items: state.items.filter((item) => item.id !== action.payload),
       };
+      // console.log("Updated cart state:", newState);
+      return newState;
 
     case "CLEAR_CART":
-      return {
+      newState = {
         ...state,
         items: [],
+      };
+      return newState;
+
+    case "LOAD_CART_FROM_STORAGE":
+      // Ensure the loaded state has the correct structure
+      return {
+        items: Array.isArray(action.payload.items) ? action.payload.items : [],
       };
 
     default:
@@ -69,13 +80,46 @@ const cartReducer = (state, action) => {
   }
 };
 
+// Load cart from localStorage
+const loadCartFromStorage = () => {
+  try {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      const parsedCart = JSON.parse(storedCart);
+
+      // Ensure the parsed cart has the correct structure
+      return {
+        items: Array.isArray(parsedCart.items) ? parsedCart.items : [],
+      };
+    }
+  } catch (error) {
+    // console.error("Error loading cart from localStorage:", error);
+  }
+  return { items: [] };
+};
+
 // Cart provider component
 export const CartProvider = ({ children }) => {
-  const [cartState, dispatch] = useReducer(cartReducer, { items: [] });
+  // Initialize with a default state that has the correct structure
+  const [cartState, dispatch] = useReducer(cartReducer, { items: [] }, () => {
+    // Initialize state from localStorage
+    const loadedState = loadCartFromStorage();
+    return loadedState;
+  });
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem("cart", JSON.stringify(cartState));
+      // console.log("Saved cart to localStorage:", cartState);
+    } catch (error) {
+      // console.error("Error saving cart to localStorage:", error);
+    }
+  }, [cartState]);
 
   const addToCart = (product) => {
-    console.log("Adding to cart:", product);
     dispatch({ type: "ADD_TO_CART", payload: product });
+    toast.success(`${product.name} added to cart!`);
   };
 
   const increaseQty = (itemId) => {
@@ -95,20 +139,29 @@ export const CartProvider = ({ children }) => {
   };
 
   const getCartTotal = () => {
+    if (!cartState.items || !Array.isArray(cartState.items)) {
+      return 0;
+    }
     return cartState.items.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + (item.price || 0) * (item.quantity || 0),
       0
     );
   };
 
   const getCartItemsCount = () => {
-    return cartState.items.reduce((total, item) => total + item.quantity, 0);
+    if (!cartState.items || !Array.isArray(cartState.items)) {
+      return 0;
+    }
+    return cartState.items.reduce(
+      (total, item) => total + (item.quantity || 0),
+      0
+    );
   };
 
   return (
     <CartContext.Provider
       value={{
-        items: cartState.items,
+        items: cartState.items || [],
         addToCart,
         increaseQty,
         decreaseQty,

@@ -10,6 +10,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom"; // Added useLocation
 import CartModal from "./cart/CartPage";
 import { useCart } from "../../contexts/CartContext";
 
@@ -17,6 +18,7 @@ const Navbar = ({ onProfileClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const location = useLocation(); // Get current location
 
   // Get cart state and functions from the context
   const {
@@ -26,11 +28,6 @@ const Navbar = ({ onProfileClick }) => {
     removeItem,
     getCartItemsCount,
   } = useCart();
-
-  // Debug effect - REMOVE THIS AFTER FIXING
-  useEffect(() => {
-    console.log("Navbar cart items:", cartItems);
-  }, [cartItems]);
 
   // Handle scroll event to add shadow and background
   useEffect(() => {
@@ -51,14 +48,34 @@ const Navbar = ({ onProfileClick }) => {
     if (isOpen) setIsOpen(false);
   };
 
-  // Navigation items data
+  // Navigation items data - Updated for React Router
   const navItems = [
-    { name: "Home", icon: Home, href: "#home" },
-    { name: "Products", icon: ShoppingBag, href: "#products" },
-    { name: "Services", icon: Briefcase, href: "#services" },
-    { name: "About Us", icon: Info, href: "#about" },
-    { name: "Contact", icon: Mail, href: "#contact" },
+    { name: "Home", icon: Home, path: "/" },
+    { name: "Products", icon: ShoppingBag, path: "/#products" },
+    { name: "Services", icon: Briefcase, path: "/#services" },
+    { name: "About Us", icon: Info, path: "/#about" },
+    { name: "Contact", icon: Mail, path: "/#contact" },
+    { name: "Menu", icon: Menu, path: "/menu" }, // Added Menu item
   ];
+
+  // Helper function to handle hash links
+  const handleHashLink = (path, e) => {
+    if (path.includes("#")) {
+      e.preventDefault();
+      const [basePath, hash] = path.split("#");
+
+      // If we're already on the home page, just scroll to section
+      if (location.pathname === "/") {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        // Navigate to home page first, then scroll to section
+        window.location.href = path;
+      }
+    }
+  };
 
   return (
     <>
@@ -74,7 +91,9 @@ const Navbar = ({ onProfileClick }) => {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-indigo-700">Order</h1>
+              <Link to="/" className="text-2xl font-bold text-indigo-700">
+                Order
+              </Link>
             </div>
 
             {/* Desktop Navigation */}
@@ -82,16 +101,27 @@ const Navbar = ({ onProfileClick }) => {
               <div className="ml-10 flex items-baseline space-x-6">
                 {navItems.map((item) => {
                   const Icon = item.icon;
-                  return (
+                  return item.path.includes("#") ? (
                     <a
                       key={item.name}
-                      href={item.href}
+                      href={item.path}
+                      onClick={(e) => handleHashLink(item.path, e)}
                       className="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center group"
                       aria-label={`Navigate to ${item.name}`}
                     >
                       <Icon className="h-4 w-4 mr-2 opacity-70 group-hover:opacity-100" />
                       {item.name}
                     </a>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      className="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center group"
+                      aria-label={`Navigate to ${item.name}`}
+                    >
+                      <Icon className="h-4 w-4 mr-2 opacity-70 group-hover:opacity-100" />
+                      {item.name}
+                    </Link>
                   );
                 })}
 
@@ -103,7 +133,7 @@ const Navbar = ({ onProfileClick }) => {
                 >
                   <ShoppingCart className="h-4 w-4 mr-2 opacity-70 group-hover:opacity-100" />
                   Cart
-                  {cartItems.length > 0 && (
+                  {cartItems && cartItems.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                       {getCartItemsCount()}
                     </span>
@@ -154,17 +184,31 @@ const Navbar = ({ onProfileClick }) => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
             {navItems.map((item) => {
               const Icon = item.icon;
-              return (
+              return item.path.includes("#") ? (
                 <a
                   key={item.name}
-                  href={item.href}
-                  onClick={handleNavClick}
+                  href={item.path}
+                  onClick={(e) => {
+                    handleHashLink(item.path, e);
+                    handleNavClick();
+                  }}
                   className="text-slate-700 hover:text-indigo-600 hover:bg-slate-50 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 flex items-center"
                   aria-label={`Navigate to ${item.name}`}
                 >
                   <Icon className="h-5 w-5 mr-3 opacity-70" />
                   {item.name}
                 </a>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={handleNavClick}
+                  className="text-slate-700 hover:text-indigo-600 hover:bg-slate-50 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 flex items-center"
+                  aria-label={`Navigate to ${item.name}`}
+                >
+                  <Icon className="h-5 w-5 mr-3 opacity-70" />
+                  {item.name}
+                </Link>
               );
             })}
 
@@ -179,7 +223,7 @@ const Navbar = ({ onProfileClick }) => {
             >
               <ShoppingCart className="h-5 w-5 mr-3 opacity-70" />
               Cart
-              {cartItems.length > 0 && (
+              {cartItems && cartItems.length > 0 && (
                 <span className="ml-auto bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {getCartItemsCount()}
                 </span>
@@ -201,11 +245,11 @@ const Navbar = ({ onProfileClick }) => {
         </div>
       </nav>
 
-      {/* Cart Modal - Use the cartItems from context */}
+      {/* Cart Modal */}
       <CartModal
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
+        cartItems={cartItems || []}
         increaseQty={increaseQty}
         decreaseQty={decreaseQty}
         removeItem={removeItem}

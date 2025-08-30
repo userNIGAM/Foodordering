@@ -86,9 +86,7 @@ const ProductCard = ({ product }) => {
           <h3 className="font-bold text-slate-800 text-lg">{product.name}</h3>
           <span className="text-indigo-600 font-bold">₹{product.price}</span>
         </div>
-
         <p className="text-slate-600 text-sm mb-3 flex-grow">{product.desc}</p>
-
         {/* Rating and Category */}
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center">
@@ -101,7 +99,6 @@ const ProductCard = ({ product }) => {
             {product.category}
           </span>
         </div>
-
         {/* Additional Info */}
         <div className="flex justify-between text-sm text-slate-500 mb-4">
           <span>⏱️ {product.cookTime}</span>
@@ -112,7 +109,6 @@ const ProductCard = ({ product }) => {
             {product.spicyLevel}
           </span>
         </div>
-
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}

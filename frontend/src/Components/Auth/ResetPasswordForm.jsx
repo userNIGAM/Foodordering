@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, KeyRound, ArrowLeft, Loader2 } from "lucide-react";
 import Input from "./Input";
 import Card from "./Card";
-import api from "../services/api";
-
+import api from "../../services/api";
 const ResetPasswordForm = ({ email, onModeChange }) => {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");

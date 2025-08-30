@@ -1,31 +1,55 @@
-import { createContext, useState, useEffect } from "react";
-import Cookies from "js-cookie"; // install: npm i js-cookie
+// context/AuthContext.jsx
+import { createContext, useState, useEffect, useCallback } from "react";
+import api from "../services/api"; // Use your axios instance
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load user from cookies on refresh
-  useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
-      setUser({ token }); // you can fetch user details with token if needed
+  // Check if user is authenticated on app load
+  const checkAuth = useCallback(async () => {
+    try {
+      const res = await api.get("/api/auth/me");
+      setUser(res.data.user);
+    } catch (err) {
+      setUser(null);
+      console.error("Auth check failed:", err);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  const login = (token) => {
-    Cookies.set("token", token, { expires: 7 }); // expires in 7 days
-    setUser({ token });
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  // Login function
+  const login = async (email, password) => {
+    try {
+      const res = await api.post("/api/auth/login", { email, password });
+      setUser(res.data.user);
+      return { success: true };
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Login failed";
+      return { success: false, message: msg };
+    }
   };
 
-  const logout = () => {
-    Cookies.remove("token");
-    setUser(null);
+  // Logout function
+  const logout = async () => {
+    try {
+      await api.post("/api/auth/logout");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, api }}>
       {children}
     </AuthContext.Provider>
   );
