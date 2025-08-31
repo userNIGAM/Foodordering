@@ -263,6 +263,26 @@ const FoodMenu = () => {
             ))}
           </div>
         )}
+        {cart.length > 0 && (
+          <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg z-10">
+            <div className="flex items-center mb-2">
+              <i className="fas fa-shopping-cart text-[#8B2635] mr-2"></i>
+              <span className="font-bold">{totalItems} items</span>
+            </div>
+            <div className="font-bold mb-2">
+              Total: $
+              {cart
+                .reduce((total, item) => total + item.price * item.quantity, 0)
+                .toFixed(2)}
+            </div>
+            <Link
+              to="/order"
+              className="block w-full bg-[#8B2635] text-white px-3 py-2 rounded text-sm text-center"
+            >
+              Proceed to Checkout
+            </Link>
+          </div>
+        )}
 
         {/* Newsletter Section */}
         <section className="py-16 bg-[#88A096] text-white rounded-xl mt-16 text-center">

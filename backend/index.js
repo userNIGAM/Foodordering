@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import adminRoutes from "./routes/admin.js";
+import orderRoutes from "./routes/orderRoutes.js";
 import { ConnectDB } from "./config/db.js";
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/menu-items", menuRoutes);
 app.use("/api/admin", adminRoutes); // Add admin routes
+app.use("/api/orders", orderRoutes);
 
 // MongoDB connect
 ConnectDB();

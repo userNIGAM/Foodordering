@@ -20,6 +20,8 @@ import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute";
 import { Loader2 } from "lucide-react";
 import AnimatedSection from "./components/AnimatedSection";
 import AdminDashboard from "./admin/AdminDashboard";
+import OrderForm from "./components/OrderForm";
+import OrderConfirmation from "./Components/pages/OrderConfirmation";
 
 function AppContent() {
   const { user, logout, loading, isAdmin } = useContext(AuthContext);
@@ -94,6 +96,8 @@ function AppContent() {
 
             {/* Redirect any unknown routes */}
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/order" element={<OrderForm />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
           </Routes>
 
           <Toaster position="bottom-right" />
