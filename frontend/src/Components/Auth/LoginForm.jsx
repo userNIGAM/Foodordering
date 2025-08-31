@@ -1,3 +1,4 @@
+// src/Components/Auth/LoginForm.jsx
 import React, { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
@@ -7,6 +8,7 @@ import SocialButtons from "./SocialButtons";
 import Divider from "./Divider";
 import Card from "./Card";
 import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = ({ onModeChange }) => {
   const [email, setEmail] = useState("");
@@ -15,6 +17,7 @@ const LoginForm = ({ onModeChange }) => {
   const [loading, setLoading] = useState(false);
 
   const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +30,13 @@ const LoginForm = ({ onModeChange }) => {
 
       if (result.success) {
         toast.success("Logged in successfully");
-        // The context will update the user state, which will trigger navigation
+
+        // Redirect based on user role
+        if (result.user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/");
+        }
       } else {
         toast.error(result.message || "Login failed");
       }

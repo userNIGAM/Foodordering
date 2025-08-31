@@ -1,11 +1,17 @@
 // backend/routes/admin.js
-const express = require("express");
-const router = express.Router();
-const authAdmin = require("../middleware/authAdmin"); // Import the middleware
+import express from "express";
+import authAdmin from "../middleware/authAdmin.js";
 
-// This route is now protected by both authentication AND admin check
-router.get("/orders", authAdmin, (req, res) => {
-  // ... logic to get all orders from the database
+const router = express.Router();
+
+// Protected admin route example
+router.get("/orders", authAdmin, async (req, res) => {
+  try {
+    // Your admin logic here
+    res.json({ message: "Admin orders data" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-module.exports = router;
+export default router;

@@ -14,7 +14,7 @@ import { Link, useLocation } from "react-router-dom"; // Added useLocation
 import CartModal from "./cart/CartPage";
 import { useCart } from "../../contexts/CartContext";
 
-const Navbar = ({ onProfileClick }) => {
+const Navbar = ({ onProfileClick, user, isAdmin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -254,6 +254,13 @@ const Navbar = ({ onProfileClick }) => {
         decreaseQty={decreaseQty}
         removeItem={removeItem}
       />
+      {user && (
+        <Navbar
+          onProfileClick={() => setIsProfileOpen(true)}
+          user={user}
+          isAdmin={isAdmin} // Add this line
+        />
+      )}
     </>
   );
 };

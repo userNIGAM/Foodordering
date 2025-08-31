@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useContext, useState } from "react";
 import {
   BrowserRouter as Router,
@@ -8,22 +9,20 @@ import {
 import { CartProvider } from "./contexts/CartContext";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
-
 import Navbar from "./Components/pages/Navbar";
 import Dashboard from "./Components/Auth/Dashboard";
 import Modal from "./components/Modal";
 import Home from "./Components/pages/Home";
 import FoodMenu from "./Components/menu/FoodMenu";
 import AuthPage from "./Components/Auth/AuthPage";
-import ProtectedRoute from "./Components/auth/ProtectedRoute";
+import ProtectedRoute from "./Components/Auth/ProtectedRoute";
+import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute";
 import { Loader2 } from "lucide-react";
-import AnimatedSection from "./components/AnimatedSection"; // Import the new component
-
+import AnimatedSection from "./components/AnimatedSection";
 import AdminDashboard from "./admin/AdminDashboard";
 
-// App content
 function AppContent() {
-  const { user, logout, loading } = useContext(AuthContext);
+  const { user, logout, loading, isAdmin } = useContext(AuthContext);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   if (loading) {
@@ -39,7 +38,11 @@ function AppContent() {
       <Router>
         <div className="App">
           {user && (
-            <Navbar onProfileClick={() => setIsProfileOpen(true)} user={user} />
+            <Navbar
+              onProfileClick={() => setIsProfileOpen(true)}
+              user={user}
+              isAdmin={isAdmin}
+            />
           )}
 
           <Routes>
@@ -52,7 +55,7 @@ function AppContent() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <Home /> {/* Now Home contains all the sections */}
+                  <Home />
                 </ProtectedRoute>
               }
             />
@@ -72,10 +75,11 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/admin/dashboard"
               element={
-                <ProtectedRoute>
+                <AdminProtectedRoute>
                   <AnimatedSection
                     variant={{
                       hidden: { opacity: 0 },
@@ -84,9 +88,12 @@ function AppContent() {
                   >
                     <AdminDashboard />
                   </AnimatedSection>
-                </ProtectedRoute>
+                </AdminProtectedRoute>
               }
             />
+
+            {/* Redirect any unknown routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 
           <Toaster position="bottom-right" />
