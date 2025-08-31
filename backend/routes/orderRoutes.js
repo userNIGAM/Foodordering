@@ -10,8 +10,22 @@ const router = express.Router();
 // Create a new order
 router.post("/", async (req, res) => {
   try {
+    //validate if all the menu items exists
+    for (const item of req.body.items) {
+      const menuItem = await MenuItem.findById(item.menuItemId);
+      if (!menuItem) {
+        return res.status(400).json({
+          success: false,
+          message: `Menu item with ID ${item.menuItemId} not found`,
+        });
+      }
+    }
+
     const order = new Order(req.body);
     const savedOrder = await order.save();
+
+    // Populate the order with menu item details
+    await savedOrder.populate("items.menuItemId");
 
     // Send confirmation email to customer
     await sendOrderConfirmationEmail(savedOrder);

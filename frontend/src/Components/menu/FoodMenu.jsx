@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Chatbot from "../pages/chat/Chatbot";
 import api from "../../services/api";
+import { Link } from "react-router-dom";
+import { useCart } from "../../contexts/CartContext"; // Import useCart
 
 const FoodMenu = () => {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [cart, setCart] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Use cart context instead of local state
+  const { cart, addToCart, getCartItemsCount, getCartTotal } = useCart();
 
   // Fetch data from backend
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
         setLoading(true);
-        // Use axios to fetch data
         const response = await api.get("/api/menu-items/");
         setMenuItems(response.data.data);
       } catch (err) {
@@ -28,6 +30,10 @@ const FoodMenu = () => {
 
     fetchMenuItems();
   }, []);
+  useEffect(() => {
+    console.log("Current cart state:", cart);
+    console.log("Menu items:", menuItems);
+  }, [cart, menuItems]);
 
   const categories = [
     { id: "all", name: "All Items" },
@@ -46,32 +52,14 @@ const FoodMenu = () => {
       ? menuItems
       : menuItems.filter((item) => item.category === activeCategory);
 
-  const addToCart = (item) => {
-    // Check if item already exists in cart
-    const existingItem = cart.find((cartItem) => cartItem._id === item._id);
-
-    if (existingItem) {
-      // If exists, increase quantity
-      setCart(
-        cart.map((cartItem) =>
-          cartItem._id === item._id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        )
-      );
-    } else {
-      // If new, add with quantity 1
-      setCart([...cart, { ...item, quantity: 1 }]);
-    }
-
-    // Show notification
+  const handleAddToCart = (item) => {
+    addToCart(item);
     alert(`Added ${item.name} to cart!`);
   };
 
-  const buyNow = (item) => {
+  const handleBuyNow = (item) => {
     addToCart(item);
-    // In a real app, you would navigate to the cart page
-    alert(`Added ${item.name} to cart! Proceeding to checkout...`);
+    alert(`Added ${item.name} to cart!`);
   };
 
   const renderStars = (rating) => {
@@ -106,9 +94,6 @@ const FoodMenu = () => {
 
     return stars;
   };
-
-  // Calculate total items in cart
-  const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
 
   if (loading)
     return (
@@ -154,18 +139,15 @@ const FoodMenu = () => {
         </section>
 
         {/* Cart Summary */}
-        {cart.length > 0 && (
+        {cart && cart.length > 0 && (
           <div className="fixed top-20 right-4 bg-white p-4 rounded-lg shadow-lg z-10">
             <div className="flex items-center">
               <i className="fas fa-shopping-cart text-[#8B2635] mr-2"></i>
-              <span className="font-bold">{totalItems} items</span>
+              <span className="font-bold">{getCartItemsCount()} items</span>
             </div>
             <button className="mt-2 bg-[#8B2635] text-white px-3 py-1 rounded text-sm w-full">
               View Cart ($
-              {cart
-                .reduce((total, item) => total + item.price * item.quantity, 0)
-                .toFixed(2)}
-              )
+              {getCartTotal().toFixed(2)})
             </button>
           </div>
         )}
@@ -245,14 +227,14 @@ const FoodMenu = () => {
                   <div className="flex gap-2">
                     <button
                       className="flex-1 bg-[#8B2635] text-white py-2 rounded-lg flex items-center justify-center hover:bg-[#2E3532] transition"
-                      onClick={() => buyNow(item)}
+                      onClick={() => handleBuyNow(item)}
                     >
                       <i className="fas fa-bolt mr-2"></i>
                       Buy Now
                     </button>
                     <button
                       className="flex-1 bg-white border border-[#8B2635] text-[#8B2635] py-2 rounded-lg flex items-center justify-center hover:bg-gray-100 transition"
-                      onClick={() => addToCart(item)}
+                      onClick={() => handleAddToCart(item)}
                     >
                       <i className="fas fa-cart-plus mr-2"></i>
                       Add to Cart
@@ -263,26 +245,25 @@ const FoodMenu = () => {
             ))}
           </div>
         )}
-        {cart.length > 0 && (
+
+        {/* Fixed Checkout Button */}
+        {/* {cart && cart.length > 0 && (
           <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg z-10">
             <div className="flex items-center mb-2">
               <i className="fas fa-shopping-cart text-[#8B2635] mr-2"></i>
-              <span className="font-bold">{totalItems} items</span>
+              <span className="font-bold">{getCartItemsCount()} items</span>
             </div>
             <div className="font-bold mb-2">
-              Total: $
-              {cart
-                .reduce((total, item) => total + item.price * item.quantity, 0)
-                .toFixed(2)}
+              Total: ${getCartTotal().toFixed(2)}
             </div>
             <Link
-              to="/order"
+              to="/checkout"
               className="block w-full bg-[#8B2635] text-white px-3 py-2 rounded text-sm text-center"
             >
               Proceed to Checkout
             </Link>
           </div>
-        )}
+        )} */}
 
         {/* Newsletter Section */}
         <section className="py-16 bg-[#88A096] text-white rounded-xl mt-16 text-center">

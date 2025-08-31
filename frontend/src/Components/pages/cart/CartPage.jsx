@@ -1,5 +1,9 @@
 import React from "react";
 import { X, Plus, Minus, Trash2, CreditCard, Tag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+// Helper function to get item identifier
+const getItemId = (item) => item.id || item._id;
 
 const CartModal = ({
   isOpen,
@@ -15,6 +19,12 @@ const CartModal = ({
   const shipping = 0;
   const tax = (parseFloat(subtotal) * 0.08).toFixed(2);
   const total = (parseFloat(subtotal) + shipping + parseFloat(tax)).toFixed(2);
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    onClose();
+    navigate("/checkout");
+  };
 
   if (!isOpen) return null;
 
@@ -75,63 +85,66 @@ const CartModal = ({
               </div>
             ) : (
               <div className="space-y-6">
-                {cartItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 text-lg truncate">
-                        {item.name}
-                      </h3>
+                {cartItems.map((item) => {
+                  const itemId = getItemId(item);
+                  return (
+                    <div
+                      key={itemId}
+                      className="flex gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-lg truncate">
+                          {item.name}
+                        </h3>
 
-                      <div className="flex items-center justify-between mt-2">
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => decreaseQty(item.id)}
-                            className="p-1 bg-white rounded-md shadow-sm hover:bg-gray-50 transition-colors"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="font-medium text-gray-900 w-8 text-center">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => increaseQty(item.id)}
-                            className="p-1 bg-white rounded-md shadow-sm hover:bg-gray-50 transition-colors"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
+                        <div className="flex items-center justify-between mt-2">
+                          {/* Quantity Controls */}
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => decreaseQty(itemId)}
+                              className="p-1 bg-white rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="font-medium text-gray-900 w-8 text-center">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => increaseQty(itemId)}
+                              className="p-1 bg-white rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {/* Price */}
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900 text-lg">
+                              $
+                              {(parseFloat(item.price) * item.quantity).toFixed(
+                                2
+                              )}
+                            </p>
+                          </div>
                         </div>
 
-                        {/* Price */}
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900 text-lg">
-                            $
-                            {(parseFloat(item.price) * item.quantity).toFixed(
-                              2
-                            )}
-                          </p>
-                        </div>
+                        {/* Remove button */}
+                        <button
+                          onClick={() => removeItem(itemId)}
+                          className="mt-3 text-red-500 hover:text-red-700 transition-colors flex items-center text-sm"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Remove
+                        </button>
                       </div>
-
-                      {/* Remove button */}
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="mt-3 text-red-500 hover:text-red-700 transition-colors flex items-center text-sm"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Remove
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -172,7 +185,10 @@ const CartModal = ({
               </div>
 
               <div className="mt-auto space-y-4">
-                <button className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-md">
+                <button
+                  onClick={handleCheckout}
+                  className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-md"
+                >
                   <CreditCard className="w-5 h-5" />
                   Proceed to Checkout
                 </button>
