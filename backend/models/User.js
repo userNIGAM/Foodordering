@@ -25,6 +25,14 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationOTP: String,
+    verificationOTPExpires: Date,
+    resetPasswordOTP: String,
+    resetPasswordOTPExpires: Date,
   },
   {
     timestamps: true,
@@ -48,5 +56,10 @@ userSchema.pre("save", async function (next) {
     next(error);
   }
 });
+
+// Generate OTP method
+userSchema.methods.generateOTP = function () {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 export default mongoose.model("User", userSchema);

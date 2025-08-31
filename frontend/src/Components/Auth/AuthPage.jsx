@@ -15,15 +15,19 @@ import { AuthContext } from "../../context/AuthContext";
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
   const [pendingEmail, setPendingEmail] = useState("");
-  const { user } = useContext(AuthContext); // Get user from context
+  const { user, loading } = useContext(AuthContext); // Get user from context
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user) {
-      navigate("/", { replace: true });
+    if (!loading && user) {
+      if (user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleModeChange = (newMode, email = "") => {
     setMode(newMode);
@@ -64,6 +68,17 @@ const AuthPage = () => {
         );
     }
   };
+  if (loading) {
+    return (
+      <div className="min-h-screen grid place-items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return null; // Will redirect due to useEffect
+  }
 
   return (
     <div className="relative grid min-h-screen place-items-center bg-gradient-to-b from-slate-50 via-white to-slate-50 px-4 py-10">

@@ -19,7 +19,7 @@ const setAuthCookie = (res, token) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000, //7 Days
   });
 };
 
@@ -155,7 +155,7 @@ export const login = async (req, res) => {
     if (!email || !password) {
       return res
         .status(400)
-        .json({ success: false, message: "Email and password required" });
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     const user = await User.findOne({ email }).select("+password");
@@ -163,21 +163,23 @@ export const login = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
-
+    // Use the comparePassword method from the User model
     const isMatch = await user.comparePassword(password);
     if (!isMatch)
       return res
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
-
     // Create JWT token regardless of verification status
-    const token = signJWT({ id: user._id });
+    const token = signJWT({ id: user._id, role: user.role });
     setAuthCookie(res, token);
-
-    const { password: _p, ...userData } = user.toObject();
-    return res
-      .status(200)
-      .json({ success: true, message: "Login successful", user: userData });
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
+    // const { password: _p, ...userData } = user.toObject();
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: userWithoutPassword,
+    });
   } catch (err) {
     console.error("Login Error:", err);
     return res.status(500).json({ success: false, message: "Server error" });

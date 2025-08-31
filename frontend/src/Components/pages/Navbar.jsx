@@ -82,7 +82,7 @@ const Navbar = ({ onProfileClick, user, isAdmin }) => {
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           isScrolled
-            ? "bg-white/95 backdrop-blur-sm shadow-md py-2"
+            ? "bg-white/95 backdrop-blur-none shadow-md py-2"
             : "bg-white py-4"
         }`}
         aria-label="Main navigation"
@@ -229,7 +229,14 @@ const Navbar = ({ onProfileClick, user, isAdmin }) => {
                 </span>
               )}
             </button>
-
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                className="text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Admin Dashboard
+              </Link>
+            )}
             <button
               onClick={() => {
                 onProfileClick();
@@ -254,13 +261,6 @@ const Navbar = ({ onProfileClick, user, isAdmin }) => {
         decreaseQty={decreaseQty}
         removeItem={removeItem}
       />
-      {user && (
-        <Navbar
-          onProfileClick={() => setIsProfileOpen(true)}
-          user={user}
-          isAdmin={isAdmin} // Add this line
-        />
-      )}
     </>
   );
 };

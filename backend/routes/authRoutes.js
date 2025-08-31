@@ -1,3 +1,4 @@
+// backend/routes/authRoutes.js
 import express from "express";
 import {
   register,
@@ -15,11 +16,11 @@ const router = express.Router();
 
 // Auth routes
 router.post("/register", register);
-router.post("/verify-email", verifyEmail); // Changed to POST with body
+router.post("/verify-email", verifyEmail);
 router.post("/login", login);
 router.post("/resend-verification", resendVerification);
 router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword); // Changed to POST with body
+router.post("/reset-password", resetPassword);
 router.get("/me", protect, getCurrentUser);
 router.post("/logout", logout);
 

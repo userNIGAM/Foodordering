@@ -10,8 +10,12 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = useCallback(async () => {
     try {
-      const res = await api.get("/auth/me");
-      setUser(res.data.user);
+      const res = await api.get("/api/auth/me");
+      if (res.data.success) {
+        setUser(res.data.user);
+      } else {
+        setUser(null);
+      }
     } catch (err) {
       setUser(null);
       console.error("Auth check failed:", err);
@@ -27,8 +31,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await api.post("/api/auth/login", { email, password });
-      setUser(res.data.user);
-      return { success: true, user: res.data.user };
+      if (res.data.success) {
+        setUser(res.data.user);
+        return { success: true, user: res.data.user };
+      } else {
+        return { success: false, message: res.data.message };
+      }
     } catch (err) {
       const msg = err?.response?.data?.message || "Login failed";
       return { success: false, message: msg };
@@ -55,7 +63,6 @@ export const AuthProvider = ({ children }) => {
         logout,
         loading,
         isAdmin,
-        api,
       }}
     >
       {children}
