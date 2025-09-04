@@ -219,7 +219,7 @@ const cartReducer = (state, action) => {
   if (action.type !== "LOAD_CART_FROM_STORAGE") {
     try {
       localStorage.setItem("cart", JSON.stringify(newState));
-      console.log("Cart saved to localStorage:", newState);
+      // console.log("Cart saved to localStorage:", newState);
     } catch (error) {
       console.error("Error saving cart to localStorage:", error);
     }
@@ -234,7 +234,7 @@ const loadCartFromStorage = () => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
       const parsedCart = JSON.parse(storedCart);
-      console.log("Loaded cart from storage:", parsedCart);
+      // console.log("Loaded cart from storage:", parsedCart);
       // Ensure all items have proper structure
       return Array.isArray(parsedCart)
         ? parsedCart.map((item) => ({
@@ -256,14 +256,14 @@ export const CartProvider = ({ children }) => {
 
   // Load cart from localStorage on initial render
   useEffect(() => {
-    console.log("Loading cart from localStorage...");
+    // console.log("Loading cart from localStorage...");
     const loadedCart = loadCartFromStorage();
-    console.log("Loaded cart:", loadedCart);
+    // console.log("Loaded cart:", loadedCart);
     dispatch({ type: "LOAD_CART_FROM_STORAGE", payload: loadedCart });
   }, []);
 
   const addToCart = (product) => {
-    console.log("Adding to cart:", product);
+    // console.log("Adding to cart:", product);
     // Ensure the product has all required fields
     const cartProduct = {
       ...product,

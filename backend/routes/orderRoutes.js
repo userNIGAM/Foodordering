@@ -1,5 +1,6 @@
 import express from "express";
 import Order from "../models/Order.js";
+import MenuItem from "../models/MenuItem.js";
 import {
   sendOrderConfirmationEmail,
   sendAdminNotificationEmail,
