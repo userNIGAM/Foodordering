@@ -6,10 +6,15 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { useCart } from "./contexts/CartContext";
-import { CartProvider } from "./contexts/CartContext";
+
+import { CartProvider, useCart } from "./contexts/CartContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
+import About from "./Components/pages/About/About";
+import Services from "./Components/pages/services/ServicesSection";
+import Products from "./Components/pages/products/ProductsGrid";
+import Contact from "./Components/contact/ContactSection";
 import Navbar from "./Components/pages/Navbar";
 import Dashboard from "./Components/Auth/Dashboard";
 import Modal from "./components/Modal";
@@ -28,15 +33,23 @@ import OrderSuccess from "./Components/pages/OrderSuccess";
 import OrderFailed from "./Components/pages/OrderFailed";
 import CartModal from "./Components/pages/cart/CartPage";
 
-// Create a separate component that uses the cart
+import WishlistPage from "./Components/WishlistPage";
+import WishlistCounter from "./Components/WishlistCounter";
+
 function AppWithCart() {
+  // AuthContext must be available because AppWithCart is rendered inside AuthProvider
   const { user, logout, loading, isAdmin } = useContext(AuthContext);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Import useCart here, inside the CartProvider
-  const { cart, increaseQty, decreaseQty, removeItem, getCartItemsCount } =
-    useCart();
+  // useCart will be available because AppWithCart will be rendered inside CartProvider
+  const {
+    cart = [],
+    increaseQty,
+    decreaseQty,
+    removeItem,
+    getCartItemsCount,
+  } = useCart();
 
   if (loading) {
     return (
@@ -55,7 +68,11 @@ function AppWithCart() {
             onCartClick={() => setIsCartOpen(true)}
             user={user}
             isAdmin={isAdmin}
-            cartItemsCount={getCartItemsCount()}
+            cartItemsCount={
+              typeof getCartItemsCount === "function"
+                ? getCartItemsCount()
+                : cart.length || 0
+            }
           />
         )}
 
@@ -79,16 +96,56 @@ function AppWithCart() {
             element={
               <ProtectedRoute>
                 <AnimatedSection
-                  variant={{
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1 },
-                  }}
+                  variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
                 >
                   <FoodMenu />
                 </AnimatedSection>
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/about"
+            element={
+              <ProtectedRoute>
+                <About />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <ProtectedRoute>
+                <Services />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
+                <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <ProtectedRoute>
+                <Contact />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Wishlist */}
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute>
+                <WishlistPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/checkout"
             element={
@@ -119,10 +176,7 @@ function AppWithCart() {
             element={
               <AdminProtectedRoute>
                 <AnimatedSection
-                  variant={{
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1 },
-                  }}
+                  variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
                 >
                   <AdminDashboard />
                 </AnimatedSection>
@@ -130,10 +184,11 @@ function AppWithCart() {
             }
           />
 
-          {/* Redirect any unknown routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
           <Route path="/order" element={<OrderForm />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
+
+          {/* Redirect unknown routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
         <CartModal
@@ -144,6 +199,9 @@ function AppWithCart() {
           decreaseQty={decreaseQty}
           removeItem={removeItem}
         />
+
+        {/* Wishlist counter floating button */}
+        {user && <WishlistCounter />}
 
         <Toaster position="bottom-right" />
 
@@ -161,18 +219,15 @@ function AppWithCart() {
   );
 }
 
-function AppContent() {
-  return (
-    <CartProvider>
-      <AppWithCart />
-    </CartProvider>
-  );
-}
-
 export default function App() {
+  // Top-level: AuthProvider -> CartProvider -> WishlistProvider -> AppWithCart
   return (
     <AuthProvider>
-      <AppContent />
+      <CartProvider>
+        <WishlistProvider>
+          <AppWithCart />
+        </WishlistProvider>
+      </CartProvider>
     </AuthProvider>
   );
 }

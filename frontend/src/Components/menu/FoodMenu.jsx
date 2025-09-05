@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Chatbot from "../pages/chat/Chatbot";
 import api from "../../services/api";
 import { useCart } from "../../contexts/CartContext";
+import { useWishlist } from "../../contexts/WishlistContext";
 
 import HeroSection from "./HeroSection";
 import CartSummary from "./CartSummary";
@@ -16,6 +17,7 @@ const FoodMenu = () => {
   const [error, setError] = useState(null);
 
   const { cart, addToCart, getCartItemsCount, getCartTotal } = useCart();
+  const { getWishlistCount } = useWishlist();
 
   // Fetch data
   useEffect(() => {
@@ -65,11 +67,10 @@ const FoodMenu = () => {
     return (
       <div className="min-h-screen bg-[#FFF8F0] flex items-center justify-center">
         <div className="text-center">
-          <i className="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
-          <h2 className="text-xl font-bold text-gray-800">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
             Error Loading Menu
           </h2>
-          <p className="text-gray-600 mt-2">{error}</p>
+          <p className="text-gray-600">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 bg-[#8B2635] text-white px-4 py-2 rounded-lg hover:bg-[#2E3532] transition"
@@ -85,12 +86,31 @@ const FoodMenu = () => {
       <div className="container mx-auto">
         <HeroSection />
 
-        {cart && cart.length > 0 && (
-          <CartSummary
-            itemsCount={getCartItemsCount()}
-            total={getCartTotal()}
-          />
-        )}
+        {/* Floating Cart + Wishlist Summary */}
+        {(cart && cart.length > 0) || getWishlistCount() > 0 ? (
+          <div className="flex flex-col gap-3 fixed top-20 right-4 z-20">
+            {cart && cart.length > 0 && (
+              <CartSummary
+                itemsCount={getCartItemsCount()}
+                total={getCartTotal()}
+                onViewCart={() => (window.location.href = "/checkout")}
+              />
+            )}
+            {getWishlistCount() > 0 && (
+              <div className="bg-white p-4 rounded-xl shadow-lg border border-slate-200 text-center">
+                <p className="font-semibold text-slate-800">
+                  ❤️ {getWishlistCount()} Favorites
+                </p>
+                <button
+                  onClick={() => (window.location.href = "/wishlist")}
+                  className="mt-2 w-full bg-rose-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-600 transition"
+                >
+                  View Wishlist
+                </button>
+              </div>
+            )}
+          </div>
+        ) : null}
 
         <CategoryFilters
           categories={categories}
