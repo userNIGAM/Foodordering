@@ -1,24 +1,18 @@
-// src/Components/pages/WishlistPage.jsx
 import React from "react";
 import { Heart, ArrowLeft, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../contexts/WishlistContext";
 import { useCart } from "../contexts/CartContext";
-import { products } from "../Components/lists/Products";
 import { Link } from "react-router-dom";
 
 const WishlistPage = () => {
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
 
-  const wishlistProducts = products.filter((product) =>
-    wishlist.includes(product.id)
-  );
-
   const handleAddToCart = (product) => {
     addToCart(product);
   };
 
-  if (wishlistProducts.length === 0) {
+  if (wishlist.length === 0) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 mt-16">
         <Link
@@ -62,22 +56,20 @@ const WishlistPage = () => {
           </Link>
           <h1 className="text-3xl font-bold text-slate-800">Your Wishlist</h1>
           <p className="text-slate-600">
-            {wishlistProducts.length}{" "}
-            {wishlistProducts.length === 1 ? "item" : "items"} saved for later
+            {wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved
+            for later
           </p>
         </div>
         <div className="flex items-center bg-rose-50 text-rose-800 px-4 py-3 rounded-lg">
           <Heart className="w-5 h-5 mr-2 fill-rose-500 text-rose-500" />
-          <span className="font-medium">
-            {wishlistProducts.length} Favorites
-          </span>
+          <span className="font-medium">{wishlist.length} Favorites</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {wishlistProducts.map((product) => (
+        {wishlist.map((product) => (
           <div
-            key={product.id}
+            key={product.id || product._id}
             className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
           >
             <div className="relative overflow-hidden">
@@ -93,22 +85,8 @@ const WishlistPage = () => {
                 </div>
               )}
 
-              <div className="absolute top-3 right-3">
-                <div
-                  className={`w-5 h-5 rounded-full border-2 ${
-                    product.isVeg ? "border-green-500" : "border-red-500"
-                  }`}
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full m-1.5 ${
-                      product.isVeg ? "bg-green-500" : "bg-red-500"
-                    }`}
-                  ></div>
-                </div>
-              </div>
-
               <button
-                onClick={() => removeFromWishlist(product.id)}
+                onClick={() => removeFromWishlist(product.id || product._id)}
                 className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow-md hover:bg-rose-50 transition-colors"
                 aria-label="Remove from wishlist"
               >
@@ -136,7 +114,7 @@ const WishlistPage = () => {
                       <svg
                         key={i}
                         className={`w-4 h-4 ${
-                          i < Math.floor(product.rating)
+                          i < Math.floor(product.rating || 0)
                             ? "fill-amber-400 text-amber-400"
                             : "text-slate-300"
                         }`}
@@ -155,20 +133,9 @@ const WishlistPage = () => {
                 </span>
               </div>
 
-              <div className="flex justify-between text-sm text-slate-500 mb-4">
-                <span>⏱️ {product.cookTime}</span>
-                <span>
-                  {product.spicyLevel === "Hot" && "🌶️🌶️🌶️"}
-                  {product.spicyLevel === "Medium" && "🌶️🌶️"}
-                  {product.spicyLevel === "Mild" && "🌶️"}
-                  {product.spicyLevel}
-                </span>
-              </div>
-
               <button
                 onClick={() => handleAddToCart(product)}
                 className="bg-indigo-600 text-white py-2 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors mt-auto"
-                aria-label={`Add ${product.name} to cart`}
               >
                 <ShoppingCart className="w-4 h-4" />
                 Add to Cart

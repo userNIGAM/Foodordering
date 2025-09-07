@@ -59,7 +59,7 @@ const DesktopNav = ({
       </Link>
 
       {/* Products */}
-      <Link
+      {/* <Link
         to="/products"
         className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
           location.pathname === "/products"
@@ -68,7 +68,7 @@ const DesktopNav = ({
         }`}
       >
         Products
-      </Link>
+      </Link> */}
 
       {/* Contact */}
       <Link

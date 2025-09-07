@@ -1,4 +1,3 @@
-// src/contexts/WishlistContext.jsx
 import React, {
   createContext,
   useContext,
@@ -20,52 +19,49 @@ export const useWishlist = () => {
 export const WishlistProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([]);
 
-  // Load wishlist safely from localStorage once
+  // Load wishlist from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem("wishlist");
       const parsed = raw ? JSON.parse(raw) : [];
       setWishlist(Array.isArray(parsed) ? parsed : []);
     } catch (e) {
-      // If localStorage is corrupted, start fresh
       setWishlist([]);
     }
   }, []);
 
-  // Persist wishlist whenever it changes
+  // Save wishlist to localStorage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem("wishlist", JSON.stringify(wishlist));
     } catch (e) {
-      // ignore localStorage write errors
-      console.warn("Could not save wishlist to localStorage:", e);
+      console.warn("Could not save wishlist:", e);
     }
   }, [wishlist]);
 
-  // Adds id only if not already present (prevents duplicates)
-  const addToWishlist = useCallback((productId) => {
+  // Add full product object (avoid duplicates by id/_id)
+  const addToWishlist = useCallback((product) => {
     setWishlist((prev) => {
-      if (prev.includes(productId)) return prev;
-      return [...prev, productId];
+      if (prev.find((p) => p.id === product.id || p._id === product._id)) {
+        return prev; // already in wishlist
+      }
+      return [...prev, product];
     });
   }, []);
 
   const removeFromWishlist = useCallback((productId) => {
-    setWishlist((prev) => prev.filter((id) => id !== productId));
+    setWishlist((prev) =>
+      prev.filter((p) => p.id !== productId && p._id !== productId)
+    );
   }, []);
 
   const isInWishlist = useCallback(
-    (productId) => wishlist.includes(productId),
+    (productId) =>
+      wishlist.some((p) => p.id === productId || p._id === productId),
     [wishlist]
   );
 
   const getWishlistCount = useCallback(() => wishlist.length, [wishlist]);
-
-  const getWishlistItems = useCallback(
-    (products = []) =>
-      products.filter((product) => wishlist.includes(product.id)),
-    [wishlist]
-  );
 
   const value = {
     wishlist,
@@ -73,7 +69,6 @@ export const WishlistProvider = ({ children }) => {
     removeFromWishlist,
     isInWishlist,
     getWishlistCount,
-    getWishlistItems,
   };
 
   return (

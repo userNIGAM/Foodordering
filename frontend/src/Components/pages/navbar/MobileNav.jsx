@@ -70,7 +70,7 @@ const MobileNav = ({
         </Link>
 
         {/* Products */}
-        <Link
+        {/* <Link
           to="/products"
           className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
             location.pathname === "/products"
@@ -80,7 +80,7 @@ const MobileNav = ({
           onClick={handleNavClick}
         >
           Products
-        </Link>
+        </Link> */}
 
         {/* Contact */}
         <Link

@@ -1,11 +1,16 @@
+// ServicesSection.jsx
 import { useState, useEffect } from "react";
 import ServiceCard from "./ServiceCard";
 import ValuesCard from "./ValuesCard";
-import FoodConcierge from "./FoodConcierge";
 import ServicesHeader from "./ServicesHeader";
 import ServicesCTA from "./ServicesCTA";
 import { servicesData, valuesData } from "./data";
 import useScrollAnimationsList from "../../hooks/useScrollAnimation";
+import Testimonials from "./Testimonials";
+import FAQSection from "./FAQSection";
+import StatsCounter from "./StatsCounter";
+import FeaturedRestaurants from "./FeaturedRestaurants"; // ✅ New Component
+import HowItWorks from "./HowItWorks"; // ✅ New Component
 
 const ServicesSection = () => {
   const [activeService, setActiveService] = useState(0);
@@ -30,7 +35,7 @@ const ServicesSection = () => {
   return (
     <section
       id="services"
-      className="py-16 px-4 bg-gradient-to-b from-gray-50 to-white"
+      className="py-16 my-10 px-4 bg-gradient-to-b from-gray-50 to-white"
     >
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
@@ -63,11 +68,14 @@ const ServicesSection = () => {
           ))}
         </div>
 
+        {/* How it Works */}
+        <HowItWorks />
+
         {/* Values Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {valuesData.map((value, index) => (
             <div
-              key={value.id ?? index} // fallback to index if id is missing
+              key={value.id ?? index}
               ref={(el) => (valueRefs.current[index] = el)}
             >
               <ValuesCard
@@ -78,8 +86,19 @@ const ServicesSection = () => {
           ))}
         </div>
 
-        {/* Other Components */}
-        <FoodConcierge />
+        {/* Featured Restaurants */}
+        <FeaturedRestaurants />
+
+        {/* Stats */}
+        <StatsCounter />
+
+        {/* Testimonials */}
+        <Testimonials />
+
+        {/* FAQ Section */}
+        <FAQSection />
+
+        {/* CTA */}
         <ServicesCTA />
       </div>
     </section>

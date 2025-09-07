@@ -13,6 +13,7 @@ import {
   Linkedin,
 } from "lucide-react";
 import ContactForm from "./ContactForm";
+import NepalMap from "./NepalMap";
 
 const ContactSection = () => {
   // const [formData, setFormData] = useState({
@@ -73,7 +74,7 @@ const ContactSection = () => {
 
   return (
     <section
-      className="py-16 bg-gradient-to-br from-amber-50 to-orange-50"
+      className="py-16 my-10 bg-gradient-to-br from-amber-50 to-orange-50"
       id="contact"
     >
       <div className="container mx-auto px-4 max-w-6xl">
@@ -162,6 +163,7 @@ const ContactSection = () => {
           </div>
 
           <ContactForm isVisible={true} />
+          <NepalMap />
         </div>
       </div>
     </section>

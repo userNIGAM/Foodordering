@@ -106,7 +106,7 @@ const ProductsGrid = () => {
   };
 
   return (
-    <div id="products" className="max-w-7xl mx-auto px-4 py-8">
+    <div id="products" className="max-w-7xl mx-auto my-20 px-4 py-8">
       {/* Filter Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-800 mb-4 flex items-center">
