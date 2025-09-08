@@ -5,12 +5,10 @@ export const protect = async (req, res, next) => {
   try {
     let token;
 
-    // Check for token in cookies
     if (req.cookies.token) {
       token = req.cookies.token;
     }
 
-    // Also check for token in Authorization header
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -25,10 +23,7 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Get user from token
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
@@ -41,19 +36,9 @@ export const protect = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error("Auth middleware error:", error);
-
-    // More specific error messages for different JWT errors
-    let message = "Not authorized";
-    if (error.name === "TokenExpiredError") {
-      message = "Token expired";
-    } else if (error.name === "JsonWebTokenError") {
-      message = "Invalid token";
-    }
-
     return res.status(401).json({
       success: false,
-      message,
+      message: "Not authorized, token failed",
     });
   }
 };

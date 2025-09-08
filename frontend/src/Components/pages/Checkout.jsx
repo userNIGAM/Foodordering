@@ -36,26 +36,30 @@ const Checkout = () => {
       const orderData = {
         customer: customerInfo,
         items: cart.map((item) => ({
-          menuId: item._id, // backend needs this
+          menuItemId: typeof item._id === "string" ? item._id : null, // only keep valid IDs
           name: item.name,
-          price: item.price,
-          quantity: item.quantity,
+          price: Number(item.price), // force number
+          quantity: Number(item.quantity), // force number
         })),
-        total: getCartTotal(),
+        total: Number(getCartTotal().toFixed(2)),
         paymentMethod,
         status: "pending",
       };
-
+      console.log("Submitting orderData:", orderData);
+      console.log("Submitting orderData:", JSON.stringify(orderData, null, 2));
       const response = await api.post("/api/orders", orderData);
 
       if (response.data.success) {
-        clearCart();
-        navigate("/order-success", {
-          state: {
-            orderId: response.data.orderId,
-            orderTotal: getCartTotal().toFixed(2),
-          },
-        });
+        // clearCart();
+        setTimeout(() => {
+          clearCart();
+          navigate("/order-success", {
+            state: {
+              orderId: response.data.orderId,
+              orderTotal: getCartTotal().toFixed(2),
+            },
+          });
+        }, 5000);
       }
     } catch (error) {
       console.error("Error placing order:", error);

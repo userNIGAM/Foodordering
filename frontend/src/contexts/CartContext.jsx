@@ -113,9 +113,10 @@ export const CartProvider = ({ children }) => {
       // Always preserve original _id if it exists (Mongo style)
       _id: product._id || product.id,
       id: product.id || product._id, // still keep id for reducer consistency
+      quantity: product.quantity || 1,
     };
     dispatch({ type: "ADD_TO_CART", payload: cartProduct });
-    toast.success(`${product.name} added to cart!`);
+    toast?.success && toast.success(`${product.name} added to cart!`);
   };
 
   const increaseQty = (itemId) => {

@@ -39,10 +39,10 @@ const ProductsGrid = () => {
           const index = cardRefs.current.indexOf(entry.target);
           if (index !== -1) {
             if (entry.isIntersecting) {
-              // Card visible → animate in
-              setVisibleCards((prev) => [...new Set([...prev, index])]);
+              setVisibleCards((prev) =>
+                prev.includes(index) ? prev : [...prev, index]
+              );
             } else {
-              // Card out of view → remove from visibleCards
               setVisibleCards((prev) => prev.filter((i) => i !== index));
             }
           }

@@ -9,9 +9,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const checkAuth = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await api.get("api/auth/me");
-      if (res.data.success) {
+      // Make sure we call the correct endpoint. backend has /api/auth/me
+      const res = await api.get("/api/auth/me");
+      if (res?.data?.success) {
         setUser(res.data.user);
       } else {
         setUser(null);
@@ -31,11 +33,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await api.post("/api/auth/login", { email, password });
-      if (res.data.success) {
+      if (res?.data?.success) {
+        // backend should set the cookie; we update local user state from response
         setUser(res.data.user);
         return { success: true, user: res.data.user };
       } else {
-        return { success: false, message: res.data.message };
+        return {
+          success: false,
+          message: res?.data?.message || "Login failed",
+        };
       }
     } catch (err) {
       const msg = err?.response?.data?.message || "Login failed";

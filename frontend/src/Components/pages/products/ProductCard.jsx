@@ -18,8 +18,8 @@ const ProductCard = ({ product }) => {
   };
 
   const toggleWishlist = () => {
-    if (isWishlisted) removeFromWishlist(product.id);
-    else addToWishlist(product.id);
+    if (isWishlisted) removeFromWishlist(product.id || product._id);
+    else addToWishlist(product); // pass the full product
   };
 
   const renderStars = (rating) => {

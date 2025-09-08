@@ -1,4 +1,4 @@
-// hooks/useScrollAnimationsList.js
+// src/hooks/useScrollAnimationsList.js
 import { useEffect, useState, useRef } from "react";
 
 const useScrollAnimationsList = (itemsLength, options = {}) => {

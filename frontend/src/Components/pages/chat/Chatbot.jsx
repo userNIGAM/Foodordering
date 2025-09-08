@@ -11,14 +11,18 @@ const Chatbot = () => {
   const chatContainerRef = useRef(null);
   const { user } = useContext(AuthContext);
 
+  const userId = user?.id || user?._id;
+
   useEffect(() => {
-    // Load chat history from localStorage if user is authenticated
-    if (user) {
-      const savedChat = localStorage.getItem(`chat_${user.id}`);
+    if (userId) {
+      const savedChat = localStorage.getItem(`chat_${userId}`);
       if (savedChat) {
-        setMessages(JSON.parse(savedChat));
+        try {
+          setMessages(JSON.parse(savedChat));
+        } catch {
+          setMessages([]);
+        }
       } else {
-        // Add welcome message if no history exists
         setMessages([
           {
             id: Date.now(),
@@ -28,18 +32,18 @@ const Chatbot = () => {
           },
         ]);
       }
+    } else {
+      setMessages([]); // ensure messages cleared when not authenticated
     }
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
-    // Save messages to localStorage when they change
-    if (user && messages.length > 0) {
-      localStorage.setItem(`chat_${user.id}`, JSON.stringify(messages));
+    if (userId && messages.length > 0) {
+      localStorage.setItem(`chat_${userId}`, JSON.stringify(messages));
     }
-  }, [messages, user]);
+  }, [messages, userId]);
 
   useEffect(() => {
-    // Scroll to bottom when new message is added
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
@@ -56,7 +60,7 @@ const Chatbot = () => {
       timestamp: new Date(),
     };
 
-    setMessages([...messages, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setInputMessage("");
     setIsTyping(true);
 
@@ -71,7 +75,7 @@ const Chatbot = () => {
       };
       setMessages((prev) => [...prev, botResponse]);
       setIsTyping(false);
-    }, 1500); // Increased delay to show typing animation longer
+    }, 1200); // Increased delay to show typing animation longer
   };
 
   const handleKeyPress = (e) => {
