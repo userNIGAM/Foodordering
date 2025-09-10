@@ -20,7 +20,13 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       setUser(null);
-      console.error("Auth check failed:", err);
+      // Suppress error log for 401 after logout
+      if (
+        process.env.NODE_ENV === "development" &&
+        err?.response?.status !== 401
+      ) {
+        console.error("Auth check failed:", err);
+      }
     } finally {
       setLoading(false);
     }
