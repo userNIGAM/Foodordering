@@ -15,8 +15,8 @@ const MainLayout = ({ children }) => {
     );
   }
 
-  // If no user → redirect to /auth
-  if (!user) {
+  // Only redirect to /auth when loading is false and user is null
+  if (!loading && !user) {
     return <Navigate to="/auth" replace />;
   }
 
