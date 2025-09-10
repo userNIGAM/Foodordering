@@ -209,7 +209,8 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://facebook.com/nigamsubedi.18"
+                target="_blank"
                 className="bg-gray-800 p-3 rounded-full hover:bg-orange-500 transition-colors"
               >
                 <FaFacebookF size={16} />
@@ -221,13 +222,15 @@ const Footer = () => {
                 <FaTwitter size={16} />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/nigamsubedi3/"
+                target="_blank"
                 className="bg-gray-800 p-3 rounded-full hover:bg-orange-500 transition-colors"
               >
                 <FaInstagram size={16} />
               </a>
               <a
-                href="#"
+                href="https://www.linkedin.com/in/nigam-subedi-8b65a8323/"
+                target="_blank"
                 className="bg-gray-800 p-3 rounded-full hover:bg-orange-500 transition-colors"
               >
                 <FaLinkedinIn size={16} />

@@ -6,16 +6,25 @@ import MenuItem from "../models/MenuItem.js";
 // @access  Public
 const getMenuItems = async (req, res) => {
   try {
-    const { category, featured, limit } = req.query;
+    const { category, search, featured, limit } = req.query;
 
     let query = {};
-
+    console.log("Query params:", req.query);
+    console.log("Mongo query object:", query);
     if (category && category !== "all") {
       query.category = category;
     }
 
     if (featured) {
       query.isPopular = featured === "true";
+    }
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { tags: { $elemMatch: { $regex: search, $options: "i" } } }, // 👈 fixed for array
+      ];
     }
 
     let menuItemsQuery = MenuItem.find(query);
@@ -32,6 +41,7 @@ const getMenuItems = async (req, res) => {
       data: menuItems,
     });
   } catch (error) {
+    console.error("Error in getMenuItems:", error); // 👈 full error trace
     res.status(500).json({
       success: false,
       message: "Server Error",

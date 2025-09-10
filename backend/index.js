@@ -8,8 +8,8 @@ import authRoutes from "./routes/authRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import adminRoutes from "./routes/admin.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import { ConnectDB } from "./config/db.js";
-import contactRouter from "./routes/conactRouter.js";
+import ConnectDB from "./config/db.js";
+import contactRouter from "./routes/contactRouter.js";
 
 dotenv.config();
 
@@ -19,9 +19,16 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// CORS configuration
+const allowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:5173", // dev
+  "https://foodordering-5gt3.vercel.app", // production frontend
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -29,7 +36,7 @@ app.use(
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/menu-items", menuRoutes);
-app.use("/api/admin", adminRoutes); // Add admin routes
+app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRouter);
 

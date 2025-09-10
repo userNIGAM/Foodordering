@@ -22,6 +22,7 @@ import Dashboard from "./Components/Auth/Dashboard";
 import Modal from "./Components/Modal";
 import Home from "./Components/pages/Home";
 import FoodMenu from "./Components/menu/FoodMenu";
+import FoodDetail from "./Components/menu/FoodDetail";
 import AuthPage from "./Components/Auth/AuthPage";
 import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute";
 import { Loader2 } from "lucide-react";
@@ -131,6 +132,16 @@ function AppRoutes() {
               variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
             >
               <FoodMenu />
+            </AnimatedSection>
+          }
+        />
+        <Route
+          path="/menu/:id"
+          element={
+            <AnimatedSection
+              variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+            >
+              <FoodDetail />
             </AnimatedSection>
           }
         />

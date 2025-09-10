@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import MenuItem from "../models/MenuItem.js";
-import { ConnectDB } from "../config/db.js";
+import ConnectDB from "../config/db.js";
 
 dotenv.config();
 ConnectDB();
@@ -681,6 +681,7 @@ export const menuItems = [
 
 const importData = async () => {
   try {
+    await ConnectDB();
     await MenuItem.deleteMany();
     await MenuItem.insertMany(menuItems);
 
