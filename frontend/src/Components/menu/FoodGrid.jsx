@@ -2,8 +2,10 @@ import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import { Star, Heart, Clock } from "lucide-react";
 import PropTypes from "prop-types";
+import { useCart } from "../../contexts/CartContext";
 
 const FoodCard = memo(({ item }) => {
+  const { addToCart } = useCart();
   const handleImageError = (e) => {
     e.target.src = "/placeholder-food.jpg";
   };
@@ -60,7 +62,13 @@ const FoodCard = memo(({ item }) => {
             </span>
           </div>
 
-          <button className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+          <button
+            onClick={(e) => {
+              e.preventDefault(); // prevent navigating when clicking the button
+              addToCart(item);
+            }}
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+          >
             Add to Cart
           </button>
         </div>

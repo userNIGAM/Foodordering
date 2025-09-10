@@ -12,10 +12,11 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import api from "../../services/api";
+import { useCart } from "../../contexts/CartContext";
 
 export default function FoodDetail() {
   const { id } = useParams();
-
+  const { addToCart } = useCart();
   const [item, setItem] = useState(null);
   const [relatedItems, setRelatedItems] = useState([]);
   const [quantity, setQuantity] = useState(1);
@@ -140,15 +141,7 @@ export default function FoodDetail() {
   const reviews = Array.isArray(item.reviews) ? item.reviews : [];
 
   const handleAddToCart = () => {
-    // Optionally integrate with your CartContext here.
-    // Kept intentionally simple to avoid assumptions about your cart API.
-    // You can replace this with context dispatch or other behavior.
-    // For now we do a small visual confirmation:
-    alert(
-      `Added ${quantity} × ${item.name} to cart — price: $${(
-        (item.price || 0) * quantity
-      ).toFixed(2)}`
-    );
+    addToCart({ ...item, quantity }); // 👈 add item with selected quantity
   };
 
   const capitalize = (s) =>
