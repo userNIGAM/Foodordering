@@ -15,8 +15,12 @@ const MainLayout = ({ children }) => {
     );
   }
 
-  // Only redirect to /auth when loading is false and user is null
+  // Only redirect to /auth when loading is false and user is null, but not if already on /auth
   if (!loading && !user) {
+    if (window.location.pathname === "/auth") {
+      // Already on /auth, don't redirect again
+      return children;
+    }
     return <Navigate to="/auth" replace />;
   }
 

@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       // Make sure we call the correct endpoint. backend has /api/auth/me
-      const res = await api.get("/api/auth/me");
+      const res = await api.get("/api/auth/me", { timeout: 50000 });
       if (res?.data?.success) {
         setUser(res.data.user);
       } else {
@@ -20,13 +20,16 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       setUser(null);
-      // Suppress error log for 401 after logout
+      setLoading(false);
+      // Suppress error log for 401 and ECONNABORTED after logout/network issues
       if (
         process.env.NODE_ENV === "development" &&
+        err?.code !== "ECONNABORTED" &&
         err?.response?.status !== 401
       ) {
         console.error("Auth check failed:", err);
       }
+      return;
     } finally {
       setLoading(false);
     }

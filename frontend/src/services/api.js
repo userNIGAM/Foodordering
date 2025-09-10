@@ -24,7 +24,10 @@ api.interceptors.response.use(
       try {
         localStorage.removeItem("user");
       } catch (e) {}
-      window.location.href = "/auth";
+      // window.location.href = "/auth";
+      if (window.location.pathname !== "/auth") {
+        window.location.href = "/auth";
+      }
     }
     return Promise.reject(error);
   }
