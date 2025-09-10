@@ -17,9 +17,9 @@ const signJWT = (
 const setAuthCookie = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
-    maxAge: 7 * 24 * 60 * 60 * 1000, //7 Days
+    secure: process.env.NODE_ENV === "production", // only true in prod
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days
   });
 };
 
@@ -341,7 +341,11 @@ export const getCurrentUser = async (req, res) => {
 /* ------------------- LOGOUT ------------------- */
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    });
     return res
       .status(200)
       .json({ success: true, message: "Logged out successfully" });

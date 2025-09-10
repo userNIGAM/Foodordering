@@ -8,6 +8,7 @@ const api = axios.create({
       ? "http://localhost:5000"
       : "https://foodordering-i801.onrender.com"),
   withCredentials: true,
+  timeout: 40000,
 });
 
 // Interceptors
