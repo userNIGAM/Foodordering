@@ -56,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Logout error:", err);
     } finally {
       setUser(null);
+      await checkAuth(); // Refresh auth state after logout
     }
   };
 
