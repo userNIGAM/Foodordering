@@ -22,14 +22,23 @@ app.use(cookieParser());
 
 // CORS configuration
 const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:5173", // dev
-  "https://foodordering-5gt3.vercel.app", // production frontend
+  "http://localhost:5173", // dev
+  "https://foodordering-q4rq.vercel.app", // production frontend
 ];
 
+// Middleware
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true,
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"), false);
+      }
+    },
+    credentials: true, // allow cookies
   })
 );
 
