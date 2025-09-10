@@ -346,9 +346,10 @@ export const logout = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
-    return res
-      .status(200)
-      .json({ success: true, message: "Logged out successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
   } catch (err) {
     console.error("Logout Error:", err);
     return res.status(500).json({ success: false, message: "Server error" });
