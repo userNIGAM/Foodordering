@@ -3,11 +3,23 @@ import { Link } from "react-router-dom";
 import { Star, Heart, Clock } from "lucide-react";
 import PropTypes from "prop-types";
 import { useCart } from "../../contexts/CartContext";
+import { useWishlist } from "../../contexts/WishlistContext";
 
 const FoodCard = memo(({ item }) => {
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
   const handleImageError = (e) => {
     e.target.src = "/placeholder-food.jpg";
+  };
+
+  const handleWishlist = (e) => {
+    e.preventDefault(); // prevent navigation
+    if (isInWishlist(item._id)) {
+      removeFromWishlist(item._id);
+    } else {
+      addToWishlist(item);
+    }
   };
 
   return (
@@ -21,11 +33,18 @@ const FoodCard = memo(({ item }) => {
             onError={handleImageError}
             loading="lazy"
           />
-          <div className="absolute top-3 right-3">
-            <button className="p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors">
-              <Heart size={16} className="text-gray-600 hover:text-red-500" />
-            </button>
-          </div>
+          <button
+            onClick={handleWishlist}
+            className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md"
+          >
+            <Heart
+              size={16}
+              className={
+                isInWishlist(item._id) ? "text-red-500" : "text-gray-600"
+              }
+            />
+          </button>
+
           {item.isPopular && (
             <div className="absolute top-3 left-3">
               <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
@@ -64,7 +83,7 @@ const FoodCard = memo(({ item }) => {
         </div>
         <button
           onClick={(e) => {
-            e.preventDefault(); // prevent navigating when clicking the button
+            e.preventDefault();
             addToCart(item);
           }}
           className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"

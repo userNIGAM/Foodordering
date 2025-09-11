@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../../services/api";
 import { useCart } from "../../contexts/CartContext";
+import { useWishlist } from "../../contexts/WishlistContext";
 
 export default function FoodDetail() {
   const { id } = useParams();
@@ -24,6 +25,9 @@ export default function FoodDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   // helper to make images array (backend stores `image` string; some clients may store `images`)
   const getImages = (menuItem) => {
@@ -190,8 +194,23 @@ export default function FoodDetail() {
                 alt={item.name}
                 className="w-full h-80 object-cover"
               />
-              <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors">
-                <Heart size={24} className="text-gray-600 hover:text-red-500" />
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (isInWishlist(item._id)) {
+                    removeFromWishlist(item._id);
+                  } else {
+                    addToWishlist(item);
+                  }
+                }}
+                className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md"
+              >
+                <Heart
+                  size={16}
+                  className={
+                    isInWishlist(item._id) ? "text-red-500" : "text-gray-600"
+                  }
+                />
               </button>
             </div>
 

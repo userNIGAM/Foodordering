@@ -11,7 +11,8 @@ const AnimatedSection = ({ children, variant, className = "" }) => {
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={variant}
-      className={className}
+      // className={className}
+      className={`relative z-0 ${className}`}
     >
       {children}
     </motion.div>
