@@ -16,16 +16,24 @@ const MainLayout = ({ children }) => {
       </div>
     );
   }
+  // useEffect(() => {
+  //   if (!loading && user) {
+  //     if (user.role === "admin" && location.pathname === "/") {
+  //       navigate("/admin/dashboard", { replace: true });
+  //     } else if (user.role === "user" && location.pathname === "/") {
+  //       navigate("/home", { replace: true });
+  //     }
+  //   }
+  // }, [user, loading, location.pathname, navigate]);
   useEffect(() => {
-    if (!loading && user) {
-      if (user.role === "admin" && location.pathname === "/") {
+    if (!loading && user && location.pathname === "/") {
+      if (user.role === "admin") {
         navigate("/admin/dashboard", { replace: true });
-      } else if (user.role === "user" && location.pathname === "/") {
+      } else if (user.role === "user") {
         navigate("/home", { replace: true });
       }
     }
-  }, [user, loading, location.pathname, navigate]);
-
+  }, [user, loading]);
   if (loading) {
     return (
       <div className="min-h-screen grid place-items-center">
