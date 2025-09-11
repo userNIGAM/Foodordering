@@ -10,15 +10,21 @@ import adminRoutes from "./routes/admin.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import ConnectDB from "./config/db.js";
 import contactRouter from "./routes/contactRouter.js";
+import { initSocket } from "./socket.js";
+import { createServer } from "http";
 
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// init socket.io
+initSocket(httpServer);
 
 // CORS configuration
 const allowedOrigins = [
@@ -26,11 +32,9 @@ const allowedOrigins = [
   "https://foodordering-q4rq.vercel.app", // production frontend
 ];
 
-// Middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
@@ -38,7 +42,7 @@ app.use(
         return callback(new Error("Not allowed by CORS"), false);
       }
     },
-    credentials: true, // allow cookies
+    credentials: true,
   })
 );
 
@@ -48,9 +52,12 @@ app.use("/api/menu-items", menuRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRouter);
+app.use("/uploads", express.static("uploads"));
 
+// Connect to DB
 ConnectDB();
 
-app.listen(PORT, () => {
-  console.log(`Server is running on PORT ${PORT}`);
+// ✅ only use httpServer.listen (not app.listen)
+httpServer.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

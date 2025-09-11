@@ -9,33 +9,27 @@ dotenv.config();
 const seedAdmin = async () => {
   try {
     await mongoose.connect(
-      process.env.MONGO_URI || "mongodb://localhost:27017/foodOrdering"
+      process.env.MONGO_URI || "mongodb://127.0.0.1:27017/foodOrdering"
     );
 
-    const adminExists = await User.findOne({ email: "admin@example.com" });
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash("admin123", saltRounds);
 
-    if (!adminExists) {
-      // Hash the password
-      const saltRounds = 12;
-      const hashedPassword = await bcrypt.hash("admin123", saltRounds);
-
-      const adminUser = new User({
+    const adminUser = await User.findOneAndUpdate(
+      { email: "admin@example.com" },
+      {
         name: "Admin User",
         email: "admin@example.com",
         password: hashedPassword,
         role: "admin",
         isVerified: true,
-      });
+      },
+      { upsert: true, new: true } // 👈 creates if not exists, updates if exists
+    );
 
-      await adminUser.save();
-      console.log("✅ Admin user created successfully");
-      console.log("📧 Email: admin@example.com");
-      console.log("🔑 Password: admin123");
-    } else {
-      console.log("ℹ️ Admin user already exists");
-      console.log("📧 Email: admin@example.com");
-      console.log("🔑 If you forgot the password, reset it in the database");
-    }
+    console.log("✅ Admin user ready");
+    console.log("📧 Email: admin@example.com");
+    console.log("🔑 Password: admin123");
 
     process.exit(0);
   } catch (error) {

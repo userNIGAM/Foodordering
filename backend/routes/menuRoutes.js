@@ -9,10 +9,14 @@ import {
   getMenuItemsByCategory,
   getCategories,
 } from "../controllers/menuController.js";
+import upload from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-router.route("/").get(getMenuItems).post(createMenuItem);
+router
+  .route("/")
+  .get(getMenuItems)
+  .post(upload.single("image"), createMenuItem);
 
 router.route("/categories/all").get(getCategories);
 

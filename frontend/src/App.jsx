@@ -116,13 +116,13 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public route: /auth is always accessible, never wrapped */}
+      {/* Public route - DO NOT wrap with AppLayout/MainLayout */}
       <Route
         path="/auth"
         element={user ? <Navigate to="/" replace /> : <AuthPage />}
       />
 
-      {/* Protected routes: wrapped with AppLayout/MainLayout */}
+      {/* Protected routes - wrapped with AppLayout/MainLayout */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route

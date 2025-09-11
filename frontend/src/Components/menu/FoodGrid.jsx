@@ -34,45 +34,44 @@ const FoodCard = memo(({ item }) => {
             </div>
           )}
         </div>
+      </Link>
 
-        <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2 group-hover:text-indigo-600 transition-colors line-clamp-1">
-            {item.name}
-          </h3>
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {item.description}
-          </p>
+      <div className="p-4">
+        <h3 className="font-semibold text-lg mb-2 group-hover:text-indigo-600 transition-colors line-clamp-1">
+          {item.name}
+        </h3>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {item.description}
+        </p>
 
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <div className="flex items-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                <Star size={14} className="fill-current mr-1" />
-                <span className="text-sm font-semibold">
-                  {item.rating?.toFixed(1) || "4.5"}
-                </span>
-              </div>
-              <div className="flex items-center ml-3 text-gray-500 text-sm">
-                <Clock size={14} className="mr-1" />
-                <span>15-25 min</span>
-              </div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <div className="flex items-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+              <Star size={14} className="fill-current mr-1" />
+              <span className="text-sm font-semibold">
+                {item.rating?.toFixed(1) || "4.5"}
+              </span>
             </div>
-
-            <span className="text-indigo-600 font-bold text-lg">
-              ${item.price.toFixed(2)}
-            </span>
+            <div className="flex items-center ml-3 text-gray-500 text-sm">
+              <Clock size={14} className="mr-1" />
+              <span>15-25 min</span>
+            </div>
           </div>
 
-          <button
-            onClick={(e) => {
-              e.preventDefault(); // prevent navigating when clicking the button
-              addToCart(item);
-            }}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
-          >
-            Add to Cart
-          </button>
+          <span className="text-indigo-600 font-bold text-lg">
+            ${item.price.toFixed(2)}
+          </span>
         </div>
-      </Link>
+        <button
+          onClick={(e) => {
+            e.preventDefault(); // prevent navigating when clicking the button
+            addToCart(item);
+          }}
+          className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+        >
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 });

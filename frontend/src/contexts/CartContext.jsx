@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useState,
+} from "react";
 import toast from "react-hot-toast";
 
 const CartContext = createContext();
@@ -58,11 +64,10 @@ const cartReducer = (state, action) => {
       newState = state;
   }
 
-  // After any state change, save to localStorage
+  // Save to localStorage after any change except initial load
   if (action.type !== "LOAD_CART_FROM_STORAGE") {
     try {
       localStorage.setItem("cart", JSON.stringify(newState));
-      // console.log("Cart saved to localStorage:", newState);
     } catch (error) {
       console.error("Error saving cart to localStorage:", error);
     }
@@ -77,12 +82,9 @@ const loadCartFromStorage = () => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
       const parsedCart = JSON.parse(storedCart);
-      // console.log("Loaded cart from storage:", parsedCart);
-      // Ensure all items have proper structure
       return Array.isArray(parsedCart)
         ? parsedCart.map((item) => ({
             ...item,
-            // Ensure quantity is always a number
             quantity: typeof item.quantity === "number" ? item.quantity : 1,
           }))
         : [];
@@ -93,30 +95,30 @@ const loadCartFromStorage = () => {
   return [];
 };
 
-// Cart provider component
 export const CartProvider = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, []);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Load cart from localStorage on initial render
   useEffect(() => {
-    // console.log("Loading cart from localStorage...");
     const loadedCart = loadCartFromStorage();
-    // console.log("Loaded cart:", loadedCart);
     dispatch({ type: "LOAD_CART_FROM_STORAGE", payload: loadedCart });
   }, []);
 
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+  const toggleCart = () => setIsCartOpen((prev) => !prev);
+
   const addToCart = (product) => {
-    // console.log("Adding to cart:", product);
-    // Ensure the product has all required fields
     const cartProduct = {
       ...product,
-      // Always preserve original _id if it exists (Mongo style)
       _id: product._id || product.id,
-      id: product.id || product._id, // still keep id for reducer consistency
+      id: product.id || product._id,
       quantity: product.quantity || 1,
     };
     dispatch({ type: "ADD_TO_CART", payload: cartProduct });
-    toast?.success && toast.success(`${product.name} added to cart!`);
+    toast.success(`${product.name} added to cart!`);
+    openCart(); // 👈 open modal when item added
   };
 
   const increaseQty = (itemId) => {
@@ -135,30 +137,24 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: "CLEAR_CART" });
   };
 
-  const getCartTotal = () => {
-    if (!Array.isArray(cart)) return 0;
-    return cart.reduce(
-      (total, item) =>
-        total + (parseFloat(item.price) || 0) * (item.quantity || 0),
-      0
-    );
-  };
+  const getCartTotal = () =>
+    Array.isArray(cart)
+      ? cart.reduce(
+          (total, item) =>
+            total + (parseFloat(item.price) || 0) * (item.quantity || 0),
+          0
+        )
+      : 0;
 
-  const getCartItemsCount = () => {
-    if (!Array.isArray(cart)) return 0;
-    return cart.reduce((total, item) => total + (item.quantity || 0), 0);
-  };
-
-  // Debug function to check cart state
-  const debugCart = () => {
-    console.log("Current cart state:", cart);
-    console.log("LocalStorage cart:", localStorage.getItem("cart"));
-  };
+  const getCartItemsCount = () =>
+    Array.isArray(cart)
+      ? cart.reduce((total, item) => total + (item.quantity || 0), 0)
+      : 0;
 
   return (
     <CartContext.Provider
       value={{
-        cart: cart || [],
+        cart,
         addToCart,
         increaseQty,
         decreaseQty,
@@ -166,7 +162,10 @@ export const CartProvider = ({ children }) => {
         clearCart,
         getCartTotal,
         getCartItemsCount,
-        debugCart,
+        isCartOpen,
+        openCart,
+        closeCart,
+        toggleCart,
       }}
     >
       {children}
@@ -174,7 +173,6 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use the cart context
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {

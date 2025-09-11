@@ -157,14 +157,16 @@ export const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
     }
-
+    console.log("Login attempt:", email, password);
     const user = await User.findOne({ email }).select("+password");
+    console.log("User found:", !!user);
     if (!user)
       return res
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
     // Use the comparePassword method from the User model
     const isMatch = await user.comparePassword(password);
+    console.log("Password match:", isMatch);
     if (!isMatch)
       return res
         .status(400)

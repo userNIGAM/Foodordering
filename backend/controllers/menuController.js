@@ -80,15 +80,46 @@ const getMenuItem = async (req, res) => {
 // @desc    Create new menu item
 // @route   POST /api/menu-items
 // @access  Private/Admin
+// @desc    Create new menu item with image
+// @route   POST /api/menu-items
+// @access  Private/Admin
 const createMenuItem = async (req, res) => {
   try {
-    const menuItem = await MenuItem.create(req.body);
+    const {
+      name,
+      category,
+      price,
+      description,
+      calories,
+      prepTime,
+      rating,
+      isPopular,
+      ingredients,
+      tags,
+    } = req.body;
+
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+    const menuItem = await MenuItem.create({
+      name,
+      category,
+      price,
+      description,
+      calories,
+      prepTime,
+      rating,
+      isPopular,
+      ingredients: ingredients ? ingredients.split(",") : [],
+      tags: tags ? tags.split(",") : [],
+      image: imagePath,
+    });
 
     res.status(201).json({
       success: true,
       data: menuItem,
     });
   } catch (error) {
+    console.error("Error in createMenuItem:", error);
     res.status(500).json({
       success: false,
       message: "Server Error",

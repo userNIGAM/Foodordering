@@ -2,6 +2,7 @@
 import Order from "../models/Order.js";
 import nodemailer from "nodemailer";
 import mongoose from "mongoose";
+import { updateInventoryOnOrder } from "../middleware/inventoryMiddleware.js";
 
 export const placeOrder = async (req, res) => {
   try {
@@ -33,6 +34,9 @@ export const placeOrder = async (req, res) => {
     });
 
     await order.save();
+
+    // Update inventory based on ordered items
+    await updateInventoryOnOrder(order);
 
     // Respond first
     res.status(201).json({ success: true, orderId: order.orderId });
