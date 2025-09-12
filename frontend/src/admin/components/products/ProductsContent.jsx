@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Package, Upload, X } from "lucide-react";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 const ProductsContent = () => {
+  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -17,6 +20,7 @@ const ProductsContent = () => {
     isPopular: false,
   });
 
+  // Handle text, number, checkbox inputs
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -25,9 +29,18 @@ const ProductsContent = () => {
     }));
   };
 
+  // Handle file input
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        alert("❌ File size must be less than 10MB.");
+        return;
+      }
+
+      setImageFile(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -37,6 +50,7 @@ const ProductsContent = () => {
   };
 
   const removeImage = () => {
+    setImageFile(null);
     setImagePreview(null);
   };
 
@@ -49,9 +63,8 @@ const ProductsContent = () => {
       actualFormData.append(key, formData[key]);
     });
 
-    if (imagePreview) {
-      const fileInput = document.querySelector('input[name="image"]');
-      actualFormData.append("image", fileInput.files[0]);
+    if (imageFile) {
+      actualFormData.append("image", imageFile);
     }
 
     try {
@@ -79,6 +92,7 @@ const ProductsContent = () => {
           tags: "",
           isPopular: false,
         });
+        setImageFile(null);
         setImagePreview(null);
       } else {
         alert("❌ Failed: " + (response.data.message || "Unknown error"));
@@ -259,7 +273,7 @@ const ProductsContent = () => {
                       <p className="pl-1">or drag and drop</p>
                     </div>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG, GIF up to 10MB
+                      PNG, JPG, JPEG, GIF, WEBP up to 10MB
                     </p>
                   </div>
                 </div>

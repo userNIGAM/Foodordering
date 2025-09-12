@@ -30,10 +30,12 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-        <div className="flex items-center space-x-2">
+    <div className="p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-100 min-h-[300px] flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+          Recent Orders
+        </h3>
+        <div className="flex flex-wrap items-center gap-2">
           <input
             type="text"
             placeholder="Search..."
@@ -58,17 +60,18 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
 
       <LowStockAlerts alerts={lowStockAlerts} />
 
-      <div className="space-y-4">
+      {/* Orders list */}
+      <div className="space-y-4 flex-1 overflow-y-auto pr-1">
         {paginatedOrders.map((order, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
           >
             <div className="flex-1">
               <p className="text-sm font-semibold text-gray-900">{order.id}</p>
               <p className="text-sm text-gray-600">{order.customer}</p>
             </div>
-            <div className="text-right mr-4">
+            <div className="text-left sm:text-right sm:mr-4">
               <p className="text-sm font-semibold text-gray-900">
                 {order.amount}
               </p>
@@ -92,24 +95,26 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-end mt-4 space-x-2">
-        <button
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50"
-          disabled={page === 1}
-        >
-          Prev
-        </button>
-        <span className="text-sm text-gray-600">
-          Page {page} of {totalPages}
-        </span>
-        <button
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50"
-          disabled={page === totalPages}
-        >
-          Next
-        </button>
+      <div className="flex flex-col sm:flex-row sm:justify-end sm:items-center mt-4 gap-2">
+        <div className="flex justify-center sm:justify-end gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50"
+            disabled={page === 1}
+          >
+            Prev
+          </button>
+          <span className="text-sm text-gray-600">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50"
+            disabled={page === totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

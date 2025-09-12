@@ -4,6 +4,7 @@ import { Star, Heart, Clock } from "lucide-react";
 import PropTypes from "prop-types";
 import { useCart } from "../../contexts/CartContext";
 import { useWishlist } from "../../contexts/WishlistContext";
+import { getImageUrl } from "../../services/api";
 
 const FoodCard = memo(({ item }) => {
   const { addToCart } = useCart();
@@ -27,10 +28,12 @@ const FoodCard = memo(({ item }) => {
       <Link to={`/menu/${item._id}`} className="block">
         <div className="relative overflow-hidden">
           <img
-            src={item.image || "/placeholder-food.jpg"}
+            src={getImageUrl(item.image)}
             alt={item.name}
+            onError={(e) => {
+              e.target.src = "/placeholder-food.jpg";
+            }}
             className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-            onError={handleImageError}
             loading="lazy"
           />
           <button

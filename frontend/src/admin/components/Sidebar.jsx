@@ -97,7 +97,7 @@ const Sidebar = ({
             className="fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-2xl lg:hidden"
             aria-label="Mobile sidebar"
           >
-            <div className="flex items-center justify-between px-4 py-25 bg-gradient-to-r from-blue-600 to-sky-600">
+            <div className="flex items-center justify-between px-4 py-5 bg-gradient-to-r from-blue-600 to-sky-600">
               <div className="text-white font-semibold text-lg">
                 Admin Panel
               </div>
@@ -157,7 +157,7 @@ const Sidebar = ({
           <div className="text-white font-semibold text-lg">Admin Panel</div>
         </div>
 
-        <div className="px-4 py-20">
+        <div className="px-4 py-3">
           <div className="relative mb-4">
             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
             <input

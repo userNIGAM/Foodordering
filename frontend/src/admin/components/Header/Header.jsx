@@ -2,10 +2,6 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Plus, ChevronDown, Bell, Search } from "lucide-react";
 
-/**
- * Header: modern, accessible header with mobile hamburger.
- * - `setSidebarOpen` toggles the sidebar (hamburger on <lg).
- */
 const Header = ({ activeSection, setSidebarOpen }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -27,34 +23,34 @@ const Header = ({ activeSection, setSidebarOpen }) => {
     <motion.header
       initial={{ y: -12, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-20 bg-white border-b border-gray-200 py-25"
+      className="sticky top-0 z-20 bg-white border-b border-gray-200 py-3 sm:py-4"
       role="banner"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between h-14 sm:h-16">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             {/* Hamburger (mobile only) */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Toggle sidebar"
               className="p-2 text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 transition-colors"
-              onClick={() => setSidebarOpen(true)} // ✅ this opens sidebar on click
+              onClick={() => setSidebarOpen(true)}
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </motion.button>
 
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">
+              <h1 className="text-base sm:text-lg font-semibold text-gray-900">
                 {getPageTitle()}
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500">
                 Welcome back — here's your admin overview.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Search (shown on md+) */}
             <div className="relative hidden md:flex items-center">
               <Search className="w-4 h-4 text-gray-400 absolute left-3" />
@@ -92,13 +88,15 @@ const Header = ({ activeSection, setSidebarOpen }) => {
                 aria-haspopup="true"
                 aria-expanded={isProfileOpen}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center space-x-2 px-2 py-1 rounded-lg bg-gray-50 hover:bg-gray-100"
+                className="flex items-center space-x-2 px-2 py-1 sm:px-3 sm:py-2 rounded-lg bg-gray-50 hover:bg-gray-100"
                 onClick={() => setIsProfileOpen((s) => !s)}
               >
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
                   AD
                 </div>
-                <span className="text-sm font-medium text-gray-700">Admin</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-700">
+                  Admin
+                </span>
                 <ChevronDown className="w-4 h-4 text-gray-500" />
               </motion.button>
 
@@ -108,7 +106,7 @@ const Header = ({ activeSection, setSidebarOpen }) => {
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
-                    className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+                    className="absolute right-0 mt-2 w-40 sm:w-44 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
                     role="menu"
                   >
                     <button className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">

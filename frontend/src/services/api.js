@@ -11,6 +11,13 @@ const api = axios.create({
   timeout: 40000,
 });
 
+// Add a helper to resolve image URLs
+export const getImageUrl = (path) => {
+  if (!path) return "/placeholder-food.jpg"; // fallback
+  if (path.startsWith("http")) return path; // already full URL
+  return `${baseURL}${path}`;
+};
+
 // Interceptors
 api.interceptors.request.use(
   (config) => config,

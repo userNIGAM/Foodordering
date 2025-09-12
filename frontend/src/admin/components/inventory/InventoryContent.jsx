@@ -6,7 +6,6 @@ import {
   Filter,
   Search,
   AlertTriangle,
-  Box,
   BarChart3,
 } from "lucide-react";
 import api from "../../../services/api";
@@ -15,7 +14,6 @@ const InventoryContent = () => {
   const [inventory, setInventory] = useState([]);
   const [filteredInventory, setFilteredInventory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editingItem, setEditingItem] = useState(null);
   const [showLowStock, setShowLowStock] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -74,13 +72,11 @@ const InventoryContent = () => {
 
   const filterInventory = () => {
     let filtered = inventory;
-
     if (searchTerm) {
       filtered = filtered.filter((item) =>
         item.menuItemId?.name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     setFilteredInventory(filtered);
   };
 
@@ -89,7 +85,6 @@ const InventoryContent = () => {
       const res = await api.put(`/api/admin/inventory/${id}`, {
         currentStock: parseInt(newStock),
       });
-
       if (res.data.success) {
         setInventory(
           inventory.map((item) => (item._id === id ? res.data.data : item))
@@ -100,30 +95,11 @@ const InventoryContent = () => {
     }
   };
 
-  const handleBulkUpdate = async (updates) => {
-    try {
-      const res = await api.patch("/api/admin/inventory/bulk", { updates });
-      if (res.data.success) {
-        // Update local state with the returned updated items
-        const updatedItems = res.data.data;
-        setInventory(
-          inventory.map((item) => {
-            const updatedItem = updatedItems.find((u) => u._id === item._id);
-            return updatedItem || item;
-          })
-        );
-      }
-    } catch (error) {
-      console.error("Error in bulk update:", error);
-    }
-  };
-
   const handleRestock = async (id, quantity) => {
     try {
       const res = await api.post(`/api/admin/inventory/${id}/restock`, {
         quantity: parseInt(quantity),
       });
-
       if (res.data.success) {
         setInventory(
           inventory.map((item) => (item._id === id ? res.data.data : item))
@@ -164,58 +140,63 @@ const InventoryContent = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        <span className="ml-3 text-gray-600">Loading inventory...</span>
+      <div className="flex justify-center items-center h-48 sm:h-64">
+        <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-2 sm:ml-3 text-gray-600">Loading inventory...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
             Inventory Management
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Manage stock levels and track inventory
           </p>
         </div>
-        <div className="flex space-x-3 mt-4 md:mt-0">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <button
-            onClick={() => setShowReport(!showReport)}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            onClick={() => {
+              setShowReport(!showReport);
+              if (!reportData) fetchInventoryReport();
+            }}
+            className="flex items-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             <BarChart3 className="w-4 h-4 mr-2" />
             {showReport ? "Hide Report" : "View Report"}
           </button>
-          <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button className="flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <Download className="w-4 h-4 mr-2" />
             Export
           </button>
         </div>
       </div>
 
-      {/* Inventory Report */}
+      {/* Report */}
       {showReport && reportData && (
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h3 className="text-lg font-semibold mb-4">
+        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 overflow-x-auto">
+          <h3 className="text-base sm:text-lg font-semibold mb-4">
             Inventory Summary Report
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="text-blue-800 font-semibold">
+              <h4 className="text-blue-800 font-semibold text-sm sm:text-base">
                 Total Inventory Value
               </h4>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-xl sm:text-2xl font-bold text-blue-600">
                 ${reportData.totalValue.toFixed(2)}
               </p>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
-              <h4 className="text-yellow-800 font-semibold">Low Stock Items</h4>
-              <p className="text-2xl font-bold text-yellow-600">
+              <h4 className="text-yellow-800 font-semibold text-sm sm:text-base">
+                Low Stock Items
+              </h4>
+              <p className="text-xl sm:text-2xl font-bold text-yellow-600">
                 {reportData.report.reduce(
                   (sum, cat) => sum + cat.lowStockItems,
                   0
@@ -223,8 +204,10 @@ const InventoryContent = () => {
               </p>
             </div>
             <div className="bg-red-50 p-4 rounded-lg">
-              <h4 className="text-red-800 font-semibold">Out of Stock</h4>
-              <p className="text-2xl font-bold text-red-600">
+              <h4 className="text-red-800 font-semibold text-sm sm:text-base">
+                Out of Stock
+              </h4>
+              <p className="text-xl sm:text-2xl font-bold text-red-600">
                 {reportData.report.reduce(
                   (sum, cat) => sum + cat.outOfStockItems,
                   0
@@ -233,58 +216,56 @@ const InventoryContent = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Total Items
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Low Stock
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Out of Stock
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Total Value
-                  </th>
+          <table className="w-full min-w-[600px]">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Category
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Total Items
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Low Stock
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Out of Stock
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Total Value
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {reportData.report.map((category) => (
+                <tr key={category._id}>
+                  <td className="px-4 sm:px-6 py-3 font-medium text-gray-900">
+                    {category._id}
+                  </td>
+                  <td className="px-4 sm:px-6 py-3">{category.totalItems}</td>
+                  <td className="px-4 sm:px-6 py-3">
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                      {category.lowStockItems}
+                    </span>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3">
+                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
+                      {category.outOfStockItems}
+                    </span>
+                  </td>
+                  <td className="px-4 sm:px-6 py-3 font-semibold">
+                    ${(category.totalStockValue || 0).toFixed(2)}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {reportData.report.map((category) => (
-                  <tr key={category._id}>
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      {category._id}
-                    </td>
-                    <td className="px-6 py-4">{category.totalItems}</td>
-                    <td className="px-6 py-4">
-                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
-                        {category.lowStockItems}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
-                        {category.outOfStockItems}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-semibold">
-                      ${(category.totalStockValue || 0).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+      <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
@@ -318,7 +299,9 @@ const InventoryContent = () => {
               onChange={(e) => setShowLowStock(e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <span className="text-gray-700">Show low stock only</span>
+            <span className="text-sm sm:text-base text-gray-700">
+              Show low stock only
+            </span>
           </label>
         </div>
       </div>
@@ -326,31 +309,31 @@ const InventoryContent = () => {
       {/* Inventory Table */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Current Stock
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Low Stock Level
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Cost/Unit
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Total Value
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Actions
                 </th>
               </tr>
@@ -373,31 +356,31 @@ const InventoryContent = () => {
                         : ""
                     }
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
                       <div className="flex items-center">
                         {item.menuItemId?.image ? (
                           <img
                             src={item.menuItemId.image}
                             alt={item.menuItemId.name}
-                            className="w-10 h-10 rounded-md object-cover mr-3"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-md object-cover mr-2 sm:mr-3"
                           />
                         ) : (
-                          <Package className="w-10 h-10 text-gray-400 mr-3" />
+                          <Package className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 mr-2 sm:mr-3" />
                         )}
                         <div>
                           <div className="text-sm font-medium text-gray-900">
                             {item.menuItemId?.name || "Unknown Item"}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-xs sm:text-sm text-gray-500">
                             {item.unit}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-500">
                       {item.menuItemId?.category || "N/A"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
                       <input
                         type="number"
                         min="0"
@@ -405,10 +388,10 @@ const InventoryContent = () => {
                         onChange={(e) =>
                           handleStockUpdate(item._id, e.target.value)
                         }
-                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                        className="w-16 sm:w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                       <input
                         type="number"
                         min="0"
@@ -420,23 +403,23 @@ const InventoryContent = () => {
                             e.target.value
                           )
                         }
-                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                        className="w-16 sm:w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
                       <span
                         className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColor}`}
                       >
                         {statusText}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                       ${item.costPerUnit?.toFixed(2) || "0.00"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
                       ${totalValue.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => {
                           const quantity = prompt(
@@ -447,7 +430,7 @@ const InventoryContent = () => {
                             handleRestock(item._id, quantity);
                           }
                         }}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
+                        className="text-blue-600 hover:text-blue-900 mr-2 sm:mr-4"
                       >
                         Restock
                       </button>
@@ -460,12 +443,12 @@ const InventoryContent = () => {
         </div>
 
         {filteredInventory.length === 0 && (
-          <div className="text-center py-12">
-            <Package className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <div className="text-center py-10 sm:py-12">
+            <Package className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm sm:text-base font-medium text-gray-900">
               No inventory items
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-xs sm:text-sm text-gray-500">
               {showLowStock
                 ? "No items are low on stock."
                 : "Get started by adding inventory items."}
@@ -480,31 +463,16 @@ const InventoryContent = () => {
           getStockStatus(item) === "low-stock" ||
           getStockStatus(item) === "out-of-stock"
       ).length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-          <div className="flex">
-            <AlertTriangle className="h-5 w-5 text-yellow-400 mr-3" />
-            <div>
-              <h3 className="text-sm font-medium text-yellow-800">
-                Stock Alerts
-              </h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                <p>
-                  You have{" "}
-                  {
-                    inventory.filter(
-                      (item) => getStockStatus(item) === "out-of-stock"
-                    ).length
-                  }{" "}
-                  items out of stock and{" "}
-                  {
-                    inventory.filter(
-                      (item) => getStockStatus(item) === "low-stock"
-                    ).length
-                  }{" "}
-                  items low on stock.
-                </p>
-              </div>
-            </div>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-yellow-400" />
+          <div>
+            <h3 className="text-sm font-medium text-yellow-800">
+              Stock Alerts
+            </h3>
+            <p className="text-xs sm:text-sm text-yellow-700 mt-1">
+              Some items are running low or are out of stock. Please restock to
+              avoid disruptions.
+            </p>
           </div>
         </div>
       )}

@@ -29,16 +29,14 @@ export const getDashboardData = async (req, res) => {
     const recentOrders = await Order.find()
       .sort({ createdAt: -1 })
       .limit(10)
-      .populate("items.menuItemId", "name customer");
+      .populate("items.menuItemId", "name"); // ✅ only menu items
 
     // Get sales data for chart (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const salesData = await Order.aggregate([
-      {
-        $match: { createdAt: { $gte: sevenDaysAgo } },
-      },
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
@@ -51,7 +49,7 @@ export const getDashboardData = async (req, res) => {
 
     // Get low stock items
     const lowStockItems = await Inventory.find({
-      $expr: { $lte: ["$quantity", "$lowStockThreshold"] },
+      $expr: { $lte: ["$currentStock", "$lowStockThreshold"] },
     })
       .populate("menuItemId", "name")
       .limit(5);
@@ -98,23 +96,32 @@ export const getDashboardData = async (req, res) => {
             trend: "up",
           },
         ],
+
+        // ✅ Safe mapping for recent orders
         recentOrders: recentOrders.map((order) => ({
           id: order.orderId,
           customer: order.customer?.name || "N/A",
-          amount: `$${order.total}`,
-          status: order.status,
+          email: order.customer?.email || "N/A",
+          amount: `$${Number(order.total || 0).toFixed(2)}`,
+          status: order.status || "pending",
           time: order.createdAt,
         })),
+
+        // ✅ Safe mapping for sales data
         salesData: salesData.map((item) => ({
-          day: new Date(item._id).toLocaleDateString("en-US", {
-            weekday: "short",
-          }),
-          sales: item.orderCount,
+          day: item._id
+            ? new Date(item._id).toLocaleDateString("en-US", {
+                weekday: "short",
+              })
+            : "N/A",
+          sales: item.orderCount || 0,
         })),
+
+        // ✅ Safe mapping for low stock alerts
         lowStockAlerts: lowStockItems.map((item) => ({
-          name: item.menuItemId.name,
-          quantity: item.quantity,
-          threshold: item.lowStockThreshold,
+          name: item.menuItemId?.name || "Unknown Item",
+          quantity: item.currentStock ?? 0,
+          threshold: item.lowStockThreshold ?? 0,
         })),
       },
     });

@@ -116,13 +116,31 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public route - DO NOT wrap with AppLayout/MainLayout */}
+      {/* Public auth route */}
       <Route
         path="/auth"
         element={user ? <Navigate to="/" replace /> : <AuthPage />}
       />
 
-      {/* Protected routes - wrapped with AppLayout/MainLayout */}
+      {/* ---------------------- */}
+      {/* Admin routes (NO Navbar) */}
+      {/* ---------------------- */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <AdminProtectedRoute>
+            <AnimatedSection
+              variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+            >
+              <AdminDashboard />
+            </AnimatedSection>
+          </AdminProtectedRoute>
+        }
+      />
+
+      {/* ---------------------- */}
+      {/* User routes WITH Navbar */}
+      {/* ---------------------- */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route
@@ -152,18 +170,6 @@ function AppRoutes() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/order-failed" element={<OrderFailed />} />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <AdminProtectedRoute>
-              <AnimatedSection
-                variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-              >
-                <AdminDashboard />
-              </AnimatedSection>
-            </AdminProtectedRoute>
-          }
-        />
         <Route path="/order" element={<OrderForm />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
 

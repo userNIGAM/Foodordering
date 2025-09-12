@@ -1,8 +1,8 @@
 import React from "react";
 
 const LowStockAlerts = ({ alerts }) => (
-  <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
-    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+  <div className="p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
       Low Stock Alerts
     </h3>
     <div className="space-y-3">
@@ -14,7 +14,7 @@ const LowStockAlerts = ({ alerts }) => (
           >
             <div>
               <p className="text-sm font-medium text-gray-900">{alert.name}</p>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 Current: {alert.quantity} | Threshold: {alert.threshold}
               </p>
             </div>

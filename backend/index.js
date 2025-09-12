@@ -12,6 +12,7 @@ import ConnectDB from "./config/db.js";
 import contactRouter from "./routes/contactRouter.js";
 import { initSocket } from "./socket.js";
 import { createServer } from "http";
+import path from "path";
 
 dotenv.config();
 
@@ -52,7 +53,8 @@ app.use("/api/menu-items", menuRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRouter);
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Connect to DB
 ConnectDB();
