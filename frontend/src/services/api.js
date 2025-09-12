@@ -24,6 +24,10 @@ export const getImageUrl = (path) => {
   if (path.startsWith("http")) return path; // already full URL
   return `${baseURL}${path}`;
 };
+// //helper for fetching categories
+// export const getCategories = () => {
+//   return api.get("/api/categories");
+// };
 
 // Interceptors
 api.interceptors.request.use(

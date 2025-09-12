@@ -9,7 +9,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { TrendingUp } from "lucide-react";
-import ChartWrapper from "../wrapper/ChartWrapper";
+import ChartWrapper from "../../components/ChartWrapper";
 
 const SalesChart = ({ salesData }) => {
   // Fix Recharts bug: force resize so it recalculates

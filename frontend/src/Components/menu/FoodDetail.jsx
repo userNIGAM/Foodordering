@@ -14,6 +14,7 @@ import {
 import api from "../../services/api";
 import { useCart } from "../../contexts/CartContext";
 import { useWishlist } from "../../contexts/WishlistContext";
+import Image from "../UI/Image";
 
 export default function FoodDetail() {
   const { id } = useParams();
@@ -25,8 +26,6 @@ export default function FoodDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // const { toggleWishlist, isInWishlist } = useWishlist();
-
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   // helper to make images array (backend stores `image` string; some clients may store `images`)
@@ -145,7 +144,7 @@ export default function FoodDetail() {
   const reviews = Array.isArray(item.reviews) ? item.reviews : [];
 
   const handleAddToCart = () => {
-    addToCart({ ...item, quantity }); // 👈 add item with selected quantity
+    addToCart({ ...item, quantity }); // add item with selected quantity
   };
 
   const capitalize = (s) =>
@@ -189,7 +188,7 @@ export default function FoodDetail() {
           {/* Images */}
           <div>
             <div className="relative rounded-2xl overflow-hidden shadow-md mb-4">
-              <img
+              <Image
                 src={displayImage}
                 alt={item.name}
                 className="w-full h-80 object-cover"
@@ -226,7 +225,7 @@ export default function FoodDetail() {
                         : "border-gray-200"
                     }`}
                   >
-                    <img
+                    <Image
                       src={img}
                       alt={`${item.name} view ${index + 1}`}
                       className="w-full h-full object-cover"
@@ -468,8 +467,8 @@ export default function FoodDetail() {
                   className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                 >
                   <div className="relative">
-                    <img
-                      src={related.image || "/placeholder-food.jpg"}
+                    <Image
+                      src={related.image}
                       alt={related.name}
                       className="w-full h-48 object-cover"
                     />

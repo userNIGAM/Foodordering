@@ -1,5 +1,6 @@
 // models/MenuItem.js
 import mongoose from "mongoose";
+import Category from "./Category.js";
 
 const menuItemSchema = new mongoose.Schema(
   {
@@ -11,16 +12,15 @@ const menuItemSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: [
-        "burgers",
-        "pizzas",
-        "sandwiches",
-        "fries",
-        "beverages",
-        "desserts",
-        "starters",
-        "mains",
-      ],
+      trim: true,
+      validate: {
+        validator: async function (value) {
+          // make sure category exists
+          const categoryExists = await Category.findOne({ name: value });
+          return !!categoryExists;
+        },
+        message: "Category does not exist",
+      },
     },
     price: {
       type: Number,
@@ -66,5 +66,12 @@ const menuItemSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+menuItemSchema.pre("save", async function (next) {
+  const exists = await Category.findOne({ name: this.category });
+  if (!exists) {
+    return next(new Error("Invalid category"));
+  }
+  next();
+});
 
 export default mongoose.model("MenuItem", menuItemSchema);

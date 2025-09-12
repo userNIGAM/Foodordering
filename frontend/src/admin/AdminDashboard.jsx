@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Sidebar from "./components/Sidebar";
-import Header from "./components/Header/Header";
-import DashboardContent from "./components/Dashboard/DashboardContent";
-import ProductsContent from "./components/products/ProductsContent";
-import OrdersContent from "./components/order/OrdersContent";
-import CustomersContent from "./components/customers/CustomersContent";
-import AnalyticsContent from "./components/analytics/AnalyticsContent";
-import InventoryContent from "./components/inventory/InventoryContent";
-import PromotionsContent from "./components/promotions/PromotionsContent";
-import SettingsContent from "./components/setting/SettingsContent";
 import { io } from "socket.io-client";
 
-// Configure Axios to include credentials
+// Layout
+import Sidebar from "./layout/Sidebar";
+import Topbar from "./layout/Topbar";
+
+// Pages
+import DashboardContent from "./pages/Dashboard/DashboardContent";
+import ProductsContent from "./pages/products/ProductsContent";
+import OrdersContent from "./pages/order/OrdersContent";
+import CustomersContent from "./pages/customers/CustomersContent";
+import AnalyticsContent from "./pages/analytics/AnalyticsContent";
+import InventoryContent from "./pages/inventory/InventoryContent";
+import PromotionsContent from "./pages/promotions/PromotionsContent";
+import SettingsContent from "./pages/setting/SettingsContent";
+
+// Axios global config
 axios.defaults.withCredentials = true;
 
 const AdminDashboard = () => {
@@ -35,7 +39,7 @@ const AdminDashboard = () => {
     }
   }, []);
 
-  // Fetch dashboard + socket.io setup
+  // ✅ Fetch dashboard data + setup socket listeners
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -97,6 +101,7 @@ const AdminDashboard = () => {
     };
   }, []);
 
+  // ❌ Not logged in
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -118,6 +123,7 @@ const AdminDashboard = () => {
     );
   }
 
+  // ⏳ Loading
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -129,6 +135,7 @@ const AdminDashboard = () => {
     );
   }
 
+  // 📌 Section rendering
   const renderContent = () => {
     switch (activeSection) {
       case "dashboard":
@@ -162,7 +169,7 @@ const AdminDashboard = () => {
       />
 
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Header activeSection={activeSection} setSidebarOpen={setSidebarOpen} />
+        <Topbar activeSection={activeSection} setSidebarOpen={setSidebarOpen} />
 
         <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
           {renderContent()}

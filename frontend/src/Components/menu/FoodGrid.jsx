@@ -4,15 +4,15 @@ import { Star, Heart, Clock } from "lucide-react";
 import PropTypes from "prop-types";
 import { useCart } from "../../contexts/CartContext";
 import { useWishlist } from "../../contexts/WishlistContext";
-import { getImageUrl } from "../../services/api";
+import Image from "../UI/Image";
 
 const FoodCard = memo(({ item }) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
-  const handleImageError = (e) => {
-    e.target.src = "/placeholder-food.jpg";
-  };
+  // const handleImageError = (e) => {
+  //   e.target.src = "/placeholder-food.jpg";
+  // };
 
   const handleWishlist = (e) => {
     e.preventDefault(); // prevent navigation
@@ -27,12 +27,9 @@ const FoodCard = memo(({ item }) => {
     <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
       <Link to={`/menu/${item._id}`} className="block">
         <div className="relative overflow-hidden">
-          <img
-            src={getImageUrl(item.image)}
+          <Image
+            src={item.image}
             alt={item.name}
-            onError={(e) => {
-              e.target.src = "/placeholder-food.jpg";
-            }}
             className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
             loading="lazy"
           />

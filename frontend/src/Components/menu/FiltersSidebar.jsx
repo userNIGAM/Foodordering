@@ -1,8 +1,61 @@
-import React, { useCallback, memo } from "react";
+import React, { useCallback, memo, useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import api from "../../services/api";
+import SearchableCategoryFilter from "./SearchableCategoryFilter";
 
 const FiltersSidebar = memo(
   ({ filters, setFilters, priceRange, setSearch, mobile, isLoading }) => {
+    const [categories, setCategories] = useState([]);
+    const [categoryInput, setCategoryInput] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    useEffect(() => {
+      const fetchCategories = async () => {
+        try {
+          const response = await api.get("/api/categories");
+          if (response.data.success) {
+            setCategories(response.data.data);
+          }
+        } catch (error) {
+          console.error("Error fetching categories:", error);
+        }
+      };
+
+      fetchCategories();
+    }, []);
+
+    const handleCategoryInputChange = useCallback(
+      (e) => {
+        const value = e.target.value;
+        setCategoryInput(value);
+        setShowSuggestions(true);
+
+        // If input is empty, reset category filter
+        if (!value.trim()) {
+          setFilters((prev) => ({ ...prev, category: "all" }));
+        }
+      },
+      [setFilters]
+    );
+
+    const handleCategorySelect = useCallback(
+      (category) => {
+        setCategoryInput(category.name);
+        setFilters((prev) => ({ ...prev, category: category.name }));
+        setShowSuggestions(false);
+      },
+      [setFilters]
+    );
+
+    const handleCategoryBlur = useCallback(() => {
+      // Delay hiding suggestions to allow for click events
+      setTimeout(() => setShowSuggestions(false), 200);
+    }, []);
+
+    const filteredCategories = categories.filter((category) =>
+      category.name.toLowerCase().includes(categoryInput.toLowerCase())
+    );
+
     const handleCategoryChange = useCallback(
       (e) => {
         setFilters((prev) => ({ ...prev, category: e.target.value }));
@@ -59,25 +112,43 @@ const FiltersSidebar = memo(
         </h2>
 
         {/* Category */}
-        <div className="mb-6">
+        {/* <div className="mb-6 relative">
           <label className="block text-sm font-semibold mb-2 text-gray-700">
             Category
           </label>
-          <select
-            value={filters.category}
-            onChange={handleCategoryChange}
+          <input
+            type="text"
+            value={categoryInput}
+            onChange={handleCategoryInputChange}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={handleCategoryBlur}
+            placeholder="Search categories..."
             disabled={isLoading}
             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             aria-label="Filter by category"
-          >
-            <option value="all">All Categories</option>
-            <option value="pizza">Pizza</option>
-            <option value="burgers">Burgers</option>
-            <option value="salads">Salads</option>
-            <option value="drinks">Drinks</option>
-            <option value="desserts">Desserts</option>
-          </select>
-        </div>
+          />
+          {showSuggestions && filteredCategories.length > 0 && (
+            <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 max-h-60 overflow-auto">
+              {filteredCategories.map((category) => (
+                <div
+                  key={category._id}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
+                  onClick={() => handleCategorySelect(category)}
+                >
+                  {category.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div> */}
+        <SearchableCategoryFilter
+          value={filters.category === "all" ? "" : filters.category}
+          onChange={(category) =>
+            setFilters((prev) => ({ ...prev, category: category || "all" }))
+          }
+          disabled={isLoading}
+        />
 
         {/* Price Range */}
         <div className="mb-6">

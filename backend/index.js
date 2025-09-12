@@ -13,6 +13,8 @@ import contactRouter from "./routes/contactRouter.js";
 import { initSocket } from "./socket.js";
 import { createServer } from "http";
 import path from "path";
+import menuItemRoutes from "./routes/menuItems.js";
+import categoryRoutes from "./routes/categories.js";
 
 dotenv.config();
 
@@ -53,6 +55,8 @@ app.use("/api/menu-items", menuRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRouter);
+app.use("/api/menu-items", menuItemRoutes);
+app.use("/api/categories", categoryRoutes);
 // app.use("/uploads", express.static("uploads"));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 

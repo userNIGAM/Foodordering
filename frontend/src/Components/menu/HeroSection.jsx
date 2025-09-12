@@ -1,6 +1,7 @@
 import React, { useState, useCallback, memo } from "react";
 import { SearchIcon, X, Truck, Shield, Clock } from "lucide-react";
 import PropTypes from "prop-types";
+import Image from "../UI/Image";
 
 const HeroSection = memo(({ search, setSearch, onSubmit, menuItems }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -114,13 +115,10 @@ const HeroSection = memo(({ search, setSearch, onSubmit, menuItems }) => {
                   onClick={() => handleSuggestionClick(item)}
                 >
                   <div className="flex items-center space-x-4">
-                    <img
-                      src={item.image || "/placeholder-food.jpg"}
+                    <Image
+                      src={item.image}
                       alt={item.name}
                       className="w-12 h-12 rounded-lg object-cover"
-                      onError={(e) => {
-                        e.target.src = "/placeholder-food.jpg";
-                      }}
                     />
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900">

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Plus, ChevronDown, Bell, Search } from "lucide-react";
 
-const Header = ({ activeSection, setSidebarOpen }) => {
+const Topbar = ({ activeSection, setSidebarOpen }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const getPageTitle = () => {
@@ -130,4 +130,4 @@ const Header = ({ activeSection, setSidebarOpen }) => {
   );
 };
 
-export default Header;
+export default Topbar;
