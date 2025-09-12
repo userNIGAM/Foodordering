@@ -12,7 +12,7 @@ import PromotionsContent from "./components/promotions/PromotionsContent";
 import SettingsContent from "./components/setting/SettingsContent";
 import { io } from "socket.io-client";
 
-// Configure Axios to include credentials by default
+// Configure Axios to include credentials
 axios.defaults.withCredentials = true;
 
 const AdminDashboard = () => {
@@ -26,9 +26,17 @@ const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch real-time data from backend
+  // ✅ Set initial sidebar state based on screen width
   useEffect(() => {
-    // Initial fetch when dashboard loads
+    if (window.innerWidth >= 1024) {
+      setSidebarOpen(true); // open on desktop
+    } else {
+      setSidebarOpen(false); // closed on mobile
+    }
+  }, []);
+
+  // Fetch dashboard + socket.io setup
+  useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
@@ -51,8 +59,7 @@ const AdminDashboard = () => {
 
     fetchDashboardData();
 
-    // Set up WebSocket connection
-    const socket = io("http://localhost:5000");
+    const socket = io("http://localhost:5000", { withCredentials: true });
 
     socket.on("orderUpdate", (updatedOrder) => {
       setDashboardData((prev) => ({
@@ -71,18 +78,21 @@ const AdminDashboard = () => {
             ? {
                 ...stat,
                 value: (
-                  parseInt(stat.value.replace(/,/g, "")) + 1
+                  parseInt(
+                    (stat.value || "0").toString().replace(/,/g, ""),
+                    10
+                  ) + 1
                 ).toLocaleString(),
               }
             : stat
         ),
         recentOrders: [newOrder, ...prev.recentOrders.slice(0, 9)],
-        // Optionally, also update salesData here if backend sends enough info
       }));
     });
 
-    // Cleanup
     return () => {
+      socket.off("orderUpdate");
+      socket.off("newOrder");
       socket.disconnect();
     };
   }, []);
