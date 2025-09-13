@@ -1,8 +1,8 @@
 import { memo } from "react";
 import PropTypes from "prop-types";
-import HeroHeading from "./hero/HeroHeading";
-import HeroFeatures from "./hero/HeroFeatures";
-import HeroSearch from "./hero/HeroSearch";
+import HeroHeading from "./HeroHeading";
+import HeroFeatures from "./HeroFeatures";
+import HeroSearch from "./HeroSearch";
 
 const HeroSection = memo(({ search, setSearch, onSubmit, menuItems }) => {
   const safeSearch = search ?? "";
