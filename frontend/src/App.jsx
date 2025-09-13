@@ -22,7 +22,7 @@ import Dashboard from "./Components/Auth/Dashboard";
 import Modal from "./Components/Modal";
 import Home from "./Components/pages/Home";
 import FoodMenu from "./Components/menu/foodmenu/FoodMenu";
-import FoodDetail from "./Components/menu/FoodDetail";
+import FoodDetail from "./Components/menu/fooddetails/FoodDetail";
 import AuthPage from "./Components/Auth/AuthPage";
 import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute";
 import { Loader2 } from "lucide-react";
