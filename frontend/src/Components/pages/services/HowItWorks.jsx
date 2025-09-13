@@ -1,5 +1,6 @@
 // HowItWorks.jsx
 import { ShoppingBag, CreditCard, Utensils } from "lucide-react";
+import useInView from "../../hook/useInView";
 
 const HowItWorks = () => {
   const steps = [
@@ -26,20 +27,30 @@ const HowItWorks = () => {
         How It Works
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-        {steps.map((step, i) => (
-          <div
-            key={i}
-            className="text-center bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition"
-          >
-            <div className="w-16 h-16 flex items-center justify-center mx-auto rounded-full bg-orange-50 mb-6">
-              {step.icon}
+        {steps.map((step, i) => {
+          const [ref, isVisible] = useInView();
+
+          return (
+            <div
+              key={i}
+              ref={ref}
+              className={`text-center bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-700 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+              style={{ transitionDelay: `${i * 150}ms` }}
+            >
+              <div className="w-16 h-16 flex items-center justify-center mx-auto rounded-full bg-orange-50 mb-6">
+                {step.icon}
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">
+                {step.title}
+              </h4>
+              <p className="text-gray-600">{step.text}</p>
             </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-3">
-              {step.title}
-            </h4>
-            <p className="text-gray-600">{step.text}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

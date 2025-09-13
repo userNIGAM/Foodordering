@@ -13,6 +13,7 @@ import {
   X,
   Search,
 } from "lucide-react";
+import Logout from "../../logout/Logout";
 
 /**
  * Sidebar: shows a static desktop sidebar (lg+) and an animated mobile sidebar (below lg).
@@ -190,8 +191,8 @@ const Sidebar = ({
 
         <div className="mt-auto p-4 border-t border-gray-100">
           <button className="flex items-center w-full px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
-            <LogOut className="w-5 h-5 mr-3" />
-            <span className="font-medium">Logout</span>
+            <Logout />
+            {/* <span className="font-medium">Logout</span> */}
           </button>
         </div>
       </aside>

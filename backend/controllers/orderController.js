@@ -70,3 +70,28 @@ export const placeOrder = async (req, res) => {
     // res.status(500).json({ success: false, message: "Order failed" });
   }
 };
+// ✅ Get stats
+export const getOrderStats = async (req, res) => {
+  try {
+    // Total meals delivered (count of delivered orders)
+    const totalDelivered = await Order.countDocuments({ status: "delivered" });
+
+    // Active riders (dummy placeholder — you may link with Rider model later)
+    const activeRiders = 20; // Example fixed number, replace with Rider.countDocuments() if you have riders
+
+    // Average rating (if you store ratings in Order or another model)
+    const customerRating = "4.9/5"; // Placeholder until ratings implemented
+
+    res.json({
+      success: true,
+      stats: {
+        mealsDelivered: totalDelivered,
+        activeRiders,
+        customerRating,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch stats" });
+  }
+};

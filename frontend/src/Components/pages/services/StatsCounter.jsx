@@ -1,14 +1,34 @@
 // StatsCounter.jsx
 import { useEffect, useState } from "react";
+import api from "../../../services/api";
 
 const StatsCounter = () => {
-  const stats = [
-    { label: "Meals Delivered", value: 12540 },
-    { label: "Active Riders", value: 432 },
-    { label: "Customer Rating", value: "4.9/5" },
-  ];
+  const [stats, setStats] = useState([
+    { label: "Meals Delivered", value: 0 },
+    { label: "Active Riders", value: 0 },
+    { label: "Customer Rating", value: "0/5" },
+  ]);
 
   const [counts, setCounts] = useState(stats.map(() => 0));
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/api/orders/stats");
+        const data = res.data.stats;
+
+        setStats([
+          { label: "Meals Delivered", value: data.mealsDelivered },
+          { label: "Active Riders", value: data.activeRiders },
+          { label: "Customer Rating", value: data.customerRating },
+        ]);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     stats.forEach((stat, i) => {
@@ -38,7 +58,7 @@ const StatsCounter = () => {
         });
       }
     });
-  }, []);
+  }, [stats]);
 
   return (
     <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">

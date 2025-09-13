@@ -17,23 +17,7 @@ const Home = () => {
           visible: { opacity: 1 },
         }}
       >
-        {/* <ProductsGrid />
-      </AnimatedSection>
-      <AnimatedSection
-        variant={{
-          hidden: { opacity: 0 },
-          visible: { opacity: 1 },
-        }}
-      > */}
-        {/* <ServicesSection />
-      </AnimatedSection>
-      <AnimatedSection
-        variant={{
-          hidden: { opacity: 0 },
-          visible: { opacity: 1 },
-        }}
-      >
-        <ContactSection /> */}
+        {/* <ContactSection /> */}
       </AnimatedSection>
       <Chatbot /> {/* Add chatbot here */}
       <AnimatedSection

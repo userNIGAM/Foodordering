@@ -4,6 +4,7 @@ import CartHeader from "./CartHeader";
 import CartItem from "./CartItem";
 import CartSummary from "./CartSummary";
 import CartEmpty from "./CartEmpty";
+import { X } from "lucide-react";
 
 const CartModal = ({
   isOpen,
@@ -37,6 +38,13 @@ const CartModal = ({
         className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col lg:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+          aria-label="Close cart"
+        >
+          <X className="w-5 h-5 text-gray-600 hover:text-red-500" />
+        </button>
         {/* Header (mobile only) */}
         <div className="lg:hidden">
           <CartHeader onClose={onClose} itemCount={cartItems.length} />

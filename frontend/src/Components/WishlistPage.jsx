@@ -3,6 +3,7 @@ import { Heart, ArrowLeft, ShoppingCart } from "lucide-react";
 import { useWishlist } from "../contexts/WishlistContext";
 import { useCart } from "../contexts/CartContext";
 import { Link } from "react-router-dom";
+import Image from "./UI/Image";
 
 const WishlistPage = () => {
   const { wishlist, removeFromWishlist } = useWishlist();
@@ -73,10 +74,11 @@ const WishlistPage = () => {
             className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
           >
             <div className="relative overflow-hidden">
-              <img
+              <Image
                 src={product.image}
                 alt={product.name}
-                className="w-full h-48 object-cover transition-transform duration-500 hover:scale-105"
+                className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                loading="lazy"
               />
 
               {product.popular && (

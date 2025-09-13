@@ -1,7 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, ChevronRight, Star, Clock, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import AnimatedSection from "../AnimatedSection";
 
+const headingVariant = {
+  hidden: { y: -40, scale: 0.95, opacity: 0 },
+  visible: {
+    y: 0,
+    scale: 1,
+    opacity: 1,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
+
+const textVariant = {
+  hidden: { y: 20, scale: 0.95, opacity: 0 },
+  visible: {
+    y: 0,
+    scale: 1,
+    opacity: 1,
+    transition: { duration: 0.8, delay: 0.2, ease: "easeOut" },
+  },
+};
+const badgeVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.2 * i, duration: 0.5, ease: "easeOut" },
+  }),
+};
 const HeroSection = () => {
   const [loaded, setLoaded] = useState(false);
   const navigate = useNavigate();
@@ -27,22 +55,29 @@ const HeroSection = () => {
               <span>Trusted by 10,000+ customers</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Savor Culinary <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-indigo-700">
-                Excellence
-              </span>{" "}
-              Delivered
-            </h1>
+            <AnimatedSection variant={headingVariant}>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                Savor Culinary <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-indigo-700">
+                  Excellence
+                </span>{" "}
+                Delivered
+              </h1>
+            </AnimatedSection>
 
-            <p className="text-lg text-slate-600 mb-8 max-w-md leading-relaxed">
-              Experience restaurant-quality meals crafted by top chefs and
-              delivered to your doorstep. Simple, fast, and absolutely
-              delicious.
-            </p>
+            <AnimatedSection variant={textVariant}>
+              <p className="text-lg text-slate-600 mb-8 max-w-md leading-relaxed">
+                Experience restaurant-quality meals crafted by top chefs and
+                delivered to your doorstep. Simple, fast, and absolutely
+                delicious.
+              </p>
+            </AnimatedSection>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <button className="group bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 mx-auto md:mx-0 hover:-translate-y-0.5">
+              <button
+                onClick={() => navigate("/menu")}
+                className="group bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 mx-auto md:mx-0 hover:-translate-y-0.5"
+              >
                 <ShoppingCart className="w-5 h-5" />
                 Order Now
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

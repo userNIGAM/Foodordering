@@ -9,8 +9,8 @@ const getMenuItems = async (req, res) => {
     const { category, search, featured, limit } = req.query;
 
     let query = {};
-    console.log("Query params:", req.query);
-    console.log("Mongo query object:", query);
+    // console.log("Query params:", req.query);
+    // console.log("Mongo query object:", query);
     if (category && category !== "all") {
       query.category = category;
     }

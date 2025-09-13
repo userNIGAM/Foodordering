@@ -15,6 +15,7 @@ import { createServer } from "http";
 import path from "path";
 import menuItemRoutes from "./routes/menuItems.js";
 import categoryRoutes from "./routes/categories.js";
+import ratingRoutes from "./routes/ratingRoutes.js";
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRouter);
 app.use("/api/menu-items", menuItemRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/ratings", ratingRoutes);
 // app.use("/uploads", express.static("uploads"));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 

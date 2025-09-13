@@ -1,5 +1,6 @@
 import React from "react";
 import { Plus, Minus, Trash2 } from "lucide-react";
+import Image from "../../UI/Image";
 
 const getItemId = (item) => item.id || item._id;
 
@@ -8,10 +9,11 @@ const CartItem = ({ item, increaseQty, decreaseQty, removeItem }) => {
 
   return (
     <div className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50 hover:bg-gray-100">
-      <img
+      <Image
         src={item.image}
         alt={item.name}
-        className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg flex-shrink-0"
+        className="w-20 h-20 sm:w-28 sm:h-28 rounded-lg object-cover flex-shrink-0"
+        loading="lazy"
       />
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-gray-900 text-sm sm:text-lg truncate">

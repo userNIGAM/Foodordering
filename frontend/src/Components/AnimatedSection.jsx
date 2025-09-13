@@ -4,14 +4,14 @@ import { motion, useInView } from "framer-motion";
 
 const AnimatedSection = ({ children, variant, className = "" }) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { margin: "-100px" });
   return (
     <motion.div
       ref={ref}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={variant}
-      // className={className}
+      // custom={custom}
       className={`relative z-0 ${className}`}
     >
       {children}
