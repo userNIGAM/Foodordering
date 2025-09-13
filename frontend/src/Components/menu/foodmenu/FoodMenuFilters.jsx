@@ -1,5 +1,5 @@
 import { Funnel, Grid, List } from "lucide-react";
-import FiltersSidebar from "../FiltersSidebar";
+import FiltersSidebar from "../Filtersidebar/FiltersSidebar";
 
 export default function FoodMenuFilters({
   filters,
