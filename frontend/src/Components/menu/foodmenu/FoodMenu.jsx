@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Layout from "../../layout/Layout";
-import HeroSection from "../HeroSection";
+import HeroSection from "../hero/HeroSection";
 import { useMenuItems } from "../../hooks/useMenuItems";
 import FoodMenuHeader from "./FoodMenuHeader";
 import FoodMenuFilters from "./FoodMenuFilters";
