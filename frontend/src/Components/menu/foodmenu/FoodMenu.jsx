@@ -1,10 +1,10 @@
 import { useState } from "react";
-import Layout from "../layout/Layout";
-import HeroSection from "./HeroSection";
-import { useMenuItems } from "../hooks/useMenuItems";
-import FoodMenuHeader from "./foodmenu/FoodMenuHeader";
-import FoodMenuFilters from "./foodmenu/FoodMenuFilters";
-import FoodMenuContent from "./foodmenu/FoodMenuContent";
+import Layout from "../../layout/Layout";
+import HeroSection from "../HeroSection";
+import { useMenuItems } from "../../hooks/useMenuItems";
+import FoodMenuHeader from "./FoodMenuHeader";
+import FoodMenuFilters from "./FoodMenuFilters";
+import FoodMenuContent from "./FoodMenuContent";
 
 export default function FoodMenu() {
   const [viewMode, setViewMode] = useState("grid");

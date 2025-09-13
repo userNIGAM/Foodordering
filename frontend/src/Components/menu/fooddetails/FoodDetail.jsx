@@ -1,18 +1,18 @@
 // src/Components/menu/FoodDetail.jsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import api from "../../services/api";
-import { useCart } from "../../contexts/CartContext";
-import { useWishlist } from "../../contexts/WishlistContext";
+import api from "../../../services/api";
+import { useCart } from "../../../contexts/CartContext";
+import { useWishlist } from "../../../contexts/WishlistContext";
 
-import Breadcrumb from "./fooddetails/Breadcrumb";
-import FoodImages from "./fooddetails/FoodImages";
-import FoodInfo from "./fooddetails/FoodInfo";
-import QuantitySelector from "./fooddetails/QuantitySelector";
-import AddToCartButton from "./fooddetails/AddToCartButton";
-import Benefits from "./fooddetails/Benefits";
-import Reviews from "./fooddetails/Reviews";
-import RelatedItems from "./fooddetails/RelatedItems";
+import Breadcrumb from "./Breadcrumb";
+import FoodImages from "./FoodImages";
+import FoodInfo from "./FoodInfo";
+import QuantitySelector from "./QuantitySelector";
+import AddToCartButton from "./AddToCartButton";
+import Benefits from "./Benefits";
+import Reviews from "./Reviews";
+import RelatedItems from "./RelatedItems";
 
 export default function FoodDetail() {
   const { id } = useParams();
