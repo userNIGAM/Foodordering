@@ -9,7 +9,7 @@ export default function AddToCartButton({ item, quantity, addToCart }) {
   return (
     <button
       onClick={handleAdd}
-      className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center mb-6"
+      className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center mb-6 cursor-pointer"
     >
       <ShoppingCart size={20} className="mr-2" />
       Add to Cart - ${(Number(item.price ?? 0) * quantity).toFixed(2)}

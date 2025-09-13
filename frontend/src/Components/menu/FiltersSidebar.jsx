@@ -1,10 +1,10 @@
 import React, { memo, useCallback } from "react";
 import PropTypes from "prop-types";
-import SearchableCategoryFilter from "./filtersidebar/SearchableCategoryFilter";
-import PriceRangeFilter from "./filtersidebar/PriceRangeFilter";
-import RatingFilter from "./filtersidebar/RatingFilter";
-import DietaryPreferencesFilter from "./filtersidebar/DietaryPreferencesFilter";
-import ResetFiltersButton from "./filtersidebar/ResetFiltersButton";
+import SearchableCategoryFilter from "./Filtersidebar/SearchableCategoryFilter";
+import PriceRangeFilter from "./Filtersidebar/PriceRangeFilter";
+import RatingFilter from "./Filtersidebar/RatingFilter";
+import DietaryPreferencesFilter from "./Filtersidebar/DietaryPreferencesFilter";
+import ResetFiltersButton from "./Filtersidebar/ResetFiltersButton";
 
 const FiltersSidebar = memo(
   ({ filters, setFilters, priceRange, setSearch, mobile, isLoading }) => {
