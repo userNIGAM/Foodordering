@@ -5,10 +5,14 @@ import PropTypes from "prop-types";
 import { useCart } from "../../contexts/CartContext";
 import { useWishlist } from "../../contexts/WishlistContext";
 import Image from "../UI/Image";
+import { StarHalf } from "lucide-react";
 
 const FoodCard = memo(({ item }) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { name, image, price, ratings } = item;
+  const average = ratings?.average || 0;
+  const count = ratings?.count || 0;
 
   // const handleImageError = (e) => {
   //   e.target.src = "/placeholder-food.jpg";
@@ -22,6 +26,44 @@ const FoodCard = memo(({ item }) => {
       addToWishlist(item);
     }
   };
+
+  //-----------------------------------------------------------------------------------------//
+  //                             RenderStar Function                                         //
+  //-----------------------------------------------------------------------------------------//
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalf = rating - fullStars >= 0.5;
+
+    for (let i = 1; i <= 5; i++) {
+      if (i <= fullStars) {
+        stars.push(
+          <Star
+            key={i}
+            size={14}
+            fill="currentColor"
+            className="text-yellow-500"
+          />
+        );
+      } else if (i === fullStars + 1 && hasHalf) {
+        stars.push(
+          <StarHalf
+            key={i}
+            size={14}
+            fill="currentColor"
+            className="text-yellow-500"
+          />
+        );
+      } else {
+        stars.push(<Star key={i} size={14} className="text-gray-300" />);
+      }
+    }
+    return stars;
+  };
+
+  //-----------------------------------------------------------------------------------------//
+  //                             RenderStar Function                                         //
+  //-----------------------------------------------------------------------------------------//
 
   return (
     <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
@@ -65,12 +107,14 @@ const FoodCard = memo(({ item }) => {
 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center">
-            <div className="flex items-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-              <Star size={14} className="fill-current mr-1" />
-              <span className="text-sm font-semibold">
-                {item.rating?.toFixed(1) || "4.5"}
+            {/* ⭐ Show stars + average number */}
+            <div className="flex items-center">
+              {renderStars(item.ratings?.average || 0)}
+              <span className="ml-2 text-sm text-gray-600">
+                {item.ratings?.average?.toFixed(1) || "0.0"}
               </span>
             </div>
+
             <div className="flex items-center ml-3 text-gray-500 text-sm">
               <Clock size={14} className="mr-1" />
               <span>15-25 min</span>
@@ -81,6 +125,7 @@ const FoodCard = memo(({ item }) => {
             ${item.price.toFixed(2)}
           </span>
         </div>
+
         <button
           onClick={(e) => {
             e.preventDefault();

@@ -1,10 +1,8 @@
-// src/Components/menu/FoodDetail.jsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../../services/api";
 import { useCart } from "../../../contexts/CartContext";
 import { useWishlist } from "../../../contexts/WishlistContext";
-
 import Breadcrumb from "./Breadcrumb";
 import FoodImages from "./FoodImages";
 import FoodInfo from "./FoodInfo";
@@ -13,6 +11,9 @@ import AddToCartButton from "./AddToCartButton";
 import Benefits from "./Benefits";
 import Reviews from "./Reviews";
 import RelatedItems from "./RelatedItems";
+import StarRating from "../../UI/StarRating"; // ✅ Import star rating
+import { useRating } from "../../hooks/useRating"; // ✅ Import hook
+import StarRatingdynamic from "../../UI/StarRatingdynamic";
 
 export default function FoodDetail() {
   const { id } = useParams();
@@ -26,6 +27,8 @@ export default function FoodDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { rating, setRating, stats, submitRating } = useRating(id); // ✅ Hook for this item
 
   // fetch item + related
   useEffect(() => {
@@ -106,7 +109,7 @@ export default function FoodDetail() {
   const displayImage = images[selectedImage] || "/placeholder-food.jpg";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 py-17">
       <main className="container mx-auto px-4 py-8">
         <Breadcrumb itemName={item.name} />
 
@@ -128,6 +131,37 @@ export default function FoodDetail() {
               activeTab={activeTab}
               setActiveTab={setActiveTab}
             />
+
+            {/* ✅ Ratings Section (always visible) */}
+            <div className="flex items-center mb-4">
+              {/* Numeric average */}
+              <span className="text-lg font-semibold mr-2">
+                {stats?.average?.toFixed(1) || "0.0"}
+              </span>
+
+              {/* Star display (non-interactive) */}
+              <StarRatingdynamic
+                rating={stats?.average || 0}
+                interactive={false}
+              />
+
+              {/* Review count */}
+              <span className="text-sm text-gray-500 ml-2">
+                ({stats?.count || 0} reviews)
+              </span>
+            </div>
+
+            {/* ✅ User Rating (interactive for logged-in user) */}
+            {rating !== null && (
+              <div className="mb-6">
+                <h4 className="font-medium mb-2">Your Rating</h4>
+                <StarRating
+                  rating={rating}
+                  onSubmit={submitRating}
+                  interactive
+                />
+              </div>
+            )}
 
             <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
 

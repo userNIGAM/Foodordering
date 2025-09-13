@@ -13,14 +13,6 @@ const menuItemSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      validate: {
-        validator: async function (value) {
-          // make sure category exists
-          const categoryExists = await Category.findOne({ name: value });
-          return !!categoryExists;
-        },
-        message: "Category does not exist",
-      },
     },
     price: {
       type: Number,
@@ -78,9 +70,11 @@ const menuItemSchema = new mongoose.Schema(
   }
 );
 menuItemSchema.pre("save", async function (next) {
-  const exists = await Category.findOne({ name: this.category });
-  if (!exists) {
-    return next(new Error("Invalid category"));
+  if (this.isModified("category")) {
+    const exists = await Category.findOne({ name: this.category });
+    if (!exists) {
+      return next(new Error("Invalid category"));
+    }
   }
   next();
 });
