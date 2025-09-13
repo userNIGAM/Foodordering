@@ -159,7 +159,7 @@ const FoodGrid = memo(({ items }) => {
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
       {items.map((item) => (
         <FoodCard key={item._id} item={item} />
       ))}
