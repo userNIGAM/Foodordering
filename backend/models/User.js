@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
+    // 🔐 Authentication fields
     name: {
       type: String,
       required: true,
@@ -14,6 +15,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
@@ -33,18 +35,28 @@ const userSchema = new mongoose.Schema(
     verificationOTPExpires: Date,
     resetPasswordOTP: String,
     resetPasswordOTPExpires: Date,
+
+    // 👤 Profile fields
+    firstName: { type: String, trim: true },
+    lastName: { type: String, trim: true },
+    bio: { type: String, maxlength: 500 },
+    phoneNumber: { type: String, trim: true },
+    avatar: { type: String }, // store image URL or /uploads/file.jpg
+
+    // 📧 Secondary email(s)
+    secondaryEmails: [{ type: String, lowercase: true, trim: true }],
   },
   {
     timestamps: true,
   }
 );
 
-// Add comparePassword method to the user schema
+// 🔑 Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Pre-save hook to hash password before saving
+// 🔑 Pre-save hook to hash password
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -57,7 +69,7 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Generate OTP method
+// 🔑 Generate OTP
 userSchema.methods.generateOTP = function () {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
