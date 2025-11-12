@@ -6,6 +6,7 @@ import ContactSection from "../contact/ContactSection";
 import Chatbot from "../pages/chat/Chatbot";
 import AnimatedSection from "../AnimatedSection";
 import Footer from "../footer/Footer";
+import HomeFoodSection from "./HeroMenu";
 
 const Home = () => {
   return (
@@ -17,6 +18,7 @@ const Home = () => {
           visible: { opacity: 1 },
         }}
       >
+        <HomeFoodSection />
         {/* <ContactSection /> */}
       </AnimatedSection>
       <Chatbot /> {/* Add chatbot here */}
