@@ -1,21 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../../context/AuthContext";
+import {
+  getUserProfile,
+  updateUserProfile,
+} from "../../../services/userService";
 import { motion } from "framer-motion";
-import { User, Phone, Mail, MapPin, Edit3, Camera, Save } from "lucide-react";
+import { toast } from "react-hot-toast";
+import ProfileHeader from "./ProfileHeader";
+import ProfileField from "./ProfileField";
+import ProfileBio from "./ProfileBio";
+import ProfileActions from "./ProfileActions";
+import { User, Phone, Mail, MapPin, Edit3 } from "lucide-react";
 
 const ProfileSection = () => {
+  const { user } = useContext(AuthContext);
+  const [profile, setProfile] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const [profile, setProfile] = useState({
-    name: "Alex Johnson",
-    username: "@alexj",
-    email: "alex.johnson@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    joinDate: "January 2022",
-    bio: "Product designer with a passion for creating intuitive user experiences. Love hiking and photography in my free time.",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1887&q=80",
-  });
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getUserProfile();
+        if (res.data.success) {
+          setProfile(res.data.user);
+          setFormData(res.data.user);
+        }
+      } catch (err) {
+        console.error("Profile fetch error:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const [formData, setFormData] = useState({ ...profile });
 
@@ -24,9 +40,22 @@ const ProfileSection = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSave = () => {
-    setProfile({ ...formData });
-    setIsEditing(false);
+  const handleSave = async () => {
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+    if (avatarFile) data.append("avatar", avatarFile);
+
+    try {
+      const res = await updateUserProfile(data);
+      if (res.data.success) {
+        setProfile(res.data.user);
+        toast.success("Profile updated!");
+        setIsEditing(false);
+      }
+    } catch (err) {
+      console.error("Profile update error:", err);
+      toast.error("Failed to update profile");
+    }
   };
 
   const handleCancel = () => {
@@ -36,7 +65,6 @@ const ProfileSection = () => {
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-      {/* Header */}
       <div className="px-8 py-6 border-b border-gray-100">
         <h2 className="text-2xl font-bold text-gray-800">
           Profile Information
@@ -44,165 +72,73 @@ const ProfileSection = () => {
         <p className="text-gray-500 mt-1">Manage your personal information</p>
       </div>
 
-      {/* Profile Content */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="p-8"
       >
-        <div className="flex items-center gap-6 mb-8">
-          <div className="relative">
-            <img
-              src={profile.avatar}
-              alt="Profile"
-              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
-            />
-            {isEditing && (
-              <label className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md cursor-pointer border border-gray-200 hover:bg-gray-50 transition-colors">
-                <Camera size={16} className="text-gray-600" />
-                <input type="file" className="hidden" />
-              </label>
-            )}
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800">
-              {profile.name}
-            </h3>
-            <p className="text-gray-500">{profile.username}</p>
-            <p className="text-gray-400 text-sm mt-1">
-              Member since {profile.joinDate}
-            </p>
-          </div>
-        </div>
+        <ProfileHeader
+          profile={profile}
+          isEditing={isEditing}
+          onAvatarChange={(file) => console.log(file)} // can later handle avatar upload
+        />
 
         <div className="space-y-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-2">
-                <User size={18} />
-                Full Name
-              </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-              ) : (
-                <div className="px-4 py-2 text-gray-800">{profile.name}</div>
-              )}
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-2">
-                <Mail size={18} />
-                Email Address
-              </label>
-              {isEditing ? (
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-              ) : (
-                <div className="px-4 py-2 text-gray-800">{profile.email}</div>
-              )}
-            </div>
+            <ProfileField
+              label="Full Name"
+              icon={<User size={18} />}
+              name="name"
+              value={formData.name}
+              editing={isEditing}
+              onChange={handleInputChange}
+            />
+            <ProfileField
+              label="Email Address"
+              icon={<Mail size={18} />}
+              name="email"
+              value={formData.email}
+              editing={isEditing}
+              onChange={handleInputChange}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-2">
-                <Phone size={18} />
-                Phone Number
-              </label>
-              {isEditing ? (
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-              ) : (
-                <div className="px-4 py-2 text-gray-800">{profile.phone}</div>
-              )}
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-2">
-                <MapPin size={18} />
-                Location
-              </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                />
-              ) : (
-                <div className="px-4 py-2 text-gray-800">
-                  {profile.location}
-                </div>
-              )}
-            </div>
+            <ProfileField
+              label="Phone Number"
+              icon={<Phone size={18} />}
+              name="phone"
+              value={formData.phone}
+              editing={isEditing}
+              onChange={handleInputChange}
+            />
+            <ProfileField
+              label="Location"
+              icon={<MapPin size={18} />}
+              name="location"
+              value={formData.location}
+              editing={isEditing}
+              onChange={handleInputChange}
+            />
           </div>
 
-          <div>
-            <label className="flex items-center gap-2 text-gray-700 text-sm font-medium mb-2">
-              <Edit3 size={18} />
-              Bio
-            </label>
-            {isEditing ? (
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                rows="3"
-              />
-            ) : (
-              <div className="px-4 py-2 text-gray-800 leading-relaxed">
-                {profile.bio}
-              </div>
-            )}
-          </div>
+          <ProfileBio
+            label="Bio"
+            icon={<Edit3 size={18} />}
+            name="bio"
+            value={formData.bio}
+            editing={isEditing}
+            onChange={handleInputChange}
+          />
         </div>
 
-        <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
-          {isEditing ? (
-            <>
-              <button
-                onClick={handleCancel}
-                className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Save size={18} />
-                Save Changes
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Edit3 size={18} />
-              Edit Profile
-            </button>
-          )}
-        </div>
+        <ProfileActions
+          isEditing={isEditing}
+          onEdit={() => setIsEditing(true)}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
       </motion.div>
     </div>
   );

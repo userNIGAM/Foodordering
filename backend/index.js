@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import adminRoutes from "./routes/admin.js";
 import orderRoutes from "./routes/orderRoutes.js";
@@ -52,6 +53,7 @@ app.use(
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/menu-items", menuRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
