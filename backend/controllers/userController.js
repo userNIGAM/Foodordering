@@ -13,7 +13,13 @@ export const getUserProfile = async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
 
-    return res.json({ success: true, user });
+    return res.json({
+      success: true,
+      user: {
+        ...user._doc,
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+      },
+    });
   } catch (err) {
     console.error("Get profile error:", err);
     return res.status(500).json({ success: false, message: "Server error" });
@@ -23,6 +29,8 @@ export const getUserProfile = async (req, res) => {
 // 📤 Update user profile (name, bio, phoneNumber, avatar, etc.)
 export const updateUserProfile = async (req, res) => {
   try {
+    console.log("File received:", req.file);
+    console.log("Body received:", req.body);
     const userId = req.user._id;
     const { firstName, lastName, bio, phoneNumber } = req.body;
     let avatarUrl;
@@ -58,7 +66,15 @@ export const updateUserProfile = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    return res.json({ success: true, user: updatedUser });
+    return res.json({
+      success: true,
+      user: {
+        ...updatedUser._doc,
+        name: `${updatedUser.firstName || ""} ${
+          updatedUser.lastName || ""
+        }`.trim(),
+      },
+    });
   } catch (err) {
     console.error("Update profile error:", err);
     return res.status(500).json({ success: false, message: "Server error" });

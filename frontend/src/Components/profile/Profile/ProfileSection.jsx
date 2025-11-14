@@ -11,6 +11,8 @@ import ProfileField from "./ProfileField";
 import ProfileBio from "./ProfileBio";
 import ProfileActions from "./ProfileActions";
 import { User, Phone, Mail, MapPin, Edit3 } from "lucide-react";
+import ProfileSkeleton from "./ProfileSkeleton";
+import api from "../../../services/api";
 
 const ProfileSection = () => {
   const { user } = useContext(AuthContext);
@@ -28,33 +30,56 @@ const ProfileSection = () => {
         }
       } catch (err) {
         console.error("Profile fetch error:", err);
+        toast.error("Profile fetch error:");
       }
     };
     fetchProfile();
   }, []);
 
-  const [formData, setFormData] = useState({ ...profile });
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    bio: "",
+    phoneNumber: "",
+    location: "",
+    email: "",
+    avatar: null,
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleAvatarChange = (file) => {
+    console.log("Avatar before save:", formData.avatar);
+    setFormData((prev) => ({ ...prev, avatar: file }));
+  };
+
   const handleSave = async () => {
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
-    if (avatarFile) data.append("avatar", avatarFile);
+    const formDataToSend = new FormData();
+    formDataToSend.append("firstName", formData.firstName || "");
+    formDataToSend.append("lastName", formData.lastName || "");
+    formDataToSend.append("bio", formData.bio || "");
+    formDataToSend.append("phoneNumber", formData.phoneNumber || "");
+
+    if (formData.avatar instanceof File) {
+      formDataToSend.append("avatar", formData.avatar); // 👈 MUST MATCH multer field name!
+    }
 
     try {
-      const res = await updateUserProfile(data);
+      const res = await api.put("/api/user/update", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       if (res.data.success) {
+        toast.success("Profile updated successfully!");
         setProfile(res.data.user);
-        toast.success("Profile updated!");
         setIsEditing(false);
       }
     } catch (err) {
-      console.error("Profile update error:", err);
-      toast.error("Failed to update profile");
+      toast.error("Failed to update profile.");
+      console.error("Update error:", err);
     }
   };
 
@@ -62,6 +87,7 @@ const ProfileSection = () => {
     setFormData({ ...profile });
     setIsEditing(false);
   };
+  if (!profile) return <ProfileSkeleton />;
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -81,7 +107,7 @@ const ProfileSection = () => {
         <ProfileHeader
           profile={profile}
           isEditing={isEditing}
-          onAvatarChange={(file) => console.log(file)} // can later handle avatar upload
+          onAvatarChange={handleAvatarChange}
         />
 
         <div className="space-y-6 mb-8">
