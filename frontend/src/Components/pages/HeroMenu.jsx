@@ -19,7 +19,7 @@ export default function HomeFoodSection() {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const [itemRefs, visibleItems] = useScrollAnimationsList(items.length);
-  const [showMoreRef, showMoreVisible] = useInView(0.3);
+  const [showMoreRef, showMoreVisible] = useInView(0.1);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -179,8 +179,13 @@ export default function HomeFoodSection() {
 
       <motion.div
         ref={showMoreRef}
-        initial={{ opacity: 0, y: 50 }}
-        animate={showMoreVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+        // initial={{ opacity: 0, y: 50 }}
+        animate={showMoreVisible ? { opacity: 1, y: 0 } : {}}
+        // style={{
+        //   background: "rgba(255,0,0,0.2)",
+        //   zIndex: 50,
+        //   position: "relative",
+        // }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="text-center mt-12"
       >

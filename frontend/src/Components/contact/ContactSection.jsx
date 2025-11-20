@@ -102,8 +102,8 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-800">Phone Number</h4>
-                  <p className="text-gray-600">+1 (555) 123-4567</p>
-                  <p className="text-gray-600">+1 (555) 987-FOOD</p>
+                  <p className="text-gray-600">+977-980-0000000</p>
+                  <p className="text-gray-600">+977-980-0000000</p>
                 </div>
               </div>
 
@@ -124,8 +124,8 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-800">Main Office</h4>
-                  <p className="text-gray-600">123 Culinary Street</p>
-                  <p className="text-gray-600">Foodville, Tasty 54321</p>
+                  <p className="text-gray-600">Birtamode -06</p>
+                  <p className="text-gray-600">Jhapa, Nepal</p>
                 </div>
               </div>
 

@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
-import {
-  getUserProfile,
-  updateUserProfile,
-} from "../../../services/userService";
+import { getUserProfile } from "../../../services/userService";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import ProfileHeader from "./ProfileHeader";
@@ -17,58 +14,70 @@ import api from "../../../services/api";
 const ProfileSection = () => {
   const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
-  const [avatarFile, setAvatarFile] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    location: "",
+    bio: "",
+    avatar: null,
+  });
   const [isEditing, setIsEditing] = useState(false);
 
+  // Load profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await getUserProfile();
         if (res.data.success) {
-          setProfile(res.data.user);
-          setFormData(res.data.user);
+          const u = res.data.user;
+
+          setProfile(u);
+          setFormData({
+            fullName: `${u.firstName || ""} ${u.lastName || ""}`.trim(),
+            email: u.email || "",
+            phoneNumber: u.phoneNumber || "",
+            location: u.location || "",
+            bio: u.bio || "",
+            avatar: u.avatar || null,
+          });
         }
       } catch (err) {
         console.error("Profile fetch error:", err);
-        toast.error("Profile fetch error:");
+        toast.error("Failed to fetch profile!");
       }
     };
+
     fetchProfile();
   }, []);
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    bio: "",
-    phoneNumber: "",
-    location: "",
-    email: "",
-    avatar: null,
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
   const handleAvatarChange = (file) => {
-    console.log("Avatar before save:", formData.avatar);
     setFormData((prev) => ({ ...prev, avatar: file }));
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSave = async () => {
-    const formDataToSend = new FormData();
-    formDataToSend.append("firstName", formData.firstName || "");
-    formDataToSend.append("lastName", formData.lastName || "");
-    formDataToSend.append("bio", formData.bio || "");
-    formDataToSend.append("phoneNumber", formData.phoneNumber || "");
+    const fd = new FormData();
+
+    // Split full name before sending ✔️
+    const [firstName = "", ...rest] = formData.fullName.split(" ");
+    const lastName = rest.join(" ");
+
+    fd.append("firstName", firstName);
+    fd.append("lastName", lastName);
+    fd.append("bio", formData.bio);
+    fd.append("phoneNumber", formData.phoneNumber);
+    fd.append("location", formData.location);
 
     if (formData.avatar instanceof File) {
-      formDataToSend.append("avatar", formData.avatar); // 👈 MUST MATCH multer field name!
+      fd.append("avatar", formData.avatar);
     }
 
     try {
-      const res = await api.put("/api/user/update", formDataToSend, {
+      const res = await api.put("/api/user/update", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -78,15 +87,23 @@ const ProfileSection = () => {
         setIsEditing(false);
       }
     } catch (err) {
-      toast.error("Failed to update profile.");
-      console.error("Update error:", err);
+      console.error(err);
+      toast.error("Update failed");
     }
   };
 
   const handleCancel = () => {
-    setFormData({ ...profile });
     setIsEditing(false);
+    setFormData({
+      fullName: `${profile.firstName || ""} ${profile.lastName || ""}`.trim(),
+      email: profile.email || "",
+      phoneNumber: profile.phoneNumber || "",
+      location: profile.location || "",
+      bio: profile.bio || "",
+      avatar: profile.avatar || null,
+    });
   };
+
   if (!profile) return <ProfileSkeleton />;
 
   return (
@@ -95,7 +112,7 @@ const ProfileSection = () => {
         <h2 className="text-2xl font-bold text-gray-800">
           Profile Information
         </h2>
-        <p className="text-gray-500 mt-1">Manage your personal information</p>
+        <p className="text-gray-500 mt-1">Manage your personal details</p>
       </div>
 
       <motion.div
@@ -105,7 +122,7 @@ const ProfileSection = () => {
         className="p-8"
       >
         <ProfileHeader
-          profile={profile}
+          profile={{ ...profile, avatar: formData.avatar }}
           isEditing={isEditing}
           onAvatarChange={handleAvatarChange}
         />
@@ -115,37 +132,38 @@ const ProfileSection = () => {
             <ProfileField
               label="Full Name"
               icon={<User size={18} />}
-              name="name"
-              value={formData.name}
+              name="fullName"
+              value={formData.fullName}
               editing={isEditing}
-              onChange={handleInputChange}
+              onChange={handleChange}
             />
+
             <ProfileField
-              label="Email Address"
+              label="Email"
               icon={<Mail size={18} />}
               name="email"
               value={formData.email}
-              editing={isEditing}
-              onChange={handleInputChange}
+              editing={false} // Email should not be editable
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ProfileField
-              label="Phone Number"
+              label="Phone"
               icon={<Phone size={18} />}
-              name="phone"
-              value={formData.phone}
+              name="phoneNumber"
+              value={formData.phoneNumber}
               editing={isEditing}
-              onChange={handleInputChange}
+              onChange={handleChange}
             />
+
             <ProfileField
               label="Location"
               icon={<MapPin size={18} />}
               name="location"
               value={formData.location}
               editing={isEditing}
-              onChange={handleInputChange}
+              onChange={handleChange}
             />
           </div>
 
@@ -155,7 +173,7 @@ const ProfileSection = () => {
             name="bio"
             value={formData.bio}
             editing={isEditing}
-            onChange={handleInputChange}
+            onChange={handleChange}
           />
         </div>
 
