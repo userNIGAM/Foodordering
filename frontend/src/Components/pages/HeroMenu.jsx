@@ -9,6 +9,27 @@ import api from "../../services/api";
 import Image from "../UI/Image";
 import useScrollAnimationsList from "../hooks/useScrollAnimation";
 import useInView from "../hook/useInView";
+import AnimatedSection from "../AnimatedSection";
+
+const headingVariant = {
+  hidden: { y: -40, scale: 0.95, opacity: 0 },
+  visible: {
+    y: 0,
+    scale: 1,
+    opacity: 1,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
+
+const textVariant = {
+  hidden: { y: 20, scale: 0.95, opacity: 0 },
+  visible: {
+    y: 0,
+    scale: 1,
+    opacity: 1,
+    transition: { duration: 0.8, delay: 0.2, ease: "easeOut" },
+  },
+};
 
 export default function HomeFoodSection() {
   const [items, setItems] = useState([]);
@@ -90,7 +111,9 @@ export default function HomeFoodSection() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          Our Popular Dishes
+          <AnimatedSection variant={headingVariant}>
+            Our Popular Dishes
+          </AnimatedSection>
         </motion.h2>
         <motion.p
           className="text-gray-600"
@@ -99,7 +122,9 @@ export default function HomeFoodSection() {
           transition={{ delay: 0.2, duration: 0.6 }}
           viewport={{ once: true }}
         >
-          A few of our delicious options, just for you!
+          <AnimatedSection variant={textVariant}>
+            A few of our delicious options, just for you!
+          </AnimatedSection>
         </motion.p>
       </div>
 

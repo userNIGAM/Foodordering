@@ -37,11 +37,12 @@ const userSchema = new mongoose.Schema(
     resetPasswordOTPExpires: Date,
 
     // 👤 Profile fields
-    firstName: { type: String, trim: true },
-    lastName: { type: String, trim: true },
-    bio: { type: String, maxlength: 500 },
-    phoneNumber: { type: String, trim: true },
-    avatar: { type: String }, // store image URL or /uploads/file.jpg
+    firstName: { type: String, trim: true, default: "" },
+    lastName: { type: String, trim: true, default: "" },
+    location: { type: String, trim: true, default: "" },
+    phoneNumber: { type: String, trim: true, default: "" },
+    bio: { type: String, maxlength: 500, default: "" },
+    avatar: { type: String, default: null }, // store image URL or /uploads/file.jpg
 
     // 📧 Secondary email(s)
     secondaryEmails: [{ type: String, lowercase: true, trim: true }],
