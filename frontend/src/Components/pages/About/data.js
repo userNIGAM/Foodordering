@@ -64,37 +64,6 @@ export const stats = [
   { number: "95%", label: "Restaurant Retention Rate" },
 ];
 
-export const features = [
-  {
-    // icon: <Target className="w-8 h-8" />,
-    title: "For Established Restaurants",
-    description:
-      "You have the kitchen, staff, and delivery setup. We provide the customers and ordering platform.",
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-    icon: <Zap className="w-8 h-8" />,
-    title: "Instant Online Presence",
-    description:
-      "Get listed immediately without waiting for website development or SEO optimization",
-    color: "from-orange-500 to-red-500",
-  },
-  {
-    icon: <Building className="w-8 h-8" />,
-    title: "Professional Platform",
-    description:
-      "Maintain your restaurant's professional image with our premium ordering system",
-    color: "from-purple-500 to-pink-500",
-  },
-  {
-    icon: <ChefHat className="w-8 h-8" />,
-    title: "Focus on Cooking",
-    description:
-      "Concentrate on your food while we handle orders, payments, and customer management",
-    color: "from-green-500 to-teal-500",
-  },
-];
-
 export const problemsWeSolve = [
   {
     problem: "High Website Development Costs",
