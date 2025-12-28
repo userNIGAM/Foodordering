@@ -41,7 +41,7 @@ export default function RelatedItems({ relatedItems }) {
                     </div>
                   </div>
                   <span className="text-indigo-600 font-bold text-lg">
-                    ${Number(related.price ?? 0).toFixed(2)}
+                    Rs.{Number(related.price ?? 0).toFixed(2)}
                   </span>
                 </div>
                 <Link

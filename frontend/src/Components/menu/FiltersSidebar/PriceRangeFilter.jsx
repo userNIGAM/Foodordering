@@ -25,7 +25,7 @@ const PriceRangeFilter = ({ filters, setFilters, priceRange, isLoading }) => {
   return (
     <div className="mb-6">
       <label className="block text-sm font-semibold mb-2 text-gray-700">
-        Price Range (${filters.price[0]} – ${filters.price[1]})
+        Price Range (Rs.{filters.price[0]} – Rs.{filters.price[1]})
       </label>
       <div className="flex items-center space-x-3 mb-2">
         <input

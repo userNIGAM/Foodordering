@@ -28,7 +28,7 @@ export default function FoodInfo({ item, activeTab, setActiveTab }) {
       </div>
 
       <p className="text-2xl font-bold text-indigo-600 mb-6">
-        ${Number(item.price ?? 0).toFixed(2)}
+        Rs.{Number(item.price ?? 0).toFixed(2)}
       </p>
 
       <div className="mb-6">

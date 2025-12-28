@@ -38,6 +38,7 @@ import WishlistPage from "./Components/WishlistPage";
 import WishlistCounter from "./Components/WishlistCounter";
 import MainLayout from "./Components/layout/MainLayout";
 import ScrollToTop from "./Components/scroll/ScrollToTop";
+import { ThemeProvider } from "./context/ThemeContext";
 
 // ---------------------------
 // Layout wrapper with Navbar + Modals
@@ -57,54 +58,56 @@ function AppLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center">
+      <div className="min-h-screen grid place-items-center bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <MainLayout>
-      <Navbar
-        onProfileClick={() => setIsProfileOpen(true)}
-        onCartClick={() => setIsCartOpen(true)}
-        user={user}
-        isAdmin={isAdmin}
-        cartItemsCount={
-          typeof getCartItemsCount === "function"
-            ? getCartItemsCount()
-            : cart.length || 0
-        }
-      />
+    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      <MainLayout>
+        <Navbar
+          onProfileClick={() => setIsProfileOpen(true)}
+          onCartClick={() => setIsCartOpen(true)}
+          user={user}
+          isAdmin={isAdmin}
+          cartItemsCount={
+            typeof getCartItemsCount === "function"
+              ? getCartItemsCount()
+              : cart.length || 0
+          }
+        />
 
-      {/* Floating wishlist button */}
-      <WishlistCounter />
+        {/* Floating wishlist button */}
+        <WishlistCounter />
 
-      {/* Render the nested route */}
-      <Outlet />
+        {/* Render the nested route */}
+        <Outlet />
 
-      {/* Cart modal */}
-      <CartModal
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cart || []}
-        increaseQty={increaseQty}
-        decreaseQty={decreaseQty}
-        removeItem={removeItem}
-      />
+        {/* Cart modal */}
+        <CartModal
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          cartItems={cart || []}
+          increaseQty={increaseQty}
+          decreaseQty={decreaseQty}
+          removeItem={removeItem}
+        />
 
-      <Toaster position="bottom-right" />
+        <Toaster position="bottom-right" />
 
-      {user && (
-        <Modal
-          isOpen={isProfileOpen}
-          onClose={() => setIsProfileOpen(false)}
-          fullWidth={true}
-        >
-          <Dashboard user={user} onLogout={logout} />
-        </Modal>
-      )}
-    </MainLayout>
+        {user && (
+          <Modal
+            isOpen={isProfileOpen}
+            onClose={() => setIsProfileOpen(false)}
+            fullWidth={true}
+          >
+            <Dashboard user={user} onLogout={logout} />
+          </Modal>
+        )}
+      </MainLayout>
+    </div>
   );
 }
 
@@ -199,10 +202,12 @@ function AppWithProviders() {
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <ScrollToTop />
-        <AppWithProviders />
-      </Router>
+      <ThemeProvider>
+        <Router>
+          <ScrollToTop />
+          <AppWithProviders />
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

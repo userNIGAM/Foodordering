@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Star, StarHalf, Heart } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { useCart } from "../../contexts/CartContext";
 import { useWishlist } from "../../contexts/WishlistContext";
@@ -115,7 +116,7 @@ export default function HomeFoodSection() {
             Our Popular Dishes
           </AnimatedSection>
         </motion.h2>
-        <motion.p
+        <motion.h3
           className="text-gray-600"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -125,7 +126,7 @@ export default function HomeFoodSection() {
           <AnimatedSection variant={textVariant}>
             A few of our delicious options, just for you!
           </AnimatedSection>
-        </motion.p>
+        </motion.h3>
       </div>
 
       <div className="max-w-7xl mx-auto grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-4 sm:px-6 lg:px-8">
@@ -183,7 +184,7 @@ export default function HomeFoodSection() {
                     </span>
                   </div>
                   <span className="text-indigo-600 font-bold text-lg">
-                    ${Number(item.price).toFixed(2)}
+                    Rs.{Number(item.price).toFixed(2)}
                   </span>
                 </div>
 

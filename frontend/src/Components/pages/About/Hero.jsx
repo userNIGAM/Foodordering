@@ -8,7 +8,7 @@ const Hero = () => {
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="relative py-20 px-4 text-center bg-gradient-to-r from-blue-600 to-cyan-600 text-white"
+      className="relative py-20 px-4 mt-10 text-center bg-gradient-to-r from-blue-600 to-cyan-600 text-white"
     >
       <div className="absolute inset-0 bg-black/10"></div>
       <div className="relative max-w-4xl mx-auto">

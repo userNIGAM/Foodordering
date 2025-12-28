@@ -9,7 +9,7 @@ export default function FoodMenuContent({
   fetchItems,
   resetFilters,
   viewMode,
-  priceRange,
+  // priceRange,
 }) {
   if (loading) return <LoadingSpinner message="Loading delicious options..." />;
   if (error) return <ErrorMessage message={error} onRetry={fetchItems} />;

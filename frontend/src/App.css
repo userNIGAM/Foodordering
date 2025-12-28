@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+:root {
+  --bg: 255 255 255; /* Light background R G B */
+  --text: 0 0 0; /* Light text */
+}
+
+[data-theme="dark"] {
+  --bg: 18 18 18; /* Dark background */
+  --text: 255 255 255; /* Dark text */
+}
+
+body {
+  @apply bg-[rgb(var(--bg))] text-[rgb(var(--text))];
+}

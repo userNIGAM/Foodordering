@@ -12,7 +12,7 @@ export default function Benefits({ preparationTime }) {
           </div>
           <div>
             <p className="font-medium text-gray-900">Free Delivery</p>
-            <p className="text-sm text-gray-600">On orders over $25</p>
+            <p className="text-sm text-gray-600">On orders over Rs.2500</p>
           </div>
         </div>
         <div className="flex items-start">
