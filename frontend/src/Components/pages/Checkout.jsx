@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -269,7 +270,7 @@ const Checkout = () => {
                     </div>
                   </div>
                   <span className="font-bold text-gray-700">
-                    ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                    Rs.{((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                   </span>
                 </div>
               );
@@ -279,7 +280,7 @@ const Checkout = () => {
           <div className="flex justify-between mt-6 pt-4 border-t">
             <span className="font-bold text-lg">Total:</span>
             <span className="font-bold text-lg text-green-600">
-              ${getCartTotal().toFixed(2)}
+              Rs.{getCartTotal().toFixed(2)}
             </span>
           </div>
         </div>

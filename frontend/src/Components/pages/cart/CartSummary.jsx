@@ -27,7 +27,7 @@ const CartSummary = ({ subtotal, tax, total, itemCount, onCheckout }) => (
         Total
       </span>
       <span className="font-bold text-gray-900 text-lg sm:text-xl">
-        ${total}
+        Rs.{total}
       </span>
     </div>
 

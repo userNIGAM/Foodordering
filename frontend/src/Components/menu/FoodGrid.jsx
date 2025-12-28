@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import { Star, Heart, Clock } from "lucide-react";
@@ -122,7 +123,7 @@ const FoodCard = memo(({ item }) => {
           </div>
 
           <span className="text-indigo-600 font-bold text-lg">
-            ${item.price.toFixed(2)}
+            Rs.{item.price.toFixed(2)}
           </span>
         </div>
 
