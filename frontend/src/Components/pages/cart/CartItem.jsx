@@ -42,7 +42,7 @@ const CartItem = ({ item, increaseQty, decreaseQty, removeItem }) => {
 
           {/* Price */}
           <p className="font-semibold text-gray-900 text-sm sm:text-lg">
-            ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+            Rs.{(parseFloat(item.price) * item.quantity).toFixed(2)}
           </p>
         </div>
 
