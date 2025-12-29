@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable react-refresh/only-export-components */
 // src/context/AuthContext.jsx
 import { createContext, useState, useEffect, useCallback } from "react";

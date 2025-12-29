@@ -6,21 +6,30 @@ import { ThemeContext } from "../../../../context/ThemeContext";
 export default function PreferencesSection({ data, onChange, isEditing }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
 
+  // const handleThemeSwitch = (val) => {
+  //   const newTheme = val ? "dark" : "light";
+
+  //   // Update in Context
+  //   if (newTheme !== theme) {
+  //     toggleTheme();
+  //   }
+
+  //   // Save in user preferences state
+  //   onChange("preferences", "theme", newTheme);
+
+  //   // Save in local storage
+  //   localStorage.setItem("theme", newTheme);
+  // };
+
   const handleThemeSwitch = (val) => {
-    const newTheme = val ? "dark" : "light";
+  const newTheme = val ? "dark" : "light";
 
-    // Update in Context
-    if (newTheme !== theme) {
-      toggleTheme();
-    }
+  if (newTheme !== theme) {
+    toggleTheme();              // context will update DOM + storage correctly
+  }
 
-    // Save in user preferences state
-    onChange("preferences", "theme", newTheme);
-
-    // Save in local storage
-    localStorage.setItem("theme", newTheme);
-  };
-
+  onChange("preferences", "theme", newTheme);
+};
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium text-gray-900">App Preferences</h3>

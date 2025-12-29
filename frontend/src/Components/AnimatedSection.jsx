@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // components/AnimatedSection.jsx
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
