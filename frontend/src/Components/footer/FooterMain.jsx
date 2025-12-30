@@ -39,8 +39,8 @@ const FooterMain = () => (
       <div>
         <h4 className="text-lg font-semibold mb-6 text-white">Contact Us</h4>
         <ul className="space-y-4">
-          <li className="flex items-start"><FaMapMarkerAlt className="mt-1 mr-3 text-orange-500" /><span className="text-gray-400">123 Food Street, Culinary District, Taste City</span></li>
-          <li className="flex items-center"><FaPhone className="mr-3 text-orange-500" /><span className="text-gray-400">+1 (234) 567-8901</span></li>
+          <li className="flex items-start"><FaMapMarkerAlt className="mt-1 mr-3 text-orange-500" /><span className="text-gray-400">Birtamode</span></li>
+          <li className="flex items-center"><FaPhone className="mr-3 text-orange-500" /><span className="text-gray-400">+977 980000000</span></li>
           <li className="flex items-center"><FaEnvelope className="mr-3 text-orange-500" /><span className="text-gray-400">support@order.com</span></li>
         </ul>
       </div>

@@ -3,7 +3,7 @@ import FoodConcierge from "./FoodConcierge";
 import FooterMain from "./FooterMain";
 import Newsletter from "./Newsletter";
 import BottomBar from "./BottomBar";
-import AppBadges from "./AppBadges";
+// import AppBadges from "./AppBadges";
 
 const Footer = () => {
   return (
@@ -13,7 +13,7 @@ const Footer = () => {
       <FooterMain />
       <Newsletter />
       <BottomBar />
-      <AppBadges />
+      {/* <AppBadges /> */}
     </footer>
   );
 };
