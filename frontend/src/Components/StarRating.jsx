@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { Star } from "lucide-react"; // you can swap with any star icon
 

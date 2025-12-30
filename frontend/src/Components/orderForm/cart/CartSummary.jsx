@@ -10,7 +10,7 @@ const CartSummary = ({ subtotal, tax, total, itemCount, onCheckout }) => (
     <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
       <div className="flex justify-between text-sm sm:text-base text-gray-700">
         <span>Subtotal ({itemCount} items)</span>
-        <span className="font-medium">${subtotal}</span>
+        <span className="font-medium">Rs.{subtotal}</span>
       </div>
       <div className="flex justify-between text-sm sm:text-base text-gray-700">
         <span>Shipping</span>
@@ -18,7 +18,7 @@ const CartSummary = ({ subtotal, tax, total, itemCount, onCheckout }) => (
       </div>
       <div className="flex justify-between text-sm sm:text-base text-gray-700">
         <span>Tax</span>
-        <span className="font-medium">${tax}</span>
+        <span className="font-medium">Rs.{tax}</span>
       </div>
     </div>
 

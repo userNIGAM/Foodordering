@@ -52,7 +52,7 @@ const OrderSuccess = () => {
             <strong>Order ID:</strong> {orderId}
           </p>
           <p className="text-gray-700 mt-2">
-            <strong>Total Amount:</strong> ${orderTotal}
+            <strong>Total Amount:</strong> Rs.{orderTotal}
           </p>
           <p className="text-gray-700 mt-2">
             You will receive an email when your order is on its way.
