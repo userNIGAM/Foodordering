@@ -5,7 +5,7 @@ const getItemId = (item) => item.id || item._id;
 
 const OrderSummary = () => {
   const { cart, getCartTotal } = useCart();
-
+console.log("cart", cart);
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 h-fit sticky top-24">
       <h2 className="text-xl font-semibold mb-6 text-gray-800">
@@ -14,13 +14,14 @@ const OrderSummary = () => {
 
       <div className="space-y-4">
         {cart.map((item) => (
+              console.log("item", item),
           <div
             key={getItemId(item)}
             className="flex justify-between items-center pb-4 border-b"
           >
             <div className="flex items-center">
               <img
-                src={item.image}
+                src={`http://localhost:5000${item.image}`}
                 alt={item.name}
                 className="w-14 h-14 object-cover rounded-md mr-3"
               />
