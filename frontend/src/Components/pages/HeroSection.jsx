@@ -42,7 +42,7 @@ const HeroSection = () => {
   return (
     <div className="overflow-hidden" id="home">
       {/* Hero Section */}
-      <section className="w-full bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800 py-16 md:py-24 px-6 md:px-12 my-5">
+      <section className="w-full bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800 py-16 md:py-24 px-6 md:px-12 my-5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
           {/* Left Content */}
           <div
@@ -50,10 +50,12 @@ const HeroSection = () => {
               loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full mb-6 text-sm font-medium">
+           <AnimatedSection variant={badgeVariant}>
+             <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full mb-6 text-sm font-medium">
               <Star className="w-4 h-4 fill-amber-400" />
               <span>Trusted by 10,000+ customers</span>
             </div>
+           </AnimatedSection>
 
             <AnimatedSection variant={headingVariant}>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">

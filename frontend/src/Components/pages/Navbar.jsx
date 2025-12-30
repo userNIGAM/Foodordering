@@ -34,7 +34,7 @@ const Navbar = ({
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         isScrolled
           ? "bg-white/95 backdrop-blur-none shadow-md py-2"
-          : "bg-white py-4"
+          : "bg-gradient-to-br from-slate-100 to-slate-400 py-4"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

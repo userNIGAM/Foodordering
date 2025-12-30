@@ -103,7 +103,7 @@ export default function HomeFoodSection() {
     );
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-gradient-to-br from-slate-300 to-slate-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
         <motion.h2
           className="text-3xl font-bold text-gray-900 mb-2"
