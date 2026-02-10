@@ -254,7 +254,7 @@ const InventoryContent = () => {
                     </span>
                   </td>
                   <td className="px-4 sm:px-6 py-3 font-semibold">
-                    ${(category.totalStockValue || 0).toFixed(2)}
+                    Rs.{(category.totalStockValue || 0).toFixed(2)}
                   </td>
                 </tr>
               ))}

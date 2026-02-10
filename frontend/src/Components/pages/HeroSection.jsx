@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { ShoppingCart, ChevronRight, Star, Clock, Shield } from "lucide-react";
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect, useRef } from "react";
+import { ShoppingCart, ChevronRight, Star, Clock, Shield, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import AnimatedSection from "../AnimatedSection";
 
 const headingVariant = {
@@ -22,27 +24,70 @@ const textVariant = {
     transition: { duration: 0.8, delay: 0.2, ease: "easeOut" },
   },
 };
+
 const badgeVariant = {
   hidden: { opacity: 0, y: 20 },
-  visible: (i) => ({
+  visible: (i = 1) => ({
     opacity: 1,
     y: 0,
     transition: { delay: 0.2 * i, duration: 0.5, ease: "easeOut" },
   }),
 };
+
+const scrollIconVariant = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.8,
+      repeat: Infinity,
+      repeatType: "reverse",
+      ease: "easeInOut",
+    },
+  },
+};
+
 const HeroSection = () => {
   const [loaded, setLoaded] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(true);
+  const heroRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Trigger animations after component mounts
     setLoaded(true);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowScrollHint(entry.isIntersecting);
+      },
+      { threshold: 0.6 }
+    );
+
+    if (heroRef.current) observer.observe(heroRef.current);
+
+    return () => {
+      if (heroRef.current) observer.unobserve(heroRef.current);
+    };
   }, []);
 
+  const scrollToContent = () => {
+    const nextSection = document.getElementById("next-section");
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="overflow-hidden" id="home">
+    <div
+      className="overflow-hidden snap-y snap-mandatory scroll-smooth"
+      id="home"
+    >
       {/* Hero Section */}
-      <section className="w-full bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800 py-16 md:py-24 px-6 md:px-12 my-5">
+      <section
+        ref={heroRef}
+        className="relative w-full bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800 py-16 md:py-24 px-6 md:px-12 my-5 snap-start"
+      >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
           {/* Left Content */}
           <div
@@ -50,12 +95,12 @@ const HeroSection = () => {
               loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-           <AnimatedSection variant={badgeVariant}>
-             <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full mb-6 text-sm font-medium">
-              <Star className="w-4 h-4 fill-amber-400" />
-              <span>Trusted by 10,000+ customers</span>
-            </div>
-           </AnimatedSection>
+            <AnimatedSection variant={badgeVariant}>
+              <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full mb-6 text-sm font-medium">
+                <Star className="w-4 h-4 fill-amber-400" />
+                <span>Trusted by 10,000+ customers</span>
+              </div>
+            </AnimatedSection>
 
             <AnimatedSection variant={headingVariant}>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
@@ -112,14 +157,13 @@ const HeroSection = () => {
             }`}
           >
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-amber-400 to-indigo-500 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition"></div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-amber-400 to-indigo-500 rounded-2xl blur-lg opacity-20 transition"></div>
               <img
                 src="/Project-images/Burger.jpeg"
                 alt="Gourmet burger with fresh ingredients"
                 className="relative w-full h-96 object-cover max-w-md rounded-2xl shadow-xl transform transition duration-700 hover:scale-105"
               />
 
-              {/* Decorative element */}
               <div className="absolute -bottom-4 -right-4 bg-white rounded-xl shadow-md py-3 px-4 flex items-center gap-2">
                 <div className="flex">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -134,6 +178,25 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
+
+        {/* Scroll Down Indicator */}
+        {showScrollHint && (
+          <motion.div
+            className="absolute left-1/2 bottom-6 -translate-x-1/2 z-20"
+            variants={scrollIconVariant}
+            initial="hidden"
+            animate="visible"
+          >
+            <button
+              onClick={scrollToContent}
+              className="flex flex-col items-center text-slate-700 hover:text-indigo-700 transition"
+              aria-label="Scroll down"
+            >
+              <span className="text-xs mb-1 font-medium">Scroll</span>
+              <ChevronDown className="w-7 h-7" />
+            </button>
+          </motion.div>
+        )}
       </section>
     </div>
   );

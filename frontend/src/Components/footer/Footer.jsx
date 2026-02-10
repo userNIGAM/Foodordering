@@ -8,7 +8,7 @@ import BottomBar from "./BottomBar";
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
-      <ServicesHighlight />
+      {/* <ServicesHighlight /> */}
       <FoodConcierge />
       <FooterMain />
       <Newsletter />

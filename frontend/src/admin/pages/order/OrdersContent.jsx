@@ -213,7 +213,7 @@ const OrdersContent = () => {
                     ).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${order.total?.toFixed(2) || "0.00"}
+                    Rs.{order.total?.toFixed(2) || "0.00"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
