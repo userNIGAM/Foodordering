@@ -8,6 +8,16 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
   const [sortKey, setSortKey] = useState("time");
   const itemsPerPage = 5;
 
+  const formatNPR = (value) => {
+  if (!value) return "Rs. 0";
+
+  // remove any non-numeric characters like $, commas, spaces
+  const numeric = String(value).replace(/[^0-9.]/g, "");
+  const amount = parseFloat(numeric) || 0;
+
+  return `Rs. ${amount.toLocaleString("en-IN")}`;
+};
+
   const filteredOrders = useMemo(() => {
     return orders
       .filter(
@@ -73,7 +83,7 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
             </div>
             <div className="text-left sm:text-right sm:mr-4">
               <p className="text-sm font-semibold text-gray-900">
-                {order.amount}
+                  {formatNPR(order.amount)}
               </p>
               <p className="text-xs text-gray-500">
                 {new Date(order.time).toLocaleTimeString()}
