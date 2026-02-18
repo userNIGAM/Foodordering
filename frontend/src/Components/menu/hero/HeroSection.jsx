@@ -9,13 +9,13 @@ const HeroSection = memo(({ search, setSearch, onSubmit, menuItems }) => {
 
   return (
     <>
-      <section className="relative py-16 bg-gradient-to-br from-indigo-900 to-indigo-700 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <HeroHeading />
-          <HeroFeatures />
-        </div>
-      </section>
+      {/* <section className="relative py-16 bg-gradient-to-br from-indigo-900 to-indigo-700 text-white overflow-hidden"> */}
+        {/* <div className="absolute inset-0 bg-black opacity-10"></div> */}
+        {/* <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"> */}
+          {/* <HeroHeading />
+          <HeroFeatures /> */}
+        {/* </div> */}
+      {/* </section> */}
 
       <HeroSearch
         safeSearch={safeSearch}

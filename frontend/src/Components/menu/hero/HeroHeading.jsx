@@ -4,7 +4,7 @@ import { headingVariant, textVariant } from "./variants";
 export default function HeroHeading() {
   return (
     <>
-      <AnimatedSection variant={headingVariant}>
+      {/* <AnimatedSection variant={headingVariant}>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
           Delicious Food,
           <span className="block text-yellow-400">Delivered Fast</span>
@@ -16,7 +16,7 @@ export default function HeroHeading() {
           Fresh ingredients, authentic flavors, and lightning-fast delivery
           right to your door
         </p>
-      </AnimatedSection>
+      </AnimatedSection> */}
     </>
   );
 }

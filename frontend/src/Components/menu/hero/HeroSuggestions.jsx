@@ -38,7 +38,7 @@ export default function HeroSuggestions({
               </div>
             </div>
             <div className="text-indigo-600 font-bold">
-              ${item.price.toFixed(2)}
+              Rs.{item.price.toFixed(2)}
             </div>
           </div>
         </button>
