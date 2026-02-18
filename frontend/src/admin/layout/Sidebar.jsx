@@ -190,10 +190,10 @@ const Sidebar = ({
         </div>
 
         <div className="mt-auto p-4 border-t border-gray-100">
-          <button className="flex items-center w-full px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+          <div className="flex items-center w-full px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
             <Logout />
             {/* <span className="font-medium">Logout</span> */}
-          </button>
+          </div>
         </div>
       </aside>
     </>

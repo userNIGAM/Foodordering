@@ -81,7 +81,7 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="relative grid min-h-screen place-items-center bg-gradient-to-b from-slate-50 via-white to-slate-50 px-4 py-10">
+    <div className="relative grid min-h-screen place-items-center bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 px-4 py-10">
       <GradientBackdrop />
       <div className="mx-auto w-full max-w-6xl">
         <AuthHeader />

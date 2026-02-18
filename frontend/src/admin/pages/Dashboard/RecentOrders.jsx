@@ -8,15 +8,27 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
   const [sortKey, setSortKey] = useState("time");
   const itemsPerPage = 5;
 
-  const formatNPR = (value) => {
-  if (!value) return "Rs. 0";
+  // const formatNPR = (value) => {
+  //   if (!value) return "Rs. 0";
 
-  // remove any non-numeric characters like $, commas, spaces
-  const numeric = String(value).replace(/[^0-9.]/g, "");
-  const amount = parseFloat(numeric) || 0;
+  //   // Extract numeric value - handle both string and number inputs
+  //   let amount = 0;
+  //   if (typeof value === "number") {
+  //     amount = value;
+  //   } else {
+  //     // Remove "Rs." and any non-numeric characters except decimal point
+  //     const numeric = String(value).replace(/[^\d.]/g, "");
+  //     amount = parseFloat(numeric) || 0;
+  //   }
 
-  return `Rs. ${amount.toLocaleString("en-IN")}`;
-};
+  //   return `Rs. ${amount.toLocaleString("en-IN")}`;
+  // };
+
+  const getAmountValue = (value) => {
+    if (typeof value === "number") return value;
+    const numeric = String(value).replace(/[^\d.]/g, "");
+    return parseFloat(numeric) || 0;
+  };
 
   const filteredOrders = useMemo(() => {
     return orders
@@ -27,7 +39,7 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
       )
       .sort((a, b) => {
         if (sortKey === "amount")
-          return parseFloat(b.amount) - parseFloat(a.amount);
+          return getAmountValue(b.amount) - getAmountValue(a.amount);
         if (sortKey === "status") return a.status.localeCompare(b.status);
         return new Date(b.time) - new Date(a.time);
       });
@@ -83,7 +95,7 @@ const RecentOrders = ({ orders, lowStockAlerts }) => {
             </div>
             <div className="text-left sm:text-right sm:mr-4">
               <p className="text-sm font-semibold text-gray-900">
-                  {formatNPR(order.amount)}
+                  {order.amount}
               </p>
               <p className="text-xs text-gray-500">
                 {new Date(order.time).toLocaleTimeString()}

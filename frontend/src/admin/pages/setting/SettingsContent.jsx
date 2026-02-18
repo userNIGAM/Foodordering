@@ -5,8 +5,8 @@ const SettingsContent = () => {
   const [settings, setSettings] = useState({
     restaurantName: "Food Ordering",
     email: "admin@example.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main St, City, State 12345",
+    phone: "+977 9834567890",
+    address: "Birtamode, Jhapa, Nepal",
     openingHours: "9:00 AM - 10:00 PM",
     deliveryFee: 2.99,
     minOrderAmount: 10,
@@ -102,7 +102,7 @@ const SettingsContent = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Delivery Fee ($)
+                Delivery Fee (Rs.)
               </label>
               <input
                 type="number"

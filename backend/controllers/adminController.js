@@ -8,11 +8,15 @@ export const getDashboardData = async (req, res) => {
     // Get total orders
     const totalOrders = await Order.countDocuments();
 
-    // Get total revenue
-    const revenueResult = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: "$total" } } },
-    ]);
-    const totalRevenue = revenueResult[0]?.total || 0;
+    // Get total revenue - calculate from items using correct MenuItem prices
+    const allOrders = await Order.find().populate("items.menuItemId", "price");
+    let totalRevenue = 0;
+    allOrders.forEach((order) => {
+      order.items.forEach((item) => {
+        const correctPrice = item.menuItemId?.price || item.price;
+        totalRevenue += correctPrice * item.quantity;
+      });
+    });
 
     // Get new customers (last 30 days)
     const thirtyDaysAgo = new Date();
@@ -25,13 +29,70 @@ export const getDashboardData = async (req, res) => {
     // Get conversion rate (placeholder)
     const conversionRate = 3.8;
 
-    // Get recent orders
-    const recentOrders = await Order.find()
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .populate("items.menuItemId", "name"); // ✅ only menu items
+    // Get recent orders using aggregation to ensure correct prices from MenuItem
+    const recentOrders = await Order.aggregate([
+      { $sort: { createdAt: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "menuitems",
+          localField: "items.menuItemId",
+          foreignField: "_id",
+          as: "menuItems",
+        },
+      },
+      {
+        $addFields: {
+          items: {
+            $map: {
+              input: "$items",
+              as: "item",
+              in: {
+                menuItemId: "$$item.menuItemId",
+                name: "$$item.name",
+                price: {
+                  $let: {
+                    vars: {
+                      menuItem: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$menuItems",
+                              as: "m",
+                              cond: { $eq: ["$$m._id", "$$item.menuItemId"] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: {
+                      $cond: [
+                        { $ne: ["$$menuItem", null] },
+                        "$$menuItem.price",
+                        "$$item.price",
+                      ],
+                    },
+                  },
+                },
+                quantity: "$$item.quantity",
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          orderId: 1,
+          customer: 1,
+          items: 1,
+          status: 1,
+          createdAt: 1,
+        },
+      },
+    ]);
 
-    // Get sales data for chart (last 7 days)
+    // Get sales data for chart (last 7 days) - calculate from items
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -40,7 +101,6 @@ export const getDashboardData = async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          totalSales: { $sum: "$total" },
           orderCount: { $sum: 1 },
         },
       },
@@ -70,7 +130,7 @@ export const getDashboardData = async (req, res) => {
           },
           {
             title: "Total Revenue",
-            value: `$${totalRevenue.toFixed(2)}`,
+            value: `Rs.${totalRevenue.toFixed(2)}`,
             change: "+8%",
             icon: "TrendingUp",
             color: "bg-green-50",
@@ -97,15 +157,28 @@ export const getDashboardData = async (req, res) => {
           },
         ],
 
-        // ✅ Safe mapping for recent orders
-        recentOrders: recentOrders.map((order) => ({
-          id: order.orderId,
-          customer: order.customer?.name || "N/A",
-          email: order.customer?.email || "N/A",
-          amount: `$${Number(order.total || 0).toFixed(2)}`,
-          status: order.status || "pending",
-          time: order.createdAt,
-        })),
+        // ✅ Safe mapping for recent orders - use correct prices from MenuItem
+        recentOrders: recentOrders.map((order) => {
+          // Recalculate total using correct prices from MenuItem
+          const calculatedTotal = order.items.reduce(
+            (sum, item) => {
+              // Use the price from the populated MenuItem (correct price)
+              // Fallback to stored price if menuItemId is not populated
+              const correctPrice = item.menuItemId?.price || item.price;
+              return sum + (correctPrice * item.quantity);
+            },
+            0
+          );
+          
+          return {
+            id: order.orderId,
+            customer: order.customer?.name || "N/A",
+            email: order.customer?.email || "N/A",
+            amount: `Rs.${Number(calculatedTotal || 0).toFixed(2)}`,
+            status: order.status || "pending",
+            time: order.createdAt,
+          };
+        }),
 
         // ✅ Safe mapping for sales data
         salesData: salesData.map((item) => ({

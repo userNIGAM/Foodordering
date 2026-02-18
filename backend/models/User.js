@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+    type: String,
+    enum: ["pending", "approved", "rejected", "processing", "completed"],
+    default: "pending"
+  },
     verificationOTP: String,
     verificationOTPExpires: Date,
     resetPasswordOTP: String,

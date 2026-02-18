@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
+import { sendStatusEmail } from "../utils/statusMail.js";
 
 // 📍 Get current logged-in user's profile
 export const getUserProfile = async (req, res) => {
@@ -78,5 +79,43 @@ export const updateUserProfile = async (req, res) => {
   } catch (err) {
     console.error("Update profile error:", err);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+export const updateUserStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { status } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const oldStatus = user.status;
+
+    // If status not changed, do nothing
+    if (oldStatus === status) {
+      return res.json({ message: "Status unchanged" });
+    }
+
+    user.status = status;
+    await user.save();
+
+    // 🔔 Send email
+    await sendStatusEmail({
+      to: user.email,
+      name: user.name || "User",
+      oldStatus,
+      newStatus: status,
+      subject: "Your Status Has Been Updated"
+    });
+
+    res.json({
+      success: true,
+      message: "Status updated and email sent",
+      user
+    });
+
+  } catch (error) {
+    console.error("Status update error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

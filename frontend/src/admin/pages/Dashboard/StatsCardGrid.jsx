@@ -46,7 +46,6 @@ const StatsCardGrid = ({ stats }) => (
               {stat.change}
             </span>
           </div>
-
           <div className="mt-3 sm:mt-4">
             <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">
               {stat.title}

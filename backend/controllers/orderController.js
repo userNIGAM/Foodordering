@@ -1,5 +1,6 @@
 // controllers/orderController.js
 import Order from "../models/Order.js";
+import MenuItem from "../models/MenuItem.js";
 import nodemailer from "nodemailer";
 import mongoose from "mongoose";
 import { updateInventoryOnOrder } from "../middleware/inventoryMiddleware.js";
@@ -8,27 +9,39 @@ export const placeOrder = async (req, res) => {
   try {
     const { customer, items, total, paymentMethod } = req.body;
 
-    const sanitizedItems = items.map((item) => {
-      let menuItemId;
-      if (mongoose.Types.ObjectId.isValid(item.menuItemId)) {
-        menuItemId = item.menuItemId;
-      } else {
-        // fallback for dummy/test items
-        menuItemId = new mongoose.Types.ObjectId();
-      }
+    // Fetch actual menu items to get correct prices from database
+    const sanitizedItems = await Promise.all(
+      items.map(async (item) => {
+        let menuItemId;
+        if (mongoose.Types.ObjectId.isValid(item.menuItemId)) {
+          menuItemId = item.menuItemId;
+        } else {
+          menuItemId = new mongoose.Types.ObjectId();
+        }
 
-      return {
-        menuItemId,
-        name: item.name,
-        price: Number(item.price),
-        quantity: Number(item.quantity),
-      };
-    });
+        // Get the actual menu item from database to ensure correct price
+        const menuItem = await MenuItem.findById(menuItemId);
+        const actualPrice = menuItem ? menuItem.price : Number(item.price);
+
+        return {
+          menuItemId,
+          name: item.name,
+          price: actualPrice,
+          quantity: Number(item.quantity),
+        };
+      })
+    );
+
+    // Recalculate total from actual prices
+    const calculatedTotal = sanitizedItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
 
     const order = new Order({
       customer,
       items: sanitizedItems,
-      total,
+      total: calculatedTotal,
       paymentMethod: paymentMethod || "cod",
       status: "pending",
     });
