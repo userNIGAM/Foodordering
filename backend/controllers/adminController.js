@@ -2,6 +2,7 @@ import Order from "../models/Order.js";
 import User from "../models/User.js";
 import MenuItem from "../models/MenuItem.js";
 import Inventory from "../models/Inventory.js";
+import nodemailer from "nodemailer";
 
 export const getDashboardData = async (req, res) => {
   try {
@@ -231,10 +232,62 @@ export const updateOrderStatus = async (req, res) => {
       { status: req.body.status },
       { new: true }
     );
+    
     if (!order)
       return res.status(404).json({ success: false, message: "Not found" });
+
+    // Send status update email asynchronously
+    if (order.customer?.email) {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      const statusMessages = {
+        pending: "Your order has been received and is pending confirmation.",
+        confirmed: "Your order has been confirmed! We're preparing it now.",
+        preparing: "Your order is being prepared in our kitchen.",
+        "out for delivery": "Your order is on its way to you!",
+        delivered: "Your order has been delivered. Thank you for ordering!",
+        cancelled: "Your order has been cancelled.",
+      };
+
+      const message = statusMessages[order.status] || `Your order status has been updated to: ${order.status}`;
+
+      // Send email to customer
+      transporter.sendMail(
+        {
+          from: `"Food Ordering" <${process.env.EMAIL_USER}>`,
+          to: order.customer.email,
+          subject: `Order ${order.orderId} - Status Update`,
+          html: `
+            <h2>Order Status Update</h2>
+            <p>Hi ${order.customer.name},</p>
+            <p>${message}</p>
+            <p><strong>Order ID:</strong> ${order.orderId}</p>
+            <p><strong>Status:</strong> ${order.status.toUpperCase()}</p>
+            <p><strong>Total Amount:</strong> Rs.${order.total?.toFixed(2) || 0}</p>
+            <br/>
+            <p>Thank you for your order!</p>
+            <p>Best regards,<br/>Food Ordering Team</p>
+          `,
+        },
+        (error) => {
+          if (error) {
+            console.error("Error sending status update email:", error);
+          } else {
+            console.log("Status update email sent successfully");
+          }
+        }
+      );
+    }
+
     res.json({ success: true, data: order });
   } catch (error) {
+    console.error("Error updating order status:", error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
