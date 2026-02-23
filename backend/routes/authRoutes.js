@@ -9,6 +9,8 @@ import {
   resetPassword,
   getCurrentUser,
   logout,
+  registerChef,
+  registerDeliveryPerson,
 } from "../controllers/authController.js";
 import { protect } from "../middleware/auth.js";
 
@@ -16,6 +18,8 @@ const router = express.Router();
 
 // Auth routes
 router.post("/register", register);
+router.post("/register-chef", registerChef);
+router.post("/register-delivery", registerDeliveryPerson);
 router.post("/verify-email", verifyEmail);
 router.post("/login", login);
 router.post("/resend-verification", resendVerification);

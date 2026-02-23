@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "chef", "delivery_person"],
       default: "user",
     },
     isVerified: {
@@ -32,10 +32,10 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     status: {
-    type: String,
-    enum: ["pending", "approved", "rejected", "processing", "completed"],
-    default: "pending"
-  },
+      type: String,
+      enum: ["pending", "approved", "rejected", "processing", "completed", "active", "inactive", "on_break"],
+      default: "pending"
+    },
     verificationOTP: String,
     verificationOTPExpires: Date,
     resetPasswordOTP: String,
@@ -51,6 +51,65 @@ const userSchema = new mongoose.Schema(
 
     // 📧 Secondary email(s)
     secondaryEmails: [{ type: String, lowercase: true, trim: true }],
+
+    // 👨‍🍳 Chef-specific fields
+    kitchenId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Kitchen",
+      default: null,
+    },
+    assignedOrders: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+      },
+    ],
+    completedOrders: {
+      type: Number,
+      default: 0,
+    },
+    currentCapacity: {
+      type: Number,
+      default: 0,
+    },
+    maxCapacity: {
+      type: Number,
+      default: 5,
+    },
+    chefRating: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: 0,
+    },
+
+    // 🚚 Delivery Person-specific fields
+    deliveryZone: {
+      type: String,
+      default: null,
+    },
+    deliveryRating: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: 0,
+    },
+    completedDeliveries: {
+      type: Number,
+      default: 0,
+    },
+    currentLocation: {
+      latitude: { type: Number, default: null },
+      longitude: { type: Number, default: null },
+      address: { type: String, default: null },
+      updatedAt: { type: Date, default: null },
+    },
+    deliveryStats: {
+      onTimeDeliveries: { type: Number, default: 0 },
+      totalDeliveries: { type: Number, default: 0 },
+      averageDeliveryTime: { type: Number, default: 0 }, // in minutes
+      cancellations: { type: Number, default: 0 },
+    },
   },
   {
     timestamps: true,

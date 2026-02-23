@@ -15,6 +15,10 @@ import AnalyticsContent from "./pages/analytics/AnalyticsContent";
 import InventoryContent from "./pages/inventory/InventoryContent";
 import PromotionsContent from "./pages/promotions/PromotionsContent";
 import SettingsContent from "./pages/setting/SettingsContent";
+import ChefDashboard from "./pages/kitchen/ChefDashboard";
+import KitchenManagement from "./pages/kitchen/KitchenManagement";
+import KitchenDisplaySystem from "./pages/kitchen/KitchenDisplaySystem";
+import DeliveryDashboard from "./pages/kitchen/DeliveryDashboard";
 
 // Axios global config
 axios.defaults.withCredentials = true;
@@ -154,6 +158,14 @@ const AdminDashboard = () => {
         return <AnalyticsContent salesData={dashboardData.salesData} />;
       case "settings":
         return <SettingsContent />;
+      case "chef-dashboard":
+        return <ChefDashboard />;
+      case "kitchen-management":
+        return <KitchenManagement />;
+      case "kitchen-display":
+        return <KitchenDisplaySystem />;
+      case "delivery-dashboard":
+        return <DeliveryDashboard />;
       default:
         return <DashboardContent data={dashboardData} />;
     }

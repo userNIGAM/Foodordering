@@ -9,6 +9,11 @@ import userRoutes from "./routes/userRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import adminRoutes from "./routes/admin.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import roleManagementRoutes from "./routes/roleManagementRoutes.js";
+import kitchenRoutes from "./routes/kitchenRoutes.js";
+import chefRoutes from "./routes/chefRoutes.js";
+import deliveryRoutes from "./routes/deliveryRoutes.js";
+import orderManagementRoutes from "./routes/orderManagementRoutes.js";
 import ConnectDB from "./config/db.js";
 import contactRouter from "./routes/contactRouter.js";
 import { initSocket } from "./socket.js";
@@ -56,7 +61,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/menu-items", menuRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/orders", orderRoutes);
+app.use("/api/role-management", roleManagementRoutes);
+app.use("/api/kitchen", kitchenRoutes);
+app.use("/api/chef", chefRoutes);
+app.use("/api/delivery", deliveryRoutes);
+app.use("/api/orders/manage", orderManagementRoutes); // Admin order management
+app.use("/api/orders", orderRoutes); // Customer order placement
 app.use("/api/contact", contactRouter);
 app.use("/api/menu-items", menuItemRoutes);
 app.use("/api/categories", categoryRoutes);

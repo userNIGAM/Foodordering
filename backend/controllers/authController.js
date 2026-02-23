@@ -322,6 +322,177 @@ export const resetPassword = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+/* ------------------- REGISTER CHEF (Admin Approval Required) ------------------- */
+export const registerChef = async (req, res) => {
+  try {
+    const { name, email, password, phoneNumber, location, maxCapacity } =
+      req.body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email and password are required",
+      });
+    }
+
+    // Check if chef already exists
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already in use",
+      });
+    }
+
+    // Create chef user
+    const chef = await User.create({
+      name,
+      email,
+      password,
+      role: "chef",
+      phoneNumber: phoneNumber || "",
+      location: location || "",
+      maxCapacity: maxCapacity || 5,
+      status: "pending", // Awaiting admin approval
+      isVerified: false,
+    });
+
+    // Send verification email
+    const otp = chef.generateOTP();
+    const salt = await bcrypt.genSalt(10);
+    chef.verificationOTP = await bcrypt.hash(otp, salt);
+    chef.verificationOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await chef.save();
+
+    await sendEmail({
+      to: chef.email,
+      subject: "Chef Account Verification - FoodOrdering",
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Welcome to FoodOrdering, Chef ${chef.name}!</h2>
+          <p>Your chef account has been created. Please verify your email using this OTP:</p>
+          <h3 style="background:#f1f5f9; padding:10px; display:inline-block; border-radius:5px;">${otp}</h3>
+          <p>This OTP will expire in 10 minutes.</p>
+          <p><strong>Note:</strong> Your account will be activated by admin after verification.</p>
+        </div>
+      `,
+    });
+
+    // Send notification to admin
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `New Chef Registration: ${chef.name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>New Chef Registration</h2>
+          <p><strong>Name:</strong> ${chef.name}</p>
+          <p><strong>Email:</strong> ${chef.email}</p>
+          <p><strong>Phone:</strong> ${chef.phoneNumber}</p>
+          <p><strong>Location:</strong> ${chef.location}</p>
+          <p><strong>Max Capacity:</strong> ${chef.maxCapacity} orders</p>
+          <p>Please approve or reject this application in the admin dashboard.</p>
+        </div>
+      `,
+    });
+
+    const { password: _p, ...chefData } = chef.toObject();
+    return res.status(201).json({
+      success: true,
+      message: "Chef registration successful. Please verify your email.",
+      user: chefData,
+    });
+  } catch (err) {
+    console.error("Register Chef Error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/* ------------------- REGISTER DELIVERY PERSON (Admin Approval Required) ------------------- */
+export const registerDeliveryPerson = async (req, res) => {
+  try {
+    const { name, email, password, phoneNumber, deliveryZone, vehicleType } =
+      req.body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email and password are required",
+      });
+    }
+
+    // Check if delivery person already exists
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already in use",
+      });
+    }
+
+    // Create delivery person user
+    const deliveryPerson = await User.create({
+      name,
+      email,
+      password,
+      role: "delivery_person",
+      phoneNumber: phoneNumber || "",
+      deliveryZone: deliveryZone || "",
+      status: "pending", // Awaiting admin approval
+      isVerified: false,
+    });
+
+    // Send verification email
+    const otp = deliveryPerson.generateOTP();
+    const salt = await bcrypt.genSalt(10);
+    deliveryPerson.verificationOTP = await bcrypt.hash(otp, salt);
+    deliveryPerson.verificationOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await deliveryPerson.save();
+
+    await sendEmail({
+      to: deliveryPerson.email,
+      subject: "Delivery Account Verification - FoodOrdering",
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Welcome to FoodOrdering, ${deliveryPerson.name}!</h2>
+          <p>Your delivery account has been created. Please verify your email using this OTP:</p>
+          <h3 style="background:#f1f5f9; padding:10px; display:inline-block; border-radius:5px;">${otp}</h3>
+          <p>This OTP will expire in 10 minutes.</p>
+          <p><strong>Note:</strong> Your account will be activated by admin after verification.</p>
+        </div>
+      `,
+    });
+
+    // Send notification to admin
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `New Delivery Person Registration: ${deliveryPerson.name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>New Delivery Person Registration</h2>
+          <p><strong>Name:</strong> ${deliveryPerson.name}</p>
+          <p><strong>Email:</strong> ${deliveryPerson.email}</p>
+          <p><strong>Phone:</strong> ${deliveryPerson.phoneNumber}</p>
+          <p><strong>Zone:</strong> ${deliveryPerson.deliveryZone}</p>
+          <p><strong>Vehicle Type:</strong> ${vehicleType || "Not specified"}</p>
+          <p>Please approve or reject this application in the admin dashboard.</p>
+        </div>
+      `,
+    });
+
+    const { password: _p, ...deliveryData } = deliveryPerson.toObject();
+    return res.status(201).json({
+      success: true,
+      message: "Delivery registration successful. Please verify your email.",
+      user: deliveryData,
+    });
+  } catch (err) {
+    console.error("Register Delivery Person Error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 /* ------------------- GET CURRENT USER ------------------- */
 export const getCurrentUser = async (req, res) => {
   try {

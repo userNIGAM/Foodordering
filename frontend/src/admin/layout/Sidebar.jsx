@@ -34,6 +34,10 @@ const Sidebar = ({
     { id: "inventory", label: "Inventory", icon: Warehouse },
     { id: "promotions", label: "Promotions", icon: Tag },
     { id: "analytics", label: "Analytics", icon: TrendingUp },
+    { id: "kitchen-display", label: "Kitchen Display", icon: BarChart3 },
+    { id: "kitchen-management", label: "Kitchen Mgmt", icon: Settings },
+    { id: "chef-dashboard", label: "Chef Dashboard", icon: Users },
+    { id: "delivery-dashboard", label: "Delivery Dashboard", icon: ShoppingCart },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 

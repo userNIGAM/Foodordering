@@ -1,0 +1,60 @@
+.chef-dashboard {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+.chef-dashboard .stat-card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.chef-dashboard .stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chef-dashboard .card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chef-dashboard .table-responsive {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.chef-dashboard .badge {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.chef-dashboard .btn-group-sm .btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.chef-dashboard .modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chef-dashboard .modal-dialog {
+  position: relative;
+  width: auto;
+  margin: 0.5rem;
+  max-width: 500px;
+}
+
+.chef-dashboard .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
