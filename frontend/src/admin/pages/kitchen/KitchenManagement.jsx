@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "./KitchenManagement.css";
 
 const KitchenManagement = () => {
   const [kitchens, setKitchens] = useState([]);
@@ -16,7 +15,6 @@ const KitchenManagement = () => {
   const token = localStorage.getItem("token");
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Fetch kitchens
   useEffect(() => {
     fetchKitchens();
   }, [token, apiUrl]);
@@ -41,7 +39,6 @@ const KitchenManagement = () => {
     }
   };
 
-  // Open create/edit modal
   const openModal = (kitchen = null) => {
     if (kitchen) {
       setEditingKitchen(kitchen);
@@ -63,7 +60,6 @@ const KitchenManagement = () => {
     setShowModal(true);
   };
 
-  // Handle form change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -72,14 +68,13 @@ const KitchenManagement = () => {
     }));
   };
 
-  // Save kitchen
   const saveKitchen = async (e) => {
     e.preventDefault();
 
     try {
       let response;
+
       if (editingKitchen) {
-        // Update
         response = await fetch(`${apiUrl}/api/kitchen/${editingKitchen._id}`, {
           method: "PATCH",
           headers: {
@@ -89,7 +84,6 @@ const KitchenManagement = () => {
           body: JSON.stringify(formData),
         });
       } else {
-        // Create
         response = await fetch(`${apiUrl}/api/kitchen`, {
           method: "POST",
           headers: {
@@ -103,15 +97,12 @@ const KitchenManagement = () => {
       if (response.ok) {
         await fetchKitchens();
         setShowModal(false);
-        alert(editingKitchen ? "✅ Kitchen updated!" : "✅ Kitchen created!");
       }
     } catch (error) {
       console.error("Error saving kitchen:", error);
-      alert("❌ Failed to save kitchen");
     }
   };
 
-  // Delete kitchen
   const deleteKitchen = async (kitchenId) => {
     if (window.confirm("Are you sure you want to delete this kitchen?")) {
       try {
@@ -124,112 +115,127 @@ const KitchenManagement = () => {
 
         if (response.ok) {
           await fetchKitchens();
-          alert("✅ Kitchen deleted!");
         }
       } catch (error) {
         console.error("Error deleting kitchen:", error);
-        alert("❌ Failed to delete kitchen");
       }
     }
   };
 
   if (loading) {
     return (
-      <div className="kitchen-management">
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="kitchen-management">
-      <div className="container-fluid py-4">
+    <div className="min-h-screen bg-gray-100 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+
         {/* Header */}
-        <div className="row mb-4">
-          <div className="col">
-            <h1 className="mb-0">🏪 Kitchen Management</h1>
-            <p className="text-muted mb-0">Manage restaurant kitchens and chef assignments</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">🏪 Kitchen Management</h1>
+            <p className="text-gray-500">
+              Manage restaurant kitchens and chef assignments
+            </p>
           </div>
-          <div className="col-auto">
-            <button
-              className="btn btn-primary"
-              onClick={() => openModal()}
-            >
-              + Create Kitchen
-            </button>
-          </div>
+
+          <button
+            onClick={() => openModal()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
+          >
+            + Create Kitchen
+          </button>
         </div>
 
-        {/* Kitchens Grid */}
+        {/* Kitchens */}
         {kitchens.length === 0 ? (
-          <div className="alert alert-info">
-            <p className="mb-0">No kitchens created yet. Click "Create Kitchen" to add one.</p>
+          <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg">
+            No kitchens created yet. Click "Create Kitchen" to add one.
           </div>
         ) : (
-          <div className="row g-3">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {kitchens.map((kitchen) => (
-              <div key={kitchen._id} className="col-md-6 col-lg-4">
-                <div className="card kitchen-card">
-                  <div className="card-header bg-light">
-                    <h5 className="mb-0">{kitchen.name}</h5>
-                  </div>
-                  <div className="card-body">
-                    <p className="mb-2">
-                      <strong>📍 Location:</strong> {kitchen.location}
-                    </p>
-                    <p className="mb-2">
-                      <strong>🏠 Address:</strong> {kitchen.address}
-                    </p>
-                    <p className="mb-2">
-                      <strong>👨‍🍳 Chefs:</strong> {kitchen.chefs?.length || 0}
-                    </p>
-                    <p className="mb-3">
-                      <strong>📊 Capacity:</strong>
-                      <span className="badge bg-info ms-2">
-                        {kitchen.currentLoad || 0}/{kitchen.maxCapacity}
-                      </span>
-                    </p>
+              <div
+                key={kitchen._id}
+                className="bg-white rounded-xl shadow hover:shadow-lg hover:-translate-y-2 transition duration-300 flex flex-col"
+              >
+                <div className="p-4 border-b">
+                  <h5 className="font-semibold text-lg">{kitchen.name}</h5>
+                </div>
 
-                    {/* Chef List */}
-                    {kitchen.chefs && kitchen.chefs.length > 0 && (
-                      <div className="mb-3">
-                        <small className="text-muted">Assigned Chefs:</small>
-                        <div className="mt-2">
-                          {kitchen.chefs.map((chef, idx) => (
-                            <div key={idx} className="chef-badge">
-                              👨‍🍳 {chef.name}
-                            </div>
-                          ))}
-                        </div>
+                <div className="p-4 flex-1">
+                  <p className="mb-2">
+                    <span className="font-medium">📍 Location:</span>{" "}
+                    {kitchen.location}
+                  </p>
+
+                  <p className="mb-2">
+                    <span className="font-medium">🏠 Address:</span>{" "}
+                    {kitchen.address}
+                  </p>
+
+                  <p className="mb-2">
+                    <span className="font-medium">👨‍🍳 Chefs:</span>{" "}
+                    {kitchen.chefs?.length || 0}
+                  </p>
+
+                  <p className="mb-3">
+                    <span className="font-medium">📊 Capacity:</span>
+                    <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
+                      {kitchen.currentLoad || 0}/{kitchen.maxCapacity}
+                    </span>
+                  </p>
+
+                  {kitchen.chefs && kitchen.chefs.length > 0 && (
+                    <div className="mb-3">
+                      <small className="text-gray-500">
+                        Assigned Chefs:
+                      </small>
+                      <div className="mt-2 flex flex-wrap">
+                        {kitchen.chefs.map((chef, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm mr-2 mb-2"
+                          >
+                            👨‍🍳 {chef.name}
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {/* Status */}
-                    <p className="mb-0">
-                      <small className="text-muted">Status:</small>
-                      <span className={`badge ms-2 ${kitchen.status === "active" ? "bg-success" : "bg-warning"}`}>
-                        {kitchen.status || "active"}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="card-footer bg-light">
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={() => openModal(kitchen)}
+                  <p>
+                    <span className="text-gray-500 text-sm">Status:</span>
+                    <span
+                      className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                        kitchen.status === "active"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
                     >
-                      ✏️ Edit
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => deleteKitchen(kitchen._id)}
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
+                      {kitchen.status || "active"}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="p-4 border-t flex gap-2">
+                  <button
+                    onClick={() => openModal(kitchen)}
+                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                  >
+                    ✏️ Edit
+                  </button>
+
+                  <button
+                    onClick={() => deleteKitchen(kitchen._id)}
+                    className="text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                  >
+                    🗑️ Delete
+                  </button>
                 </div>
               </div>
             ))}
@@ -237,83 +243,82 @@ const KitchenManagement = () => {
         )}
       </div>
 
-      {/* Create/Edit Modal */}
+      {/* Modal */}
       {showModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {editingKitchen ? "✏️ Edit Kitchen" : "➕ Create Kitchen"}
-                </h5>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-lg">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h5 className="font-semibold text-lg">
+                {editingKitchen ? "✏️ Edit Kitchen" : "➕ Create Kitchen"}
+              </h5>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={saveKitchen}>
+              <div className="p-4 space-y-4">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Kitchen Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+
+                <textarea
+                  name="address"
+                  placeholder="Address"
+                  rows="2"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+
+                <input
+                  type="number"
+                  name="maxCapacity"
+                  min="1"
+                  value={formData.maxCapacity}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 p-4 border-t">
                 <button
                   type="button"
-                  className="btn-close"
                   onClick={() => setShowModal(false)}
-                ></button>
+                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                >
+                  {editingKitchen ? "Update" : "Create"}
+                </button>
               </div>
-              <form onSubmit={saveKitchen}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Kitchen Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Location</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Address</label>
-                    <textarea
-                      className="form-control"
-                      name="address"
-                      rows="2"
-                      value={formData.address}
-                      onChange={handleChange}
-                      required
-                    ></textarea>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Max Capacity</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      name="maxCapacity"
-                      value={formData.maxCapacity}
-                      onChange={handleChange}
-                      min="1"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingKitchen ? "Update Kitchen" : "Create Kitchen"}
-                  </button>
-                </div>
-              </form>
-            </div>
+            </form>
           </div>
         </div>
       )}
