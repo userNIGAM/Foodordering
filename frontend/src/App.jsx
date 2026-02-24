@@ -25,9 +25,13 @@ import FoodMenu from "./Components/menu/foodmenu/FoodMenu";
 import FoodDetail from "./Components/menu/fooddetails/FoodDetail";
 import AuthPage from "./Components/Auth/AuthPage";
 import AdminProtectedRoute from "./Components/Auth/AdminProtectedRoute";
+import KitchenProtectedRoute from "./Components/Auth/KitchenProtectedRoute";
+import DeliveryProtectedRoute from "./Components/Auth/DeliveryProtectedRoute";
 import { Loader2 } from "lucide-react";
 import AnimatedSection from "./Components/AnimatedSection";
 import AdminDashboard from "./admin/AdminDashboard";
+import KitchenStaffDashboard from "./kitchen/KitchenStaffDashboard";
+import DeliveryStaffDashboard from "./delivery/DeliveryStaffDashboard";
 import OrderForm from "./Components/orderForm/OrderForm";
 import OrderConfirmation from "./Components/orderForm/OrderConfirmation";
 import Checkout from "./Components/orderForm/checkout/Checkout";
@@ -138,6 +142,38 @@ function AppRoutes() {
               <AdminDashboard />
             </AnimatedSection>
           </AdminProtectedRoute>
+        }
+      />
+
+      {/* ---------------------- */}
+      {/* Kitchen Staff routes (NO Navbar) */}
+      {/* ---------------------- */}
+      <Route
+        path="/kitchen/dashboard"
+        element={
+          <KitchenProtectedRoute>
+            <AnimatedSection
+              variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+            >
+              <KitchenStaffDashboard />
+            </AnimatedSection>
+          </KitchenProtectedRoute>
+        }
+      />
+
+      {/* ---------------------- */}
+      {/* Delivery Staff routes (NO Navbar) */}
+      {/* ---------------------- */}
+      <Route
+        path="/delivery/dashboard"
+        element={
+          <DeliveryProtectedRoute>
+            <AnimatedSection
+              variant={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+            >
+              <DeliveryStaffDashboard />
+            </AnimatedSection>
+          </DeliveryProtectedRoute>
         }
       />
 
