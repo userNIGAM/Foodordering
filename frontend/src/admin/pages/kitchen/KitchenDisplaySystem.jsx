@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useSocket from "../../../hooks/useSocket";
 
 const KitchenDisplaySystem = () => {
   const { isConnected, on } = useSocket();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedKitchen, setSelectedKitchen] = useState(null);
@@ -17,24 +18,109 @@ const KitchenDisplaySystem = () => {
   const token = localStorage.getItem("token");
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  /* --- Existing Logic (UNCHANGED) --- */
- // Fetch kitchens 
-useEffect(() => { const fetchKitchens = async () => { try { const response = await fetch(${apiUrl}/api/kitchen, { headers: { Authorization: Bearer ${token}, }, }); if (response.ok) { const data = await response.json(); setKitchens(data.data || []); if (data.data && data.data.length > 0) { setSelectedKitchen(data.data[0]._id); } } } catch (error) { console.error("Error fetching kitchens:", error); } finally { setLoading(false); } }; fetchKitchens(); }, [token, apiUrl]); 
-// Fetch orders for selected kitchen 
-useEffect(() => { if (!selectedKitchen) return; const fetchOrders = async () => { try { const response = await fetch(${apiUrl}/api/orders/manage/pending, { headers: { Authorization: Bearer ${token}, }, }); if (response.ok) { const data = await response.json(); 
-// Filter by kitchen if needed 
-const filteredOrders = data.data || []; setOrders(filteredOrders); updateStats(filteredOrders); } } catch (error) { console.error("Error fetching orders:", error); } }; fetchOrders(); }, [selectedKitchen, token, apiUrl]); 
-// Listen to real-time order updates 
-useEffect(() => { if (!isConnected) return; const unsubscribeConfirmed = on("order:confirmed", (data) => { console.log("Order confirmed:", data); setOrders((prev) => prev.map((o) => o._id === data.orderId ? { ...o, status: "confirmed" } : o ) ); }); const unsubscribePreparing = on("order:preparing", (data) => { console.log("Order in preparation:", data); setOrders((prev) => prev.map((o) => o._id === data.orderId ? { ...o, status: "preparing" } : o ) ); }); const unsubscribePrepared = on("order:prepared", (data) => { console.log("Order prepared:", data); setOrders((prev) => prev.filter((o) => o._id !== data.orderId) 
-// Remove from KDS once prepared 
-); });
- return () => { unsubscribeConfirmed && unsubscribeConfirmed(); unsubscribePreparing && unsubscribePreparing(); unsubscribePrepared && unsubscribePrepared(); }; }, [isConnected, on]); 
-// Update stats
- const updateStats = (ordersList) => { const newStats = { total: ordersList.length, confirmed: ordersList.filter((o) => o.status === "confirmed").length, preparing: ordersList.filter((o) => o.status === "preparing").length, prepared: ordersList.filter((o) => o.status === "prepared").length, }; setStats(newStats); }; 
-// Get order color based on status 
-const getOrderColor = (status) => { switch (status) { case "assigned_to_kitchen": return "order-new"; case "confirmed": return "order-confirmed"; case "preparing": return "order-preparing"; case "prepared": return "order-prepared"; default: return "order-default"; } };
-  /* ----------------------------------- */
+  /* ---------------- FETCH KITCHENS ---------------- */
+  useEffect(() => {
+    const fetchKitchens = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/api/kitchen`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
+        if (response.ok) {
+          const data = await response.json();
+          const kitchenList = data.data || [];
+          setKitchens(kitchenList);
+          if (kitchenList.length > 0) {
+            setSelectedKitchen(kitchenList[0]._id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching kitchens:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchKitchens();
+  }, [token, apiUrl]);
+
+  /* ---------------- FETCH ORDERS ---------------- */
+  useEffect(() => {
+    if (!selectedKitchen) return;
+
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(
+          `${apiUrl}/api/orders/manage/pending`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const filteredOrders = data.data || [];
+          setOrders(filteredOrders);
+          updateStats(filteredOrders);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchOrders();
+  }, [selectedKitchen, token, apiUrl]);
+
+  /* ---------------- REALTIME SOCKET ---------------- */
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const unsub1 = on("order:confirmed", ({ orderId }) => {
+      setOrders((prev) => {
+        const updated = prev.map((o) =>
+          o._id === orderId ? { ...o, status: "confirmed" } : o
+        );
+        updateStats(updated);
+        return updated;
+      });
+    });
+
+    const unsub2 = on("order:preparing", ({ orderId }) => {
+      setOrders((prev) => {
+        const updated = prev.map((o) =>
+          o._id === orderId ? { ...o, status: "preparing" } : o
+        );
+        updateStats(updated);
+        return updated;
+      });
+    });
+
+    const unsub3 = on("order:prepared", ({ orderId }) => {
+      setOrders((prev) => {
+        const updated = prev.filter((o) => o._id !== orderId);
+        updateStats(updated);
+        return updated;
+      });
+    });
+
+    return () => {
+      unsub1 && unsub1();
+      unsub2 && unsub2();
+      unsub3 && unsub3();
+    };
+  }, [isConnected, on]);
+
+  /* ---------------- STATS ---------------- */
+  const updateStats = useCallback((ordersList) => {
+    setStats({
+      total: ordersList.length,
+      confirmed: ordersList.filter((o) => o.status === "confirmed").length,
+      preparing: ordersList.filter((o) => o.status === "preparing").length,
+      prepared: ordersList.filter((o) => o.status === "prepared").length,
+    });
+  }, []);
+
+  /* ---------------- HELPERS ---------------- */
   const getRemainingTime = (createdAt, estimatedPrepTime = 30) => {
     const created = new Date(createdAt);
     const elapsed = Math.floor((Date.now() - created) / 60000);
@@ -56,6 +142,7 @@ const getOrderColor = (status) => { switch (status) { case "assigned_to_kitchen"
     }
   };
 
+  /* ---------------- LOADING ---------------- */
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
@@ -64,6 +151,7 @@ const getOrderColor = (status) => { switch (status) { case "assigned_to_kitchen"
     );
   }
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="min-h-screen flex flex-col text-white bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
 
@@ -110,9 +198,9 @@ const getOrderColor = (status) => { switch (status) { case "assigned_to_kitchen"
         ].map((stat, index) => (
           <div
             key={index}
-            className="bg-white/5 border border-cyan-400/30 rounded-xl p-6 text-center hover:translate-y-[-4px] transition"
+            className="bg-white/5 border border-cyan-400/30 rounded-xl p-6 text-center hover:-translate-y-1 transition"
           >
-            <div className="text-3xl font-bold text-cyan-400 drop-shadow-lg">
+            <div className="text-3xl font-bold text-cyan-400">
               {stat.value}
             </div>
             <div className="text-sm uppercase tracking-wider text-gray-400 mt-2">
@@ -123,7 +211,7 @@ const getOrderColor = (status) => { switch (status) { case "assigned_to_kitchen"
       </div>
 
       {/* ORDERS */}
-      <div className="flex-1 overflow-auto p-6 
+      <div className="flex-1 overflow-auto p-6 space-y-6
         [&::-webkit-scrollbar]:w-2
         [&::-webkit-scrollbar-track]:bg-black/20
         [&::-webkit-scrollbar-thumb]:bg-cyan-400/60
