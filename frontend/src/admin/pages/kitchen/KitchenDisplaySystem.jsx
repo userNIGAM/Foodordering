@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import useSocket from "../../../hooks/useSocket";
-import "./KitchenDisplaySystem.css";
 
 const KitchenDisplaySystem = () => {
   const { isConnected, on } = useSocket();
@@ -18,303 +17,201 @@ const KitchenDisplaySystem = () => {
   const token = localStorage.getItem("token");
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Fetch kitchens
-  useEffect(() => {
-    const fetchKitchens = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/api/kitchen`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  /* --- Existing Logic (UNCHANGED) --- */
+ // Fetch kitchens 
+useEffect(() => { const fetchKitchens = async () => { try { const response = await fetch(${apiUrl}/api/kitchen, { headers: { Authorization: Bearer ${token}, }, }); if (response.ok) { const data = await response.json(); setKitchens(data.data || []); if (data.data && data.data.length > 0) { setSelectedKitchen(data.data[0]._id); } } } catch (error) { console.error("Error fetching kitchens:", error); } finally { setLoading(false); } }; fetchKitchens(); }, [token, apiUrl]); 
+// Fetch orders for selected kitchen 
+useEffect(() => { if (!selectedKitchen) return; const fetchOrders = async () => { try { const response = await fetch(${apiUrl}/api/orders/manage/pending, { headers: { Authorization: Bearer ${token}, }, }); if (response.ok) { const data = await response.json(); 
+// Filter by kitchen if needed 
+const filteredOrders = data.data || []; setOrders(filteredOrders); updateStats(filteredOrders); } } catch (error) { console.error("Error fetching orders:", error); } }; fetchOrders(); }, [selectedKitchen, token, apiUrl]); 
+// Listen to real-time order updates 
+useEffect(() => { if (!isConnected) return; const unsubscribeConfirmed = on("order:confirmed", (data) => { console.log("Order confirmed:", data); setOrders((prev) => prev.map((o) => o._id === data.orderId ? { ...o, status: "confirmed" } : o ) ); }); const unsubscribePreparing = on("order:preparing", (data) => { console.log("Order in preparation:", data); setOrders((prev) => prev.map((o) => o._id === data.orderId ? { ...o, status: "preparing" } : o ) ); }); const unsubscribePrepared = on("order:prepared", (data) => { console.log("Order prepared:", data); setOrders((prev) => prev.filter((o) => o._id !== data.orderId) 
+// Remove from KDS once prepared 
+); });
+ return () => { unsubscribeConfirmed && unsubscribeConfirmed(); unsubscribePreparing && unsubscribePreparing(); unsubscribePrepared && unsubscribePrepared(); }; }, [isConnected, on]); 
+// Update stats
+ const updateStats = (ordersList) => { const newStats = { total: ordersList.length, confirmed: ordersList.filter((o) => o.status === "confirmed").length, preparing: ordersList.filter((o) => o.status === "preparing").length, prepared: ordersList.filter((o) => o.status === "prepared").length, }; setStats(newStats); }; 
+// Get order color based on status 
+const getOrderColor = (status) => { switch (status) { case "assigned_to_kitchen": return "order-new"; case "confirmed": return "order-confirmed"; case "preparing": return "order-preparing"; case "prepared": return "order-prepared"; default: return "order-default"; } };
+  /* ----------------------------------- */
 
-        if (response.ok) {
-          const data = await response.json();
-          setKitchens(data.data || []);
-          if (data.data && data.data.length > 0) {
-            setSelectedKitchen(data.data[0]._id);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching kitchens:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchKitchens();
-  }, [token, apiUrl]);
-
-  // Fetch orders for selected kitchen
-  useEffect(() => {
-    if (!selectedKitchen) return;
-
-    const fetchOrders = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/api/orders/manage/pending`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          // Filter by kitchen if needed
-          const filteredOrders = data.data || [];
-          setOrders(filteredOrders);
-          updateStats(filteredOrders);
-        }
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
-
-    fetchOrders();
-  }, [selectedKitchen, token, apiUrl]);
-
-  // Listen to real-time order updates
-  useEffect(() => {
-    if (!isConnected) return;
-
-    const unsubscribeConfirmed = on("order:confirmed", (data) => {
-      console.log("Order confirmed:", data);
-      setOrders((prev) =>
-        prev.map((o) =>
-          o._id === data.orderId ? { ...o, status: "confirmed" } : o
-        )
-      );
-    });
-
-    const unsubscribePreparing = on("order:preparing", (data) => {
-      console.log("Order in preparation:", data);
-      setOrders((prev) =>
-        prev.map((o) =>
-          o._id === data.orderId ? { ...o, status: "preparing" } : o
-        )
-      );
-    });
-
-    const unsubscribePrepared = on("order:prepared", (data) => {
-      console.log("Order prepared:", data);
-      setOrders((prev) =>
-        prev.filter((o) => o._id !== data.orderId) // Remove from KDS once prepared
-      );
-    });
-
-    return () => {
-      unsubscribeConfirmed && unsubscribeConfirmed();
-      unsubscribePreparing && unsubscribePreparing();
-      unsubscribePrepared && unsubscribePrepared();
-    };
-  }, [isConnected, on]);
-
-  // Update stats
-  const updateStats = (ordersList) => {
-    const newStats = {
-      total: ordersList.length,
-      confirmed: ordersList.filter((o) => o.status === "confirmed").length,
-      preparing: ordersList.filter((o) => o.status === "preparing").length,
-      prepared: ordersList.filter((o) => o.status === "prepared").length,
-    };
-    setStats(newStats);
-  };
-
-  // Get order color based on status
-  const getOrderColor = (status) => {
-    switch (status) {
-      case "assigned_to_kitchen":
-        return "order-new";
-      case "confirmed":
-        return "order-confirmed";
-      case "preparing":
-        return "order-preparing";
-      case "prepared":
-        return "order-prepared";
-      default:
-        return "order-default";
-    }
-  };
-
-  // Get remaining time estimate
   const getRemainingTime = (createdAt, estimatedPrepTime = 30) => {
     const created = new Date(createdAt);
     const elapsed = Math.floor((Date.now() - created) / 60000);
-    const remaining = Math.max(0, estimatedPrepTime - elapsed);
-    return remaining;
+    return Math.max(0, estimatedPrepTime - elapsed);
+  };
+
+  const getOrderStyles = (status) => {
+    switch (status) {
+      case "assigned_to_kitchen":
+        return "border-orange-500 shadow-[0_0_20px_rgba(255,152,0,0.4)]";
+      case "confirmed":
+        return "border-blue-500 shadow-[0_0_20px_rgba(33,150,243,0.4)]";
+      case "preparing":
+        return "border-red-500 shadow-[0_0_25px_rgba(255,87,34,0.6)] animate-pulse";
+      case "prepared":
+        return "border-green-500 shadow-[0_0_20px_rgba(76,175,80,0.4)]";
+      default:
+        return "border-cyan-400";
+    }
   };
 
   if (loading) {
     return (
-      <div className="kds">
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
+        <div className="h-12 w-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="kds">
-      {/* Header */}
-      <div className="kds-header">
-        <div className="container-fluid">
-          <div className="row align-items-center">
-            <div className="col">
-              <h1 className="mb-0">🍳 Kitchen Display System</h1>
-            </div>
-            <div className="col-auto">
-              <span className={`badge ${isConnected ? "bg-success" : "bg-danger"} fs-6`}>
-                {isConnected ? "🟢 LIVE" : "🔴 OFFLINE"}
-              </span>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col text-white bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
+
+      {/* HEADER */}
+      <div className="bg-black/30 border-b-4 border-cyan-400 shadow-lg py-6 px-6 flex justify-between items-center">
+        <h1 className="text-3xl md:text-4xl font-bold drop-shadow-lg">
+          🍳 Kitchen Display System
+        </h1>
+
+        <span
+          className={`px-4 py-2 rounded-full font-semibold text-sm ${
+            isConnected
+              ? "bg-green-600 shadow-green-500/50 shadow-lg"
+              : "bg-red-600 shadow-red-500/50 shadow-lg"
+          }`}
+        >
+          {isConnected ? "🟢 LIVE" : "🔴 OFFLINE"}
+        </span>
       </div>
 
-      {/* Kitchen Selector */}
-      <div className="kds-selector">
-        <div className="container-fluid">
-          <select
-            className="form-select"
-            value={selectedKitchen || ""}
-            onChange={(e) => setSelectedKitchen(e.target.value)}
+      {/* SELECTOR */}
+      <div className="bg-black/20 border-b border-cyan-400/40 p-4">
+        <select
+          value={selectedKitchen || ""}
+          onChange={(e) => setSelectedKitchen(e.target.value)}
+          className="w-full md:w-96 bg-[#2a2a3e] border-2 border-cyan-400 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+        >
+          <option value="">Select Kitchen</option>
+          {kitchens.map((kitchen) => (
+            <option key={kitchen._id} value={kitchen._id}>
+              {kitchen.name} - {kitchen.location}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* STATS */}
+      <div className="bg-black/20 border-b border-cyan-400/40 p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Total Orders", value: stats.total },
+          { label: "Confirmed", value: stats.confirmed },
+          { label: "Preparing", value: stats.preparing },
+          { label: "Ready", value: stats.prepared },
+        ].map((stat, index) => (
+          <div
+            key={index}
+            className="bg-white/5 border border-cyan-400/30 rounded-xl p-6 text-center hover:translate-y-[-4px] transition"
           >
-            <option value="">Select Kitchen</option>
-            {kitchens.map((kitchen) => (
-              <option key={kitchen._id} value={kitchen._id}>
-                {kitchen.name} - {kitchen.location}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="kds-stats">
-        <div className="container-fluid">
-          <div className="stats-container">
-            <div className="stat-item">
-              <div className="stat-value">{stats.total}</div>
-              <div className="stat-label">Total Orders</div>
+            <div className="text-3xl font-bold text-cyan-400 drop-shadow-lg">
+              {stat.value}
             </div>
-            <div className="stat-item">
-              <div className="stat-value text-warning">{stats.confirmed}</div>
-              <div className="stat-label">Confirmed</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value text-primary">{stats.preparing}</div>
-              <div className="stat-label">Preparing</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value text-success">{stats.prepared}</div>
-              <div className="stat-label">Ready</div>
+            <div className="text-sm uppercase tracking-wider text-gray-400 mt-2">
+              {stat.label}
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Orders Display */}
-      <div className="kds-orders">
-        <div className="container-fluid">
-          {orders.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📭</div>
-              <p>No active orders</p>
-            </div>
-          ) : (
-            <div className="orders-grid">
-              {orders
-                .sort((a, b) => {
-                  // Priority: confirmed first, then preparing
-                  const statusOrder = {
-                    assigned_to_kitchen: 1,
-                    confirmed: 2,
-                    preparing: 3,
-                  };
-                  return (
-                    (statusOrder[b.status] || 0) -
-                    (statusOrder[a.status] || 0)
-                  );
-                })
-                .map((order) => (
-                  <div
-                    key={order._id}
-                    className={`order-card ${getOrderColor(order.status)}`}
-                  >
-                    {/* Card Header */}
-                    <div className="order-header">
-                      <div className="order-number">
-                        #{order.orderId}
-                      </div>
-                      <div className="order-status-badge">
-                        {order.status === "assigned_to_kitchen" && "📋 New"}
-                        {order.status === "confirmed" && "✓ Confirmed"}
-                        {order.status === "preparing" && "🍳 Preparing"}
-                        {order.status === "prepared" && "✅ Ready"}
-                      </div>
-                    </div>
-
-                    {/* Customer & Items */}
-                    <div className="order-body">
-                      <div className="customer-name">
-                        👤 {order.customer?.name || "Unknown"}
-                      </div>
-
-                      <div className="items-list">
-                        {order.items && order.items.length > 0 ? (
-                          order.items.map((item, idx) => (
-                            <div key={idx} className="item">
-                              <span className="item-name">
-                                {item.name}
-                              </span>
-                              <span className="item-qty">
-                                x{item.quantity}
-                              </span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-muted">No items</div>
-                        )}
-                      </div>
-
-                      {/* Special Instructions */}
-                      {order.specialInstructions && (
-                        <div className="special-instructions">
-                          <small>
-                            📝 {order.specialInstructions}
-                          </small>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Footer - Time */}
-                    <div className="order-footer">
-                      <div className="order-time">
-                        ⏱️ {getRemainingTime(order.createdAt, order.estimatedPrepTime)} min
-                      </div>
-                      {order.status === "preparing" && (
-                        <div className="progress-bar">
-                          <div
-                            className="progress-fill"
-                            style={{
-                              width: `${Math.min(
-                                100,
-                                (getRemainingTime(order.createdAt, order.estimatedPrepTime) /
-                                  (order.estimatedPrepTime || 30)) *
-                                  100
-                              )}%`,
-                            }}
-                          ></div>
-                        </div>
-                      )}
-                    </div>
+      {/* ORDERS */}
+      <div className="flex-1 overflow-auto p-6 
+        [&::-webkit-scrollbar]:w-2
+        [&::-webkit-scrollbar-track]:bg-black/20
+        [&::-webkit-scrollbar-thumb]:bg-cyan-400/60
+        [&::-webkit-scrollbar-thumb]:rounded-full"
+      >
+        {orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-96 text-gray-400">
+            <div className="text-6xl mb-4">📭</div>
+            <p className="text-xl">No active orders</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {orders.map((order) => (
+              <div
+                key={order._id}
+                className={`bg-white/10 border-4 rounded-xl flex flex-col transition hover:-translate-y-2 duration-300 ${getOrderStyles(
+                  order.status
+                )}`}
+              >
+                {/* HEADER */}
+                <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 p-4 flex justify-between items-center border-b border-cyan-400/40">
+                  <div className="text-2xl font-bold text-cyan-400">
+                    #{order.orderId}
                   </div>
-                ))}
-            </div>
-          )}
-        </div>
+                  <div className="bg-cyan-400/20 px-3 py-1 rounded-full text-sm border border-cyan-400">
+                    {order.status === "assigned_to_kitchen" && "📋 New"}
+                    {order.status === "confirmed" && "✓ Confirmed"}
+                    {order.status === "preparing" && "🍳 Preparing"}
+                    {order.status === "prepared" && "✅ Ready"}
+                  </div>
+                </div>
+
+                {/* BODY */}
+                <div className="p-6 flex-1">
+                  <div className="font-semibold mb-4">
+                    👤 {order.customer?.name || "Unknown"}
+                  </div>
+
+                  <div className="bg-black/30 rounded-lg p-4 max-h-32 overflow-y-auto mb-4">
+                    {order.items?.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex justify-between border-b border-white/10 py-2 text-sm"
+                      >
+                        <span>{item.name}</span>
+                        <span className="text-cyan-400 font-semibold">
+                          x{item.quantity}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {order.specialInstructions && (
+                    <div className="bg-orange-500/10 border-l-4 border-orange-500 p-3 rounded text-orange-300 text-sm italic">
+                      📝 {order.specialInstructions}
+                    </div>
+                  )}
+                </div>
+
+                {/* FOOTER */}
+                <div className="p-4 border-t border-cyan-400/40 bg-black/20">
+                  <div className="text-lg font-bold text-cyan-400 mb-2">
+                    ⏱️ {getRemainingTime(order.createdAt, order.estimatedPrepTime)} min
+                  </div>
+
+                  {order.status === "preparing" && (
+                    <div className="h-2 bg-black/50 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-red-500 to-orange-400 transition-all duration-1000"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            (getRemainingTime(
+                              order.createdAt,
+                              order.estimatedPrepTime
+                            ) /
+                              (order.estimatedPrepTime || 30)) *
+                              100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
