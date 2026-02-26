@@ -1,5 +1,5 @@
 import React from 'react';
-import { EyeIcon, AlertCircle } from 'lucide-react';
+import { EyeIcon, AlertCircle, ChefHat } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import { getTimeAgo } from '../../utils/timeAgo';
 
