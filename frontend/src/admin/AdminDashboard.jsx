@@ -67,7 +67,7 @@ const AdminDashboard = () => {
 
     fetchDashboardData();
 
-    const socket = io("http://localhost:5000", { withCredentials: true });
+    const socket = io("http://localhost:5173", { withCredentials: true });
 
     socket.on("orderUpdate", (updatedOrder) => {
       setDashboardData((prev) => ({

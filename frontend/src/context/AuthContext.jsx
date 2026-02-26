@@ -47,6 +47,10 @@ export const AuthProvider = ({ children }) => {
       if (res?.data?.success) {
         // backend should set the cookie; we update local user state from response
         setUser(res.data.user);
+        // Store token in localStorage if provided in response
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
         return { success: true, user: res.data.user };
       } else {
         return {
@@ -66,6 +70,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
+      localStorage.removeItem("token");
       setUser(null);
       await checkAuth(); // Refresh auth state after logout
     }

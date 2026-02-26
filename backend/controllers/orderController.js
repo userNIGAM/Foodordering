@@ -68,7 +68,7 @@ export const placeOrder = async (req, res) => {
       from: `"Food Ordering" <${process.env.EMAIL_USER}>`,
       to: customer.email,
       subject: "Order Confirmed - Cash on Delivery",
-      text: `Hi ${customer.name}, your order has been received! Keep your money ready. Total: ₹${total}`,
+      text: `Hi ${customer.name}, your order has been received! Keep your money ready. Total: Rs.${total}`,
     });
 
     // Email to admin
@@ -76,7 +76,7 @@ export const placeOrder = async (req, res) => {
       from: `"Food Ordering" <${process.env.EMAIL_USER}>`,
       to: process.env.ADMIN_EMAIL,
       subject: "New Incoming Order",
-      text: `New order from ${customer.name}, Total: ₹${total}`,
+      text: `New order from ${customer.name}, Total: Rs.${total}`,
     });
   } catch (err) {
     console.error("Order Error:", err);

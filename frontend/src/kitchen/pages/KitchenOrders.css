@@ -1,0 +1,143 @@
+.kitchen-orders-container {
+  padding: 0;
+  background-color: #f9fafb;
+}
+
+/* Responsive Stats Cards */
+@media (max-width: 768px) {
+  .kitchen-orders-container .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Order Table Responsive */
+@media (max-width: 1024px) {
+  .kitchen-orders-container .overflow-x-auto {
+    font-size: 0.875rem;
+  }
+
+  .kitchen-orders-container table {
+    min-width: 100%;
+  }
+
+  .kitchen-orders-container th,
+  .kitchen-orders-container td {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Badge Animations */
+.kitchen-orders-container .inline-flex {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button Hover Effects */
+.kitchen-orders-container button {
+  transition: all 0.2s ease-in-out;
+}
+
+.kitchen-orders-container button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.kitchen-orders-container button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Modal Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kitchen-orders-container
+  .fixed
+  .bg-white:not(.absolute) {
+  animation: slideUp 0.3s ease-in-out;
+}
+
+/* Status Badge Styles */
+.bg-blue-100 {
+  background-color: #dbeafe;
+}
+
+.text-blue-800 {
+  color: #1e40af;
+}
+
+.bg-yellow-100 {
+  background-color: #fef3c7;
+}
+
+.text-yellow-800 {
+  color: #92400e;
+}
+
+.bg-green-100 {
+  background-color: #dcfce7;
+}
+
+.text-green-800 {
+  color: #15803d;
+}
+
+.bg-red-100 {
+  background-color: #fee2e2;
+}
+
+.text-red-800 {
+  color: #991b1b;
+}
+
+/* Loading Spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Table Row Hover */
+.kitchen-orders-container tbody tr:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Textarea Focus */
+.kitchen-orders-container textarea:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* Icon Animations */
+.kitchen-orders-container svg {
+  transition: transform 0.3s ease-in-out;
+}
+
+.kitchen-orders-container button:hover svg {
+  transform: scale(1.1);
+}

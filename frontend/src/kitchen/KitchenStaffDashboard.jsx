@@ -7,6 +7,7 @@ import KitchenSidebar from "./layout/KitchenSidebar";
 import KitchenTopbar from "./layout/KitchenTopbar";
 
 // Pages
+import KitchenOrders from "./pages/KitchenOrders";
 import ChefDashboard from "../admin/pages/kitchen/ChefDashboard";
 import KitchenDisplaySystem from "../admin/pages/kitchen/KitchenDisplaySystem";
 
@@ -125,7 +126,7 @@ const KitchenStaffDashboard = () => {
   const renderContent = () => {
     switch (activeSection) {
       case "orders":
-        return <ChefDashboard />;
+        return <KitchenOrders />;
       case "kitchen-display":
         return <KitchenDisplaySystem />;
       case "assignments":
@@ -143,7 +144,7 @@ const KitchenStaffDashboard = () => {
           </div>
         );
       default:
-        return <ChefDashboard />;
+        return <KitchenOrders />;
     }
   };
 
