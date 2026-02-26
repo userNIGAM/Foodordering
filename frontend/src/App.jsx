@@ -38,6 +38,7 @@ import Checkout from "./Components/orderForm/checkout/Checkout";
 import OrderSuccess from "./Components/orderForm/OrderSuccess";
 import OrderFailed from "./Components/orderForm/OrderFailed";
 import CartModal from "./Components/orderForm/cart/CartPage";
+import UserOrders from "./Components/orderForm/UserOrders";
 import WishlistPage from "./Components/WishlistPage";
 import WishlistCounter from "./Components/WishlistCounter";
 import MainLayout from "./Components/layout/MainLayout";
@@ -206,6 +207,7 @@ function AppRoutes() {
         <Route path="/services" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/orders" element={<UserOrders />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/order-failed" element={<OrderFailed />} />

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import useSocket from "../../../hooks/useSocket";
-import "./DeliveryDashboard.css";
 
 const DeliveryDashboard = () => {
   const { isConnected, on, emit } = useSocket();

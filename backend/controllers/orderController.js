@@ -4,10 +4,12 @@ import MenuItem from "../models/MenuItem.js";
 import nodemailer from "nodemailer";
 import mongoose from "mongoose";
 import { updateInventoryOnOrder } from "../middleware/inventoryMiddleware.js";
+import { protect } from "../middleware/auth.js";
 
 export const placeOrder = async (req, res) => {
   try {
     const { customer, items, total, paymentMethod } = req.body;
+    const userId = req.user?.id || req.user?._id || null;
 
     // Fetch actual menu items to get correct prices from database
     const sanitizedItems = await Promise.all(
@@ -39,6 +41,7 @@ export const placeOrder = async (req, res) => {
     );
 
     const order = new Order({
+      userId,
       customer,
       items: sanitizedItems,
       total: calculatedTotal,
@@ -106,5 +109,26 @@ export const getOrderStats = async (req, res) => {
   } catch (error) {
     console.error("Error fetching stats:", error);
     res.status(500).json({ success: false, message: "Failed to fetch stats" });
+  }
+};
+
+// ✅ Get user's orders
+export const getUserOrders = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+
+    const orders = await Order.find({ userId })
+      .populate("items.menuItemId")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch orders" });
   }
 };
