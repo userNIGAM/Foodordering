@@ -147,7 +147,22 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-
+  customerName: {
+    type: String,
+    required: true,
+  },
+  items: [
+    {
+      name: String,
+      quantity: Number,
+    },
+  ],
+  totalAmount: Number,
+  status: {
+    type: String,
+    enum: ["Pending", "Preparing", "Ready", "Completed"],
+    default: "Pending",
+  },
   // 📋 Timeline events
   timeline: [
     {

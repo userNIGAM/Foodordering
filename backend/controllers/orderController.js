@@ -317,3 +317,17 @@ export const getUserOrders = async (req, res) => {
       .json({ success: false, message: "Failed to fetch orders" });
   }
 };
+
+// ✅ Get order details for chef
+export const getOrdersForChef = async (req, res) => {
+  try {
+    // Only show orders that are not completed
+    const orders = await Order.find({
+      status: { $ne: "Completed" }
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching orders", error });
+  }
+};
