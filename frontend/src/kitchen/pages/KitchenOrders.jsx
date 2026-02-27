@@ -25,7 +25,7 @@ const KitchenOrders = () => {
   });
 
   const token = localStorage.getItem('token');
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5173';
 
   // Fetch orders
   const fetchOrders = useCallback(async () => {

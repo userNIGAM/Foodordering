@@ -24,6 +24,7 @@ const KitchenProtectedRoute = ({ children }) => {
   }
 
   return children;
+
 };
 
 export default KitchenProtectedRoute;
