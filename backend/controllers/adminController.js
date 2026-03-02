@@ -567,3 +567,53 @@ export const getInventoryReport = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+
+/***********************************************************************************************/
+/**                             creating ids for chef and delivery person                      */
+/***********************************************************************************************/
+export const createStaff = async (req, res) => {
+  try {
+    const { name, email, password, role, phoneNumber, location, deliveryZone } = req.body;
+
+    if (!["chef", "delivery_person"].includes(role)) {
+      return res.status(400).json({
+        message: "Role must be chef or delivery_person",
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "User already exists",
+      });
+    }
+
+    const user = new User({
+      name,
+      email,
+      password,
+      role,
+      phoneNumber,
+      location,
+      status: "active",
+      isVerified: true,
+      deliveryZone: role === "delivery_person" ? deliveryZone : null,
+    });
+
+    await user.save();
+
+    res.status(201).json({
+      message: `${role} account created successfully`,
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating staff",
+      error: error.message,
+    });
+  }
+};
+

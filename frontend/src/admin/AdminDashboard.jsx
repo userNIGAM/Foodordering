@@ -19,6 +19,7 @@ import ChefDashboard from "./pages/kitchen/ChefDashboard";
 import KitchenManagement from "./pages/kitchen/KitchenManagement";
 import KitchenDisplaySystem from "./pages/kitchen/KitchenDisplaySystem";
 import DeliveryDashboard from "../delivery/dashboard/DeliveryDashboard";
+import CreateStaff from "./pages/createstaff/CreateStaff";
 
 // Axios global config
 axios.defaults.withCredentials = true;
@@ -166,6 +167,8 @@ const AdminDashboard = () => {
         return <KitchenDisplaySystem />;
       case "delivery-dashboard":
         return <DeliveryDashboard />;
+      case "create-staff":
+        return <CreateStaff />;
       default:
         return <DashboardContent data={dashboardData} />;
     }

@@ -39,6 +39,7 @@ const Sidebar = ({
     { id: "chef-dashboard", label: "Chef Dashboard", icon: Users },
     { id: "delivery-dashboard", label: "Delivery Dashboard", icon: ShoppingCart },
     { id: "settings", label: "Settings", icon: Settings },
+    { id: "create-staff", label: "Create Staff", icon: Users },
   ];
 
   // Motion variants for slide-in/out

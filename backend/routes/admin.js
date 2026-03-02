@@ -15,6 +15,7 @@ import {
   bulkUpdateInventory,
   addStock,
   getInventoryReport,
+  createStaff
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -41,5 +42,8 @@ router.get("/promotions", authAdmin, getPromotions);
 router.post("/promotions", authAdmin, createPromotion);
 router.put("/promotions/:id", authAdmin, updatePromotion);
 router.delete("/promotions/:id", authAdmin, deletePromotion);
+
+// Staff
+router.post("/staff", authAdmin, createStaff);
 
 export default router;
