@@ -27,29 +27,7 @@ const KitchenOrders = () => {
   const token = localStorage.getItem("token");
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Fetch orders
-  // const fetchOrders = useCallback(async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await fetch(`${apiUrl}/api/orders/chef`, {
-  //       method: "GET",
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
 
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setOrders(data.data || []);
-  //       calculateStats(data.data || []);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching orders:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [token, apiUrl]);
   const fetchOrders = useCallback(async () => {
   try {
     setLoading(true);

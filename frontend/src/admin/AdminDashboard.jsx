@@ -18,7 +18,7 @@ import SettingsContent from "./pages/setting/SettingsContent";
 import ChefDashboard from "./pages/kitchen/ChefDashboard";
 import KitchenManagement from "./pages/kitchen/KitchenManagement";
 import KitchenDisplaySystem from "./pages/kitchen/KitchenDisplaySystem";
-import DeliveryDashboard from "./pages/kitchen/DeliveryDashboard";
+import DeliveryDashboard from "../delivery/dashboard/DeliveryDashboard";
 
 // Axios global config
 axios.defaults.withCredentials = true;

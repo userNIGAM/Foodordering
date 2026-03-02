@@ -14,7 +14,7 @@ export const getDashboardData = async (req, res) => {
     let totalRevenue = 0;
     allOrders.forEach((order) => {
       order.items.forEach((item) => {
-        const correctPrice = item.menuItemId?.price || item.price;
+        const correctPrice = item.menuItemId?.price || item.price || 0;
         totalRevenue += correctPrice * item.quantity;
       });
     });
@@ -165,7 +165,7 @@ export const getDashboardData = async (req, res) => {
             (sum, item) => {
               // Use the price from the populated MenuItem (correct price)
               // Fallback to stored price if menuItemId is not populated
-              const correctPrice = item.menuItemId?.price || item.price;
+              const correctPrice = item.menuItemId?.price || item.price || 0;
               return sum + (correctPrice * item.quantity);
             },
             0

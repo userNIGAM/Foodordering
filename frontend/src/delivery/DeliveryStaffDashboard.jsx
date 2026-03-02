@@ -7,7 +7,7 @@ import DeliverySidebar from "./layout/DeliverySidebar";
 import DeliveryTopbar from "./layout/DeliveryTopbar";
 
 // Pages
-import DeliveryDashboard from "../admin/pages/kitchen/DeliveryDashboard";
+import DeliveryDashboard from "./dashboard/DeliveryDashboard";
 
 // Axios global config
 axios.defaults.withCredentials = true;
