@@ -35,22 +35,20 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      try {
-        localStorage.removeItem("user");
-      } catch (e) {
-        console.error("Failed to clear user data:", e);
-      }
-      // window.location.href = "/auth";
-      if (window.location.pathname !== "/auth") {
-        window.location.href = "/auth";
+api.interceptors.request.use(
+  (config) => {
+    const user = localStorage.getItem("user");
+
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      if (parsedUser?.token) {
+        config.headers.Authorization = `Bearer ${parsedUser.token}`;
       }
     }
-    return Promise.reject(error);
-  }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
 export default api;
