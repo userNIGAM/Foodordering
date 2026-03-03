@@ -80,7 +80,7 @@ export default function CreateStaff() {
     try {
       setLoading(true);
 
-      const res = await api.post("/api/admin/create-staff", form);
+      const res = await api.post("/api/admin/staff", form);
 
       setMessage(res.data.message);
 

@@ -1,4 +1,4 @@
-// src/Components/Auth/LoginForm.jsx
+/* eslint-disable no-unused-vars */
 import React, { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";

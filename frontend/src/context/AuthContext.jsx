@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable react-refresh/only-export-components */
-// src/context/AuthContext.jsx
+
 import { createContext, useState, useEffect, useCallback } from "react";
 import api from "../services/api";
 
@@ -12,9 +12,10 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = useCallback(async () => {
     setLoading(true);
+
     try {
-      // Make sure we call the correct endpoint. backend has /api/auth/me
-      const res = await api.get("/api/auth/me", { timeout: 50000 });
+      const res = await api.get("/api/auth/me");
+
       if (res?.data?.success) {
         setUser(res.data.user);
       } else {
@@ -22,16 +23,13 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       setUser(null);
-      setLoading(false);
-      // Suppress error log for 401 and ECONNABORTED after logout/network issues
+
       if (
         process.env.NODE_ENV === "development" &&
-        err?.code !== "ECONNABORTED" &&
         err?.response?.status !== 401
       ) {
         console.error("Auth check failed:", err);
       }
-      return;
     } finally {
       setLoading(false);
     }
@@ -44,23 +42,26 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await api.post("/api/auth/login", { email, password });
+
       if (res?.data?.success) {
-        // backend should set the cookie; we update local user state from response
         setUser(res.data.user);
-        // Store token in localStorage if provided in response
+
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
         }
+
         return { success: true, user: res.data.user };
-      } else {
-        return {
-          success: false,
-          message: res?.data?.message || "Login failed",
-        };
       }
+
+      return {
+        success: false,
+        message: res?.data?.message || "Login failed",
+      };
     } catch (err) {
-      const msg = err?.response?.data?.message || "Login failed";
-      return { success: false, message: msg };
+      return {
+        success: false,
+        message: err?.response?.data?.message || "Login failed",
+      };
     }
   };
 
@@ -72,7 +73,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       localStorage.removeItem("token");
       setUser(null);
-      await checkAuth(); // Refresh auth state after logout
     }
   };
 
@@ -92,3 +92,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;
