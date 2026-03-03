@@ -41,7 +41,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       try {
         localStorage.removeItem("user");
-      } catch (e) {}
+      } catch (e) {
+        console.error("Failed to clear user data:", e);
+      }
       // window.location.href = "/auth";
       if (window.location.pathname !== "/auth") {
         window.location.href = "/auth";

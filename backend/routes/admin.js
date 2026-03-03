@@ -15,8 +15,12 @@ import {
   bulkUpdateInventory,
   addStock,
   getInventoryReport,
-  createStaff
+  createStaff,
+  getAllUsers,
+  deleteUser,
+  toggleBlockUser
 } from "../controllers/adminController.js";
+import { get } from "mongoose";
 
 const router = express.Router();
 
@@ -46,4 +50,12 @@ router.delete("/promotions/:id", authAdmin, deletePromotion);
 // Staff
 router.post("/staff", authAdmin, createStaff);
 
+//get all users
+router.get("/users", authAdmin, getAllUsers);
+
+// Delete a user by ID
+router.delete("/users/:id", authAdmin, deleteUser);
+
+// Block or unblock a user
+router.patch("/users/:id/block", authAdmin, toggleBlockUser);
 export default router;

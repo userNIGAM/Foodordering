@@ -170,7 +170,7 @@ export const getDashboardData = async (req, res) => {
             },
             0
           );
-          
+
           return {
             id: order.orderId,
             customer: order.customer?.name || "N/A",
@@ -185,8 +185,8 @@ export const getDashboardData = async (req, res) => {
         salesData: salesData.map((item) => ({
           day: item._id
             ? new Date(item._id).toLocaleDateString("en-US", {
-                weekday: "short",
-              })
+              weekday: "short",
+            })
             : "N/A",
           sales: item.orderCount || 0,
         })),
@@ -232,7 +232,7 @@ export const updateOrderStatus = async (req, res) => {
       { status: req.body.status },
       { new: true }
     );
-    
+
     if (!order)
       return res.status(404).json({ success: false, message: "Not found" });
 
@@ -498,6 +498,7 @@ export const addStock = async (req, res) => {
   }
 };
 
+
 export const getInventoryReport = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -617,3 +618,91 @@ export const createStaff = async (req, res) => {
   }
 };
 
+/***********************************************************************************************/
+/**                             exporting only user role for management                        */
+/***********************************************************************************************/
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({ role: "user" });
+    return res.status(200).json({
+      success: true,
+      users: users
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+};
+
+
+// @desc    Get all users (with optional search)
+// @route   GET /api/admin/users
+// @access  Private/Admin
+export const getUsers = async (req, res) => {
+  try {
+    const { search } = req.query;
+    let query = {};
+
+    // If search term provided, filter by name or email (case‑insensitive)
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // You may also want to exclude admins or certain roles
+    // query.role = 'user'; // if you have a role field
+
+    const users = await User.find(query).select("-password").sort("-createdAt");
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// @desc    Delete a user
+// @route   DELETE /api/admin/users/:id
+// @access  Private/Admin
+export const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    await user.deleteOne(); // or user.remove()
+    res.json({ message: "User removed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// @desc    Block or unblock a user
+// @route   PATCH /api/admin/users/:id/block
+// @access  Private/Admin
+export const toggleBlockUser = async (req, res) => {
+  try {
+    const { blocked } = req.body; // expected boolean: true = block, false = unblock
+    if (typeof blocked !== "boolean") {
+      return res.status(400).json({ message: "Blocked status must be a boolean" });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.status = blocked ? "blocked" : "active";
+    await user.save();
+
+    res.json({ message: `User ${blocked ? "blocked" : "unblocked"} successfully` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
