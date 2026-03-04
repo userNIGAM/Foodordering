@@ -2,18 +2,14 @@
 import axios from "axios";
 
 // Define baseURL once
-const baseURL =
+export const API_URL =
   import.meta.env.VITE_API_BASE ||
   (import.meta.env.MODE === "development"
     ? "http://localhost:5000"
     : "https://foodordering-i801.onrender.com");
 
 const api = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_BASE ||
-    (import.meta.env.MODE === "development"
-      ? "http://localhost:5000"
-      : "https://foodordering-i801.onrender.com"),
+  baseURL: API_URL,
   withCredentials: true,
   timeout: 40000,
 });
@@ -22,7 +18,7 @@ const api = axios.create({
 export const getImageUrl = (path) => {
   if (!path) return "/placeholder-food.jpg"; // fallback
   if (path.startsWith("http")) return path; // already full URL
-  return `${baseURL}${path}`;
+  return `${API_URL}${path}`;
 };
 // //helper for fetching categories
 // export const getCategories = () => {

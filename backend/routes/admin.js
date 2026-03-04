@@ -20,7 +20,6 @@ import {
   deleteUser,
   toggleBlockUser
 } from "../controllers/adminController.js";
-import { get } from "mongoose";
 
 const router = express.Router();
 
