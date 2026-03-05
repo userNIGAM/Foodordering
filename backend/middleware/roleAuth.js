@@ -1,4 +1,3 @@
-// backend/middleware/roleAuth.js
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
@@ -38,6 +37,12 @@ export const roleAuth = (...allowedRoles) => {
         });
       }
 
+      // ✅ Superadmin bypass: always allow
+      if (user.role === "superadmin") {
+        req.user = user;
+        return next();
+      }
+
       // Check if user's role is in allowed roles
       if (!allowedRoles.includes(user.role)) {
         return res.status(403).json({
@@ -57,6 +62,7 @@ export const roleAuth = (...allowedRoles) => {
       req.user = user;
       next();
     } catch (error) {
+      console.error(error);
       return res.status(401).json({
         success: false,
         message: "Not authorized, token failed",
