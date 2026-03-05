@@ -31,8 +31,8 @@ const InventoryFilters = ({
         >
           <option value="all">All Categories</option>
           {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            <option key={cat._id} value={cat}>
+              {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
             </option>
           ))}
         </select>

@@ -1,16 +1,14 @@
-// controllers/menuController.js
 import MenuItem from "../models/MenuItem.js";
+import Category from "../models/Category.js";
 
-// @desc    Get all menu items
-// @route   GET /api/menu-items
-// @access  Public
-const getMenuItems = async (req, res) => {
+
+// GET all menu items with filters
+export const getMenuItems = async (req, res) => {
   try {
     const { category, search, featured, limit } = req.query;
 
     let query = {};
-    // console.log("Query params:", req.query);
-    // console.log("Mongo query object:", query);
+
     if (category && category !== "all") {
       query.category = category;
     }
@@ -23,67 +21,52 @@ const getMenuItems = async (req, res) => {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
-        { tags: { $elemMatch: { $regex: search, $options: "i" } } }, // 👈 fixed for array
+        { tags: { $elemMatch: { $regex: search, $options: "i" } } }
       ];
     }
 
-    let menuItemsQuery = MenuItem.find(query);
+    let menuQuery = MenuItem.find(query).sort({ createdAt: -1 });
 
     if (limit) {
-      menuItemsQuery = menuItemsQuery.limit(parseInt(limit));
+      menuQuery = menuQuery.limit(parseInt(limit));
     }
 
-    const menuItems = await menuItemsQuery.sort({ createdAt: -1 });
+    const menuItems = await menuQuery;
 
     res.json({
       success: true,
       count: menuItems.length,
-      data: menuItems,
+      data: menuItems
     });
+
   } catch (error) {
-    console.error("Error in getMenuItems:", error); // 👈 full error trace
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-// @desc    Get single menu item
-// @route   GET /api/menu-items/:id
-// @access  Public
-const getMenuItem = async (req, res) => {
-  try {
-    const menuItem = await MenuItem.findById(req.params.id);
 
-    if (!menuItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Menu item not found",
-      });
+// GET single menu item
+export const getMenuItem = async (req, res) => {
+  try {
+    const item = await MenuItem.findById(req.params.id);
+
+    if (!item) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
     }
 
-    res.json({
-      success: true,
-      data: menuItem,
-    });
+    res.json({ success: true, data: item });
+
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Create new menu item
-// @route   POST /api/menu-items
-// @access  Private/Admin
-// @desc    Create new menu item with image
-// @route   POST /api/menu-items
-// @access  Private/Admin
-const createMenuItem = async (req, res) => {
+
+// CREATE menu item
+export const createMenuItem = async (req, res) => {
   try {
     const {
       name,
@@ -95,8 +78,23 @@ const createMenuItem = async (req, res) => {
       rating,
       isPopular,
       ingredients,
-      tags,
+      tags
     } = req.body;
+
+    if (!name || !category || !price || !description) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Required fields missing" });
+    }
+
+    // Validate category
+    const categoryExists = await Category.findOne({ name: category });
+
+    if (!categoryExists) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid category name" });
+    }
 
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -111,127 +109,109 @@ const createMenuItem = async (req, res) => {
       isPopular,
       ingredients: ingredients ? ingredients.split(",") : [],
       tags: tags ? tags.split(",") : [],
-      image: imagePath,
+      image: imagePath
     });
 
     res.status(201).json({
       success: true,
-      data: menuItem,
+      data: menuItem
     });
+
   } catch (error) {
-    console.error("Error in createMenuItem:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-// @desc    Update menu item
-// @route   PUT /api/menu-items/:id
-// @access  Private/Admin
-const updateMenuItem = async (req, res) => {
-  try {
-    const menuItem = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
 
-    if (!menuItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Menu item not found",
-      });
+// UPDATE menu item
+export const updateMenuItem = async (req, res) => {
+  try {
+    const { category } = req.body;
+
+    if (category) {
+      const exists = await Category.findOne({ name: category });
+
+      if (!exists) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Category does not exist" });
+      }
+    }
+
+    const item = await MenuItem.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!item) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
     }
 
     res.json({
       success: true,
-      data: menuItem,
+      data: item
     });
+
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Delete menu item
-// @route   DELETE /api/menu-items/:id
-// @access  Private/Admin
-const deleteMenuItem = async (req, res) => {
-  try {
-    const menuItem = await MenuItem.findByIdAndDelete(req.params.id);
 
-    if (!menuItem) {
-      return res.status(404).json({
-        success: false,
-        message: "Menu item not found",
-      });
+// DELETE menu item
+export const deleteMenuItem = async (req, res) => {
+  try {
+    const item = await MenuItem.findByIdAndDelete(req.params.id);
+
+    if (!item) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
     }
 
     res.json({
       success: true,
-      message: "Menu item deleted successfully",
+      message: "Menu item deleted successfully"
     });
+
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Get menu items by category
-// @route   GET /api/menu-items/category/:category
-// @access  Public
-const getMenuItemsByCategory = async (req, res) => {
+
+// GET items by category
+export const getMenuItemsByCategory = async (req, res) => {
   try {
-    const menuItems = await MenuItem.find({ category: req.params.category });
+    const items = await MenuItem.find({ category: req.params.category });
 
     res.json({
       success: true,
-      count: menuItems.length,
-      data: menuItems,
+      count: items.length,
+      data: items
     });
+
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Get all categories
-// @route   GET /api/menu-items/categories/all
-// @access  Public
-const getCategories = async (req, res) => {
+
+// GET all categories
+export const getCategories = async (req, res) => {
   try {
-    const categories = await MenuItem.distinct("category");
+    const categories = await Category.find().sort({ name: 1 });
 
     res.json({
       success: true,
-      data: categories,
+      data: categories
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
-  }
-};
 
-export {
-  getMenuItems,
-  getMenuItem,
-  createMenuItem,
-  updateMenuItem,
-  deleteMenuItem,
-  getMenuItemsByCategory,
-  getCategories,
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };

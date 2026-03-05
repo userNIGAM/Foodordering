@@ -19,7 +19,7 @@ import contactRouter from "./routes/contactRouter.js";
 import { initSocket } from "./socket.js";
 import { createServer } from "http";
 import path from "path";
-import menuItemRoutes from "./routes/menuItems.js";
+import menuItemRoutes from "./routes/menuRoutes.js";
 import categoryRoutes from "./routes/categories.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
 

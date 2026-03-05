@@ -9,7 +9,7 @@ const CategoryInput = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredCategories = categories.filter((cat) =>
-    cat.toLowerCase().includes(searchTerm.toLowerCase())
+    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

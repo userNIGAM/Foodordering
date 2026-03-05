@@ -1,31 +1,39 @@
-// routes/menuRoutes.js
 import express from "express";
+import upload from "../middleware/uploadMiddleware.js";
+
 import {
+  createMenuItem,
   getMenuItems,
   getMenuItem,
-  createMenuItem,
   updateMenuItem,
   deleteMenuItem,
   getMenuItemsByCategory,
-  getCategories,
+  getCategories
 } from "../controllers/menuController.js";
-import upload from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
+
+// CREATE + GET ALL
 router
   .route("/")
   .get(getMenuItems)
   .post(upload.single("image"), createMenuItem);
 
-router.route("/categories/all").get(getCategories);
 
-router.route("/category/:category").get(getMenuItemsByCategory);
+// GET ALL CATEGORIES
+router.get("/categories/all", getCategories);
 
+
+// GET MENU ITEMS BY CATEGORY
+router.get("/category/:category", getMenuItemsByCategory);
+
+
+// SINGLE MENU ITEM CRUD
 router
   .route("/:id")
   .get(getMenuItem)
-  .put(updateMenuItem)
+  .put(upload.single("image"), updateMenuItem)
   .delete(deleteMenuItem);
 
 export default router;
