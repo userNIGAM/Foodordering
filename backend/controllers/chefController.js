@@ -9,7 +9,7 @@ import {
   emitIssueReported,
   emitChefDashboardUpdate,
 } from "../utils/socketEvents.js";
-import { notifyUser, notifyAdmins } from "../socket.js";
+import { notifyUser, notifyAdmins } from "../sockets/socket.js";
 
 /**
  * Get all orders assigned to chef
@@ -443,33 +443,59 @@ export const getChefDashboard = async (req, res) => {
       "name completedOrders chefRating currentCapacity maxCapacity"
     );
 
-    const orders = await Order.find({ chefId });
+    if (!chef) {
+      return res.status(404).json({
+        success: false,
+        message: "Chef not found",
+      });
+    }
+
+    const orderStats = await Order.aggregate([
+      { $match: { chefId } },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 },
+          completed: {
+            $sum: { $cond: [{ $eq: ["$status", "prepared"] }, 1, 0] },
+          },
+          inProgress: {
+            $sum: {
+              $cond: [
+                { $in: ["$status", ["confirmed", "preparing"]] },
+                1,
+                0,
+              ],
+            },
+          },
+          issues: {
+            $sum: { $cond: [{ $eq: ["$status", "issue"] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    const statsData = orderStats[0] || {
+      totalOrders: 0,
+      completed: 0,
+      inProgress: 0,
+      issues: 0,
+    };
+
+    const preparedOrders = await Order.find({
+      chefId,
+      status: "prepared",
+    })
+      .sort({ updatedAt: -1 })
+      .limit(10);
 
     const stats = {
-      totalOrders: orders.length,
-      completed: orders.filter((o) => o.status === "prepared").length,
-      inProgress: orders.filter((o) =>
-        ["confirmed", "preparing"].includes(o.status)
-      ).length,
-      issues: orders.filter((o) => o.status === "issue").length,
+      ...statsData,
       currentCapacity: chef.currentCapacity,
       maxCapacity: chef.maxCapacity,
       completedOrders: chef.completedOrders,
       rating: chef.chefRating,
     };
-
-    const preparedOrders = orders.filter((o) => o.status === "prepared");
-
-    // 📡 Emit socket event for real-time dashboard update
-    emitChefDashboardUpdate(chefId, {
-      chefId,
-      stats,
-      inProgressCount: stats.inProgress,
-      completedToday: stats.completed,
-      issuesCount: stats.issues,
-      currentCapacity: stats.currentCapacity,
-      maxCapacity: stats.maxCapacity,
-    });
 
     return res.status(200).json({
       success: true,
@@ -485,6 +511,7 @@ export const getChefDashboard = async (req, res) => {
     });
   } catch (error) {
     console.error("Get Chef Dashboard Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -492,7 +519,6 @@ export const getChefDashboard = async (req, res) => {
     });
   }
 };
-
 export default {
   getAssignedOrders,
   confirmOrder,

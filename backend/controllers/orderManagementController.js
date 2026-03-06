@@ -11,7 +11,7 @@ import {
   emitOrderAssignedToChef,
   emitOrderAssignedToDelivery,
 } from "../utils/socketEvents.js";
-import { notifyUser, notifyAdmins } from "../socket.js";
+import { notifyUser, notifyAdmins } from "../sockets/socket.js";
 
 /**
  * Get pending orders (awaiting verification)

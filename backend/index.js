@@ -16,7 +16,7 @@ import deliveryRoutes from "./routes/deliveryRoutes.js";
 import orderManagementRoutes from "./routes/orderManagementRoutes.js";
 import ConnectDB from "./config/db.js";
 import contactRouter from "./routes/contactRouter.js";
-import { initSocket } from "./socket.js";
+import { initSocket } from "./sockets/socket.js";
 import { createServer } from "http";
 import path from "path";
 import menuItemRoutes from "./routes/menuRoutes.js";

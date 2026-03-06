@@ -8,7 +8,7 @@ import {
   emitDeliveryLocationUpdate,
   emitDeliveryDashboardUpdate,
 } from "../utils/socketEvents.js";
-import { notifyCustomer } from "../socket.js";
+import { notifyCustomer } from "../sockets/socket.js";
 
 /**
  * Get all assigned orders for delivery person

@@ -1,7 +1,7 @@
 // socket.js
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import User from "./models/User.js";
+import User from "../models/User.js";
 
 let io;
 const connectedUsers = new Map(); // Map of userId -> socketId
