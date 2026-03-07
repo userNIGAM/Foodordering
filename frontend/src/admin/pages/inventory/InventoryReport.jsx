@@ -12,19 +12,42 @@ const InventoryReport = ({ reportData }) => {
         </div>
 
         <div className="bg-yellow-50 p-4 rounded-lg">
-          <p className="font-semibold">Low Stock</p>
-          <p className="text-2xl font-bold">
-            {reportData.report.reduce((s,c)=>s+c.lowStockItems,0)}
-          </p>
+          <p className="font-semibold">Low Stock Items</p>
+          <p className="text-2xl font-bold">{reportData.lowStockItems}</p>
         </div>
 
         <div className="bg-red-50 p-4 rounded-lg">
           <p className="font-semibold">Out of Stock</p>
-          <p className="text-2xl font-bold">
-            {reportData.report.reduce((s,c)=>s+c.outOfStockItems,0)}
-          </p>
+          <p className="text-2xl font-bold">{reportData.outOfStockItems}</p>
         </div>
       </div>
+
+      {/* Optional: display category breakdown */}
+      {reportData.report && reportData.report.length > 0 && (
+        <div>
+          <h4 className="font-medium mb-2">By Category</h4>
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Total Value</th>
+                <th>Low Stock</th>
+                <th>Out of Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reportData.report.map((cat) => (
+                <tr key={cat.category}>
+                  <td>{cat.category}</td>
+                  <td>${cat.totalValue.toFixed(2)}</td>
+                  <td>{cat.lowStockItems}</td>
+                  <td>{cat.outOfStockItems}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

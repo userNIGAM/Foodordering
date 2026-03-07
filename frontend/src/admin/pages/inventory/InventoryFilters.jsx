@@ -8,7 +8,7 @@ const InventoryFilters = ({
   setSelectedCategory,
   categories,
   showLowStock,
-  setShowLowStock
+  setShowLowStock,
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
@@ -31,7 +31,7 @@ const InventoryFilters = ({
         >
           <option value="all">All Categories</option>
           {categories.map((cat) => (
-            <option key={cat._id} value={cat}>
+            <option key={cat._id} value={cat.name}>
               {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
             </option>
           ))}

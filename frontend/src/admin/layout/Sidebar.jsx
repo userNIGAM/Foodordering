@@ -29,7 +29,7 @@ const Sidebar = ({
   const navigationItems = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "orders", label: "Orders", icon: ShoppingCart },
-    { id: "products", label: "Products", icon: Package },
+    { id: "products", label: "Add Products", icon: Package },
     { id: "customers", label: "Customers", icon: Users },
     { id: "inventory", label: "Inventory", icon: Warehouse },
     { id: "promotions", label: "Promotions", icon: Tag },

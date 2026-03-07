@@ -6,7 +6,7 @@ import {
   notifyCustomer,
   notifyDelivery,
   getIO,
-} from "../socket.js";
+} from "../sockets/socket.js";
 
 /**
  * Emit order status change to all relevant parties

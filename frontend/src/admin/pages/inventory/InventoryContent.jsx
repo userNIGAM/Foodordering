@@ -9,7 +9,6 @@ import Loader from "./Loader";
 
 const InventoryContent = () => {
   const [inventory, setInventory] = useState([]);
-  const [filteredInventory, setFilteredInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLowStock, setShowLowStock] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,25 +17,29 @@ const InventoryContent = () => {
   const [showReport, setShowReport] = useState(false);
   const [reportData, setReportData] = useState(null);
 
+  // Fetch categories once
   useEffect(() => {
-    fetchInventory();
     fetchCategories();
   }, []);
 
+  // Fetch inventory whenever filters change
   useEffect(() => {
-    filterInventory();
-  }, [inventory, showLowStock, searchTerm, selectedCategory]);
+    fetchInventory();
+  }, [showLowStock, searchTerm, selectedCategory]); // Added searchTerm if backend supports it
 
   const fetchInventory = async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (showLowStock) params.append("lowStockOnly", "true");
       if (selectedCategory !== "all") params.append("category", selectedCategory);
+      if (searchTerm) params.append("search", searchTerm); // backend supports search
 
       const res = await api.get(`/api/admin/inventory?${params}`);
       if (res.data.success) setInventory(res.data.data);
     } catch (e) {
-      console.error(e);
+      console.error("Failed to fetch inventory:", e);
+      // Optionally show toast notification
     } finally {
       setLoading(false);
     }
@@ -60,19 +63,10 @@ const InventoryContent = () => {
     }
   };
 
-  const filterInventory = () => {
-    let filtered = inventory;
-    if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.menuItemId?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    setFilteredInventory(filtered);
-  };
-
   const handleStockUpdate = async (id, newStock) => {
     try {
-      const res = await api.put(`/api/admin/inventory/${id}`, {
+      // Use PATCH endpoint for updating stock only
+      const res = await api.patch(`/api/admin/inventory/${id}/stock`, {
         currentStock: parseInt(newStock),
       });
       if (res.data.success) {
@@ -100,7 +94,7 @@ const InventoryContent = () => {
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading && inventory.length === 0) return <Loader />;
 
   return (
     <div className="space-y-6 px-4 sm:px-6 lg:px-8">
@@ -124,7 +118,7 @@ const InventoryContent = () => {
       />
 
       <InventoryTable
-        inventory={filteredInventory}
+        inventory={inventory}
         handleStockUpdate={handleStockUpdate}
         handleRestock={handleRestock}
       />

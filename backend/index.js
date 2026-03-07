@@ -22,6 +22,7 @@ import path from "path";
 import menuItemRoutes from "./routes/menuRoutes.js";
 import categoryRoutes from "./routes/categories.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
+import inventoryRoutes from './routes/inventoryRoutes.js';
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/ratings", ratingRoutes);
 // app.use("/uploads", express.static("uploads"));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use('/api/admin/inventory', inventoryRoutes);
 
 // Connect to DB
 ConnectDB();
