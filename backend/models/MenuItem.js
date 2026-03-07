@@ -64,6 +64,25 @@ const menuItemSchema = new mongoose.Schema(
         5: { type: Number, default: 0 },
       },
     },
+    // Inventory fields
+    currentStock: {
+      type: Number,
+      default: 0
+    },
+    lowStockThreshold: {
+      type: Number,
+      default: 5
+    },
+
+    unit: {
+      type: String,
+      default: "pcs"
+    },
+
+    isAvailable: {
+      type: Boolean,
+      default: true
+    }
   },
   {
     timestamps: true,

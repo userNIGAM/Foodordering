@@ -1,131 +1,128 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
-import InventoryHeader from "./InventoryHeader";
-import InventoryReport from "./InventoryReport";
-import InventoryFilters from "./InventoryFilters";
-import InventoryTable from "./InventoryTable";
-import StockAlert from "./StockAlert";
-import Loader from "./Loader";
 
-const InventoryContent = () => {
+const Inventory = () => {
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showLowStock, setShowLowStock] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [categories, setCategories] = useState([]);
-  const [showReport, setShowReport] = useState(false);
-  const [reportData, setReportData] = useState(null);
-
-  // Fetch categories once
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  // Fetch inventory whenever filters change
-  useEffect(() => {
-    fetchInventory();
-  }, [showLowStock, searchTerm, selectedCategory]); // Added searchTerm if backend supports it
+  const [error, setError] = useState("");
 
   const fetchInventory = async () => {
-    setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (showLowStock) params.append("lowStockOnly", "true");
-      if (selectedCategory !== "all") params.append("category", selectedCategory);
-      if (searchTerm) params.append("search", searchTerm); // backend supports search
+      setLoading(true);
 
-      const res = await api.get(`/api/admin/inventory?${params}`);
-      if (res.data.success) setInventory(res.data.data);
-    } catch (e) {
-      console.error("Failed to fetch inventory:", e);
-      // Optionally show toast notification
+      const res = await api.get("/api/admin/inventory");
+
+      if (res.data.success) {
+        setInventory(res.data.data);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load inventory");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get("/api/menu-items/categories/all");
-      if (res.data.success) setCategories(res.data.data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  useEffect(() => {
+    fetchInventory();
+  }, []);
 
-  const fetchInventoryReport = async () => {
-    try {
-      const res = await api.get("/api/admin/inventory/report");
-      if (res.data.success) setReportData(res.data.data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="p-6 text-center text-gray-600">
+        Loading inventory...
+      </div>
+    );
+  }
 
-  const handleStockUpdate = async (id, newStock) => {
-    try {
-      // Use PATCH endpoint for updating stock only
-      const res = await api.patch(`/api/admin/inventory/${id}/stock`, {
-        currentStock: parseInt(newStock),
-      });
-      if (res.data.success) {
-        setInventory(
-          inventory.map((item) => (item._id === id ? res.data.data : item))
-        );
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleRestock = async (id, quantity) => {
-    try {
-      const res = await api.post(`/api/admin/inventory/${id}/restock`, {
-        quantity: parseInt(quantity),
-      });
-      if (res.data.success) {
-        setInventory(
-          inventory.map((item) => (item._id === id ? res.data.data : item))
-        );
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  if (loading && inventory.length === 0) return <Loader />;
+  if (error) {
+    return (
+      <div className="p-6 text-center text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 px-4 sm:px-6 lg:px-8">
-      <InventoryHeader
-        showReport={showReport}
-        setShowReport={setShowReport}
-        reportData={reportData}
-        fetchInventoryReport={fetchInventoryReport}
-      />
+    <div className="p-6">
 
-      {showReport && reportData && <InventoryReport reportData={reportData} />}
+      <h1 className="text-2xl font-semibold mb-6">
+        Inventory Management
+      </h1>
 
-      <InventoryFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        categories={categories}
-        showLowStock={showLowStock}
-        setShowLowStock={setShowLowStock}
-      />
+      <div className="bg-white shadow rounded-lg overflow-hidden">
 
-      <InventoryTable
-        inventory={inventory}
-        handleStockUpdate={handleStockUpdate}
-        handleRestock={handleRestock}
-      />
+        <table className="w-full">
 
-      <StockAlert inventory={inventory} />
+          <thead className="bg-gray-100 text-left text-sm uppercase text-gray-500">
+            <tr>
+              <th className="px-4 py-3">Product</th>
+              <th className="px-4 py-3">Category</th>
+              <th className="px-4 py-3">Stock</th>
+              <th className="px-4 py-3">Low Level</th>
+              <th className="px-4 py-3">Cost</th>
+              <th className="px-4 py-3">Value</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {inventory.length === 0 && (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="text-center py-6 text-gray-500"
+                >
+                  No inventory items found
+                </td>
+              </tr>
+            )}
+
+            {inventory.map((item) => {
+              const menuItem = item.menuItem || item.menuItemId;
+
+              const totalValue =
+                (item.currentStock || 0) *
+                (item.costPerUnit || 0);
+
+              return (
+                <tr
+                  key={item._id}
+                  className="border-t hover:bg-gray-50"
+                >
+                  <td className="px-4 py-3">
+                    {menuItem?.name || "Unknown"}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {menuItem?.category || "-"}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {item.currentStock}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {item.lowStockThreshold}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    Rs {item.costPerUnit?.toFixed(2)}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    Rs {totalValue.toFixed(2)}
+                  </td>
+                </tr>
+              );
+            })}
+
+          </tbody>
+        </table>
+
+      </div>
     </div>
   );
 };
 
-export default InventoryContent;
+export default Inventory;

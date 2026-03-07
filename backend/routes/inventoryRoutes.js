@@ -1,29 +1,17 @@
 import express from "express";
 import {
   getInventory,
-  getInventoryById,
-  createInventory,
-  updateInventory,
   updateStock,
-  restockInventory,
-  deleteInventory,
-  getInventoryReport,
+  restockItem,
+  getInventoryReport
 } from "../controllers/inventoryController.js";
-// import {admin } from "../middleware/auth.js"; // adjust based on your auth
 
 const router = express.Router();
 
-// All routes are protected and admin only
+router.get("/inventory", getInventory);
+router.get("/inventory/report", getInventoryReport);
 
-
-router.route("/").get(getInventory).post(createInventory);
-router.get("/report", getInventoryReport);
-router
-  .route("/:id")
-  .get(getInventoryById)
-  .put(updateInventory)
-  .delete(deleteInventory);
-router.patch("/:id/stock", updateStock);
-router.post("/:id/restock", restockInventory);
+router.patch("/inventory/:id/stock", updateStock);
+router.post("/inventory/:id/restock", restockItem);
 
 export default router;
