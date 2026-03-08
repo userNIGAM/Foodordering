@@ -29,49 +29,86 @@ const Checkout = () => {
     const { name, value } = e.target;
     setCustomerInfo((prev) => ({ ...prev, [name]: value }));
   };
+  const redirectToEsewa = (paymentData) => {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action =
+    "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+
+  Object.keys(paymentData).forEach((key) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = paymentData[key];
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+};
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      const orderData = {
-        customer: customerInfo,
-        items: cart.map((item) => ({
-          menuItemId: typeof item._id === "string" ? item._id : null,
-          name: item.name,
-          price: Number(item.price),
-          quantity: Number(item.quantity),
-        })),
-        total: Number(getCartTotal().toFixed(2)),
-        paymentMethod,
-        status: "pending",
-      };
+  try {
+    const orderData = {
+      customer: customerInfo,
+      items: cart.map((item) => ({
+        menuItemId: typeof item._id === "string" ? item._id : null,
+        name: item.name,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+      })),
+      total: Number(getCartTotal().toFixed(2)),
+      paymentMethod,
+      status: "pending",
+    };
 
-      const response = await api.post("/api/orders", orderData);
+    // 1️⃣ Create order first
+    const response = await api.post("/api/orders", orderData);
 
-      if (response.data.success) {
-        setTimeout(() => {
-          clearCart();
-          navigate("/order-success", {
-            state: {
-              orderId: response.data.orderId,
-              orderTotal: getCartTotal().toFixed(2),
-            },
-          });
-        }, 5000);
+    if (!response.data.success) throw new Error("Order creation failed");
+
+    const orderId = response.data.orderId;
+
+    // 2️⃣ If payment method is eSewa
+    if (paymentMethod === "esewa") {
+      const paymentResponse = await api.post(
+        "/api/payment/esewa/initiate",
+        {
+          amount: orderData.total,
+          orderId: orderId,
+        }
+      );
+
+      if (paymentResponse.data.success) {
+        redirectToEsewa(paymentResponse.data.payment);
       }
-    } catch (error) {
-      console.error("Error placing order:", error);
-      navigate("/order-failed", {
-        state: {
-          error: error.response?.data?.message || "Failed to place order",
-        },
-      });
-    } finally {
-      setIsSubmitting(false);
+
+      return;
     }
-  };
+
+    // 3️⃣ COD flow
+    clearCart();
+    navigate("/order-success", {
+      state: {
+        orderId: orderId,
+        orderTotal: getCartTotal().toFixed(2),
+      },
+    });
+  } catch (error) {
+    console.error("Error placing order:", error);
+
+    navigate("/order-failed", {
+      state: {
+        error: error.response?.data?.message || "Failed to place order",
+      },
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (!cart || cart.length === 0) return <EmptyCartMessage />;
 

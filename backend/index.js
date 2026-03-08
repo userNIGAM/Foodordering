@@ -23,6 +23,8 @@ import menuItemRoutes from "./routes/menuRoutes.js";
 import categoryRoutes from "./routes/categories.js";
 import ratingRoutes from "./routes/ratingRoutes.js";
 import inventoryRoutes from './routes/inventoryRoutes.js';
+import paymentRoutes from "./routes/paymentRoutes.js"
+
 
 dotenv.config();
 
@@ -75,6 +77,9 @@ app.use("/api/ratings", ratingRoutes);
 // app.use("/uploads", express.static("uploads"));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use('/api/admin/inventory', inventoryRoutes);
+
+// Payment routes
+app.use("/api/payment/esewa", paymentRoutes)
 
 // Connect to DB
 ConnectDB();
