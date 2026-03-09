@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Counter from "./Counter.js";
 
 const orderSchema = new mongoose.Schema({
   orderId: {
@@ -210,11 +211,22 @@ const orderSchema = new mongoose.Schema({
 
 // Generate order ID before saving
 orderSchema.pre("save", async function (next) {
-  if (this.isNew) {
-    const count = await mongoose.model("Order").countDocuments();
-    this.orderId = `ORD${String(count + 1).padStart(5, "0")}`;
+  if (!this.isNew) return next();
+   this.updatedAt = Date.now();
+
+
+  try {
+    const counter = await Counter.findOneAndUpdate(
+      { name: "orderId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+
+    this.orderId = `ORD${String(counter.seq).padStart(5, "0")}`;
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 });
 
 export default mongoose.model("Order", orderSchema);
