@@ -1,13 +1,16 @@
 import generateSignature from "../utils/generateSignature.js"
 import dotenv from "dotenv"
+
 dotenv.config()
-// require("dotenv").config()
 
-export function createEsewaPayment(amount) {
+export function createEsewaPayment(amount, orderId) {
 
-  const transaction_uuid = "TXN-" + Date.now()
+  const transaction_uuid = `TXN-${orderId}-${Date.now()}`
 
-  const message = `total_amount=${amount},transaction_uuid=${transaction_uuid},product_code=${process.env.ESEWA_PRODUCT_CODE}`
+  const total_amount = Number(amount)
+
+  const message =
+    `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${process.env.ESEWA_PRODUCT_CODE}`
 
   const signature = generateSignature(
     message,
@@ -15,16 +18,16 @@ export function createEsewaPayment(amount) {
   )
 
   return {
-    amount: amount,
+    amount: total_amount,
     tax_amount: 0,
-    total_amount: amount,
-    transaction_uuid: transaction_uuid,
+    total_amount: total_amount,
+    transaction_uuid,
     product_code: process.env.ESEWA_PRODUCT_CODE,
     product_service_charge: 0,
     product_delivery_charge: 0,
     success_url: process.env.SUCCESS_URL,
     failure_url: process.env.FAILURE_URL,
     signed_field_names: "total_amount,transaction_uuid,product_code",
-    signature: signature
+    signature
   }
 }

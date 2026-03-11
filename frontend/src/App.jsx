@@ -44,6 +44,8 @@ import WishlistCounter from "./Components/WishlistCounter";
 import MainLayout from "./Components/layout/MainLayout";
 import ScrollToTop from "./Components/scroll/ScrollToTop";
 import { ThemeProvider } from "./context/ThemeContext";
+import PaymentSuccess from "./Components/orderForm/checkout/PaymentSuccess";
+import PaymentFailed from "./Components/orderForm/checkout/PaymentFailed";
 
 // ---------------------------
 // Layout wrapper with Navbar + Modals
@@ -213,7 +215,9 @@ function AppRoutes() {
         <Route path="/order-failed" element={<OrderFailed />} />
         <Route path="/order" element={<OrderForm />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
-
+        {/* eSewa payment success and failure routes */}
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-failed" element={<PaymentFailed />} />
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
