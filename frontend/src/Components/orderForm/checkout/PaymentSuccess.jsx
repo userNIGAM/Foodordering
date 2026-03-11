@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import api from "../../services/api";
-import { useCart } from "../../contexts/CartContext";
+import api from "../../../services/api.js";
+import { useCart } from "../../../contexts/CartContext.jsx";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
