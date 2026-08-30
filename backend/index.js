@@ -81,10 +81,18 @@ app.use('/api/admin/inventory', inventoryRoutes);
 // Payment routes
 app.use("/api/payment/esewa", paymentRoutes)
 
-// Connect to DB
-ConnectDB();
+// server start
+const startServer = async () => {
+  try {
+    await ConnectDB();
 
-// ✅ only use httpServer.listen (not app.listen)
-httpServer.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+    httpServer.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

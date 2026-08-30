@@ -1,26 +1,19 @@
-/* eslint-disable no-unused-vars */
 import React, { memo } from "react";
 import { Link } from "react-router-dom";
-import { Star, Heart, Clock } from "lucide-react";
+import { Star, Heart, Clock, StarHalf } from "lucide-react";
 import PropTypes from "prop-types";
 import { useCart } from "../../contexts/CartContext";
 import { useWishlist } from "../../contexts/WishlistContext";
 import Image from "../UI/Image";
-import { StarHalf } from "lucide-react";
+import { getImageUrl } from "../../services/api";
 
 const FoodCard = memo(({ item }) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { name, image, price, ratings } = item;
-  const average = ratings?.average || 0;
-  const count = ratings?.count || 0;
-
-  // const handleImageError = (e) => {
-  //   e.target.src = "/placeholder-food.jpg";
-  // };
 
   const handleWishlist = (e) => {
-    e.preventDefault(); // prevent navigation
+    e.preventDefault();
+
     if (isInWishlist(item._id)) {
       removeFromWishlist(item._id);
     } else {
@@ -28,10 +21,7 @@ const FoodCard = memo(({ item }) => {
     }
   };
 
-  //-----------------------------------------------------------------------------------------//
-  //                             RenderStar Function                                         //
-  //-----------------------------------------------------------------------------------------//
-  const renderStars = (rating) => {
+  const renderStars = (rating = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalf = rating - fullStars >= 0.5;
@@ -56,34 +46,44 @@ const FoodCard = memo(({ item }) => {
           />
         );
       } else {
-        stars.push(<Star key={i} size={14} className="text-gray-300" />);
+        stars.push(
+          <Star
+            key={i}
+            size={14}
+            className="text-gray-300"
+          />
+        );
       }
     }
+
     return stars;
   };
 
-  //-----------------------------------------------------------------------------------------//
-  //                             RenderStar Function                                         //
-  //-----------------------------------------------------------------------------------------//
+  const rating = Number(item.ratings?.average || 0);
+  const price = Number(item.price || 0);
 
   return (
     <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
       <Link to={`/menu/${item._id}`} className="block">
         <div className="relative overflow-hidden">
           <Image
-            src={item.image}
+            src={getImageUrl(item.image)}
             alt={item.name}
             className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
             loading="lazy"
           />
+
           <button
+            type="button"
             onClick={handleWishlist}
             className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md"
           >
             <Heart
               size={16}
               className={
-                isInWishlist(item._id) ? "text-red-500" : "text-gray-600"
+                isInWishlist(item._id)
+                  ? "text-red-500"
+                  : "text-gray-600"
               }
             />
           </button>
@@ -102,17 +102,18 @@ const FoodCard = memo(({ item }) => {
         <h3 className="font-semibold text-lg mb-2 group-hover:text-indigo-600 transition-colors line-clamp-1">
           {item.name}
         </h3>
+
         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
           {item.description}
         </p>
 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center">
-            {/* ⭐ Show stars + average number */}
             <div className="flex items-center">
-              {renderStars(item.ratings?.average || 0)}
+              {renderStars(rating)}
+
               <span className="ml-2 text-sm text-gray-600">
-                {item.ratings?.average?.toFixed(1) || "0.0"}
+                {rating.toFixed(1)}
               </span>
             </div>
 
@@ -123,11 +124,12 @@ const FoodCard = memo(({ item }) => {
           </div>
 
           <span className="text-indigo-600 font-bold text-lg">
-            Rs.{item.price.toFixed(2)}
+            Rs.{price.toFixed(2)}
           </span>
         </div>
 
         <button
+          type="button"
           onClick={(e) => {
             e.preventDefault();
             addToCart(item);
@@ -151,7 +153,10 @@ const FoodGrid = memo(({ items }) => {
   if (!Array.isArray(items) || items.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 text-lg mb-4">No items found</div>
+        <div className="text-gray-500 text-lg mb-4">
+          No items found
+        </div>
+
         <p className="text-gray-400">
           Try adjusting your filters or search terms
         </p>

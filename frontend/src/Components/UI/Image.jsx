@@ -10,9 +10,8 @@ const Image = ({
   ...props
 }) => {
   const handleError = (e) => {
-    if (fallback && e.target.src !== fallback) {
-      e.target.src = fallback;
-    }
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = fallback;
   };
 
   return (

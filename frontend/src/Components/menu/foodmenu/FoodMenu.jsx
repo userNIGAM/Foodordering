@@ -23,8 +23,13 @@ export default function FoodMenu() {
     fetchItems,
   } = useMenuItems();
 
+  console.log("FoodMenu Debug:", {
+    items,
+    filteredItems,
+    loading,
+    error,
+  });
   const totalItems = filteredItems.length;
-
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50">

@@ -1,23 +1,14 @@
-import { Router } from "express"
-
-const router = Router()
-
+import { Router } from "express";
 import {
-
   initiatePayment,
   verifyPayment,
-  paymentFailed
+  paymentFailed,
+} from "../controllers/paymentController.js";
 
-} from "../controllers/paymentController.js"
+const router = Router();
 
+router.post("/initiate", initiatePayment);
+router.post("/verify", verifyPayment);
+router.post("/failed", paymentFailed);
 
-
-router.post("/initiate", initiatePayment)
-
-router.post("/verify", verifyPayment)
-
-router.post("/failed", paymentFailed)
-
-
-
-export default router
+export default router;

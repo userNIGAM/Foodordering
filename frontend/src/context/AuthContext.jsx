@@ -1,4 +1,3 @@
-
 import { createContext, useState, useEffect, useCallback } from "react";
 import api from "../services/api";
 
@@ -9,24 +8,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const checkAuth = useCallback(async () => {
+    const token = localStorage.getItem("token");
+
+    // Don't wake up Render just to check auth
+    // when the user is clearly logged out
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await api.get("/api/auth/me");
+      const res = await api.get("/api/auth/me", {
+        timeout: 10000,
+      });
 
       if (res?.data?.success) {
         setUser(res.data.user);
       } else {
         setUser(null);
+        localStorage.removeItem("token");
       }
     } catch (err) {
       setUser(null);
 
-      if (
-        process.env.NODE_ENV === "development" &&
-        err?.response?.status !== 401
-      ) {
-        console.error("Auth check failed:", err);
+      if (err?.response?.status === 401) {
+        localStorage.removeItem("token");
+      }
+
+      if (err?.response?.status !== 401) {
+        console.error("Auth check failed:", err.response?.data || err.message);
       }
     } finally {
       setLoading(false);
@@ -39,16 +52,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await api.post("/api/auth/login", { email, password });
+      const res = await api.post("/api/auth/login", {
+        email,
+        password,
+      });
 
       if (res?.data?.success) {
-        setUser(res.data.user);
+        const { user, token } = res.data;
 
-        if (res.data.token) {
-          localStorage.setItem("token", res.data.token);
+        if (token) {
+          localStorage.setItem("token", token);
         }
 
-        return { success: true, user: res.data.user };
+        setUser(user);
+
+        return {
+          success: true,
+          user,
+        };
       }
 
       return {
@@ -84,6 +105,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         loading,
         isAdmin,
+        checkAuth,
       }}
     >
       {children}
