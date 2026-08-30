@@ -1,7 +1,6 @@
 // src/services/api.js
 import axios from "axios";
 
-// Define baseURL once
 export const API_URL =
   import.meta.env.VITE_API_BASE ||
   (import.meta.env.MODE === "development"
@@ -11,40 +10,30 @@ export const API_URL =
 const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
-  timeout: 40000,
+  timeout: 15000,
 });
 
-// Add a helper to resolve image URLs
-export const getImageUrl = (path) => {
-  if (!path) return "/placeholder-food.jpg"; // fallback
-  if (path.startsWith("http")) return path; // already full URL
-  return `${API_URL}${path}`;
-};
-// //helper for fetching categories
-// export const getCategories = () => {
-//   return api.get("/api/categories");
-// };
-
-// Interceptors
-api.interceptors.request.use(
-  (config) => config,
-  (error) => Promise.reject(error)
-);
-
+// Add token automatically
 api.interceptors.request.use(
   (config) => {
-    const user = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-    if (user) {
-      const parsedUser = JSON.parse(user);
-      if (parsedUser?.token) {
-        config.headers.Authorization = `Bearer ${parsedUser.token}`;
-      }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
+
+// Helper to resolve image URLs
+export const getImageUrl = (path) => {
+  if (!path) return "/placeholder-food.jpg";
+
+  if (path.startsWith("http")) return path;
+
+  return `${API_URL}${path}`;
+};
 
 export default api;

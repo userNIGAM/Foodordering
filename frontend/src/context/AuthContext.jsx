@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable react-refresh/only-export-components */
 
 import { createContext, useState, useEffect, useCallback } from "react";
 import api from "../services/api";
