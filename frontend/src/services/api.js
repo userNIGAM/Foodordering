@@ -13,7 +13,6 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Add token automatically
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -27,7 +26,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Helper to resolve image URLs
 export const getImageUrl = (path) => {
   if (!path) return "/placeholder-food.jpg";
 
