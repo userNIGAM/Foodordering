@@ -133,6 +133,30 @@ export const confirmOrder = async (req, res) => {
       message: "Chef confirmed your order",
     });
 
+    await sendEmail({
+      to: order.customer.email,
+      subject: `Order ${order.orderId} Confirmed by Kitchen`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Order Confirmed by Kitchen</h2>
+          <p>Hi ${order.customer.name},</p>
+          <p>Your order <strong>${order.orderId}</strong> has been accepted by the kitchen team.</p>
+          <p>We will notify you again once it is prepared.</p>
+        </div>
+      `,
+    });
+
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `Kitchen Confirmed Order ${order.orderId}`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Kitchen Confirmation</h2>
+          <p>Order <strong>${order.orderId}</strong> has been confirmed by ${chef.name}.</p>
+        </div>
+      `,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Order confirmed successfully",
@@ -207,6 +231,29 @@ export const startPreparing = async (req, res) => {
       kitchenId: order.kitchenId,
       customerId: order.customer.email,
       message: "Chef started preparing your order",
+    });
+
+    await sendEmail({
+      to: order.customer.email,
+      subject: `Order ${order.orderId} Is Being Prepared`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Preparing Your Order</h2>
+          <p>Hi ${order.customer.name},</p>
+          <p>Your order <strong>${order.orderId}</strong> is now being prepared.</p>
+        </div>
+      `,
+    });
+
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `Order ${order.orderId} Preparing`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Kitchen Update</h2>
+          <p>Order <strong>${order.orderId}</strong> is now being prepared by ${chef.name}.</p>
+        </div>
+      `,
     });
 
     return res.status(200).json({
@@ -287,7 +334,7 @@ export const markAsPrepared = async (req, res) => {
       { new: true }
     );
 
-    // Send email to admin/delivery team
+    // Send email to admin and delivery team only
     await sendEmail({
       to: process.env.ADMIN_EMAIL || "admin@example.com",
       subject: `Order ${order.orderId} Ready for Delivery`,
@@ -301,6 +348,22 @@ export const markAsPrepared = async (req, res) => {
         </div>
       `,
     });
+
+    if (order.deliveryPersonId) {
+      const deliveryPerson = await User.findById(order.deliveryPersonId);
+      if (deliveryPerson?.email) {
+        await sendEmail({
+          to: deliveryPerson.email,
+          subject: `Order ${order.orderId} Ready for Pickup`,
+          html: `
+            <div style="font-family: Arial, sans-serif;">
+              <h2>Order Ready</h2>
+              <p>Order <strong>${order.orderId}</strong> is ready for pickup from the kitchen.</p>
+            </div>
+          `,
+        });
+      }
+    }
 
     // 📡 Emit socket event
     emitOrderStatusChange(orderId, {

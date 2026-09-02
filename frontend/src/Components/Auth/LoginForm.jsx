@@ -1,14 +1,15 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useContext } from "react";
-import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, LogIn, Loader2 } from "lucide-react";
 import Input from "./Input";
 import SocialButtons from "./SocialButtons";
 import Divider from "./Divider";
 import Card from "./Card";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { roleRedirects } from "./roleRedirects";
+import { showToastSequence } from "./toastQueue";
 
 const LoginForm = ({ onModeChange }) => {
   const [email, setEmail] = useState("");
@@ -22,27 +23,30 @@ const LoginForm = ({ onModeChange }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) return toast.error("Please fill in all fields");
+    const validationErrors = [];
+    if (!email) validationErrors.push({ type: "error", message: "Email is required" });
+    if (!password) validationErrors.push({ type: "error", message: "Password is required" });
+
+    if (validationErrors.length) {
+      showToastSequence(validationErrors);
+      return;
+    }
 
     try {
       setLoading(true);
       const result = await login(email, password);
 
       if (result.success) {
-        toast.success("Logged in successfully");
+        showToastSequence([{ type: "success", message: "Logged in successfully" }]);
 
         // Redirect based on user role
-        if (result.user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/");
-        }
+        navigate(roleRedirects[result.user.role] || "/");
       } else {
-        toast.error(result.message || "Login failed");
+        showToastSequence([{ type: "error", message: result.message || "Login failed" }]);
       }
     } catch (err) {
       console.error("Login error", err);
-      toast.error("Something went wrong");
+      showToastSequence([{ type: "error", message: "Something went wrong" }]);
     } finally {
       setLoading(false);
     }

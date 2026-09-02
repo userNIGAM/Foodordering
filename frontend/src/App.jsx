@@ -11,7 +11,7 @@ import {
 import { CartProvider, useCart } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider, AuthContext } from "./context/AuthContext";
+import { AuthProvider, AuthContext } from "./contexts/AuthContext";
 
 import About from "./Components/pages/About/About";
 import Services from "./Components/pages/services/ServicesSection";
@@ -32,6 +32,7 @@ import AnimatedSection from "./Components/AnimatedSection";
 import AdminDashboard from "./admin/AdminDashboard";
 import KitchenStaffDashboard from "./kitchen/KitchenStaffDashboard";
 import DeliveryStaffDashboard from "./delivery/DeliveryStaffDashboard";
+import { roleRedirects } from "./Components/Auth/roleRedirects";
 import OrderForm from "./Components/orderForm/OrderForm";
 import OrderConfirmation from "./Components/orderForm/OrderConfirmation";
 import Checkout from "./Components/orderForm/checkout/Checkout";
@@ -43,7 +44,7 @@ import WishlistPage from "./Components/WishlistPage";
 import WishlistCounter from "./Components/WishlistCounter";
 import MainLayout from "./Components/layout/MainLayout";
 import ScrollToTop from "./Components/scroll/ScrollToTop";
-import { ThemeProvider } from "./context/ThemeContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import PaymentSuccess from "./Components/orderForm/checkout/PaymentSuccess";
 import PaymentFailed from "./Components/orderForm/checkout/PaymentFailed";
 
@@ -129,7 +130,7 @@ function AppRoutes() {
       {/* Public auth route */}
       <Route
         path="/auth"
-        element={user ? <Navigate to="/" replace /> : <AuthPage />}
+        element={user ? <Navigate to={roleRedirects[user.role] || "/"} replace /> : <AuthPage />}
       />
 
       {/* ---------------------- */}

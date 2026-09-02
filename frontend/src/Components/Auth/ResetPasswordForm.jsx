@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, KeyRound, ArrowLeft, Loader2 } from "lucide-react";
 import Input from "./Input";
 import Card from "./Card";
 import api from "../../services/api";
+import { showToastSequence } from "./toastQueue";
 const ResetPasswordForm = ({ email, onModeChange }) => {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
@@ -15,11 +15,11 @@ const ResetPasswordForm = ({ email, onModeChange }) => {
     e.preventDefault();
 
     if (!otp || otp.length !== 6) {
-      return toast.error("Please enter a valid 6-digit OTP");
+      return showToastSequence([{ type: "error", message: "Please enter a valid 6-digit OTP" }]);
     }
 
     if (password.length < 6) {
-      return toast.error("Password must be at least 6 characters");
+      return showToastSequence([{ type: "error", message: "Password must be at least 6 characters" }]);
     }
 
     try {
@@ -29,11 +29,11 @@ const ResetPasswordForm = ({ email, onModeChange }) => {
         otp,
         password,
       });
-      toast.success("Password reset successfully");
+      showToastSequence([{ type: "success", message: "Password reset successfully" }]);
       onModeChange("login");
     } catch (err) {
       const msg = err?.response?.data?.message || "Something went wrong";
-      toast.error(msg);
+      showToastSequence([{ type: "error", message: msg }]);
     } finally {
       setLoading(false);
     }

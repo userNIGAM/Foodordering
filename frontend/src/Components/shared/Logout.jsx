@@ -17,6 +17,8 @@ const Logout = ({ className = "" }) => {
 
       // Clear any stored user/admin info
       localStorage.removeItem("admin");
+      localStorage.removeItem("chef");
+      localStorage.removeItem("delivery");
       // Redirect to login page
       navigate("/auth");
     } catch (err) {

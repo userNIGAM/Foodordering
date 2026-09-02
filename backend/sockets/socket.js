@@ -58,7 +58,7 @@ export function initSocket(server) {
     // ═══════════════════════════════════════════════════════════════
     // 👨‍💼 ADMIN ROOM MANAGEMENT
     // ═══════════════════════════════════════════════════════════════
-    if (socket.userRole === "admin") {
+    if (socket.userRole === "admin" || socket.userRole === "superadmin") {
       socket.join("admin");
       console.log(`Admin ${socket.userId} joined admin room`);
     }

@@ -1,4 +1,3 @@
-// backend/seedCategories.js
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Category from "../models/Category.js";
@@ -8,7 +7,6 @@ dotenv.config();
 ConnectDB();
 
 const categories = [
-  // Main categories
   { name: "Rice" },
   { name: "Fast Food" },
   { name: "Lunch" },
@@ -18,8 +16,6 @@ const categories = [
   { name: "Beverages" },
   { name: "Snacks" },
   { name: "Desserts" },
-
-  // Subcategories/examples
   { name: "Fried Rice", parent: "Rice" },
   { name: "Biryani", parent: "Rice" },
   { name: "Dal Bhat", parent: "Rice" },
@@ -41,11 +37,9 @@ const categories = [
 
 const seedCategories = async () => {
   try {
-    // Clear existing categories
     await Category.deleteMany({});
     console.log("Existing categories cleared.");
 
-    // Insert new categories
     await Category.insertMany(categories);
     console.log("Categories seeded successfully!");
 

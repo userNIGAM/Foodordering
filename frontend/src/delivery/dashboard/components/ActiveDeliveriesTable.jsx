@@ -1,84 +1,78 @@
-import DeliveryActions from "./DeliveryActions";
-import { getStatusColor } from "../utils/statusColors";
+import React, { useContext, useState } from "react";
+import { User, LogOut } from "lucide-react";
+import { AuthContext } from "../../../contexts/AuthContext";
 
-const ActiveDeliveriesTable = ({ deliveries, actions }) => {
-  if (deliveries.length === 0) {
-    return (
-      <p className="text-center text-gray-500 py-10">
-        No active deliveries
-      </p>
-    );
-  }
+const ActiveDeliveriesTable = () => {
+  const { user, logout } = useContext(AuthContext);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    try {
+      setIsLoggingOut(true);
+
+      await logout();
+
+      // Redirect after successful logout
+      window.location.href = "/auth";
+    } catch (error) {
+      console.error("Logout failed:", error);
+
+      // Still redirect if something unexpected happens
+      window.location.href = "/auth";
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
-    <div className="bg-white shadow-md rounded-xl mb-6">
+    <div className="relative">
+      {/* User section */}
+      <div className="group relative inline-flex items-center gap-2 cursor-pointer">
+        {/* Avatar */}
+        <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+          {user?.name
+            ? user.name.charAt(0).toUpperCase()
+            : user?.email
+              ? user.email.charAt(0).toUpperCase()
+              : "U"}
+        </div>
 
-      {/* Header */}
-      <div className="border-b px-6 py-4">
-        <h5 className="text-lg font-semibold flex items-center gap-2">
-          📦 Active Deliveries
-        </h5>
-      </div>
+        {/* User name */}
+        <div className="hidden sm:block">
+          <p className="text-sm font-medium text-gray-900">
+            {user?.name || "User"}
+          </p>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+          <p className="text-xs text-gray-500">{user?.email || ""}</p>
+        </div>
 
-        <table className="min-w-full text-sm text-left">
+        {/* Hover menu */}
+        <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+          {/* Profile */}
+          <button
+            type="button"
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            <User className="w-4 h-4" />
+            Profile
+          </button>
 
-          <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
-            <tr>
-              <th className="px-6 py-3">Order</th>
-              <th className="px-6 py-3">Customer</th>
-              <th className="px-6 py-3">Address</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Amount</th>
-              <th className="px-6 py-3">Actions</th>
-            </tr>
-          </thead>
+          <div className="border-t border-gray-100" />
 
-          <tbody className="divide-y">
+          {/* Logout */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+          >
+            <LogOut className="w-4 h-4" />
 
-            {deliveries.map((delivery) => (
-              <tr
-                key={delivery._id}
-                className="hover:bg-gray-50 transition"
-              >
-                <td className="px-6 py-4 font-medium">
-                  {delivery.orderId}
-                </td>
-
-                <td className="px-6 py-4">
-                  {delivery.customer?.name}
-                </td>
-
-                <td className="px-6 py-4">
-                  {delivery.customer?.address}
-                </td>
-
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                      delivery.status
-                    )}`}
-                  >
-                    {delivery.status}
-                  </span>
-                </td>
-
-                <td className="px-6 py-4 font-medium">
-                  ₹{delivery.total}
-                </td>
-
-                <td className="px-6 py-4">
-                  <DeliveryActions delivery={delivery} actions={actions} />
-                </td>
-              </tr>
-            ))}
-
-          </tbody>
-
-        </table>
-
+            {isLoggingOut ? "Logging out..." : "Logout"}
+          </button>
+        </div>
       </div>
     </div>
   );

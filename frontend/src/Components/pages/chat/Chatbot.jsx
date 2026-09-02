@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { MessageCircle, X, Send, Bot } from "lucide-react";
-import { AuthContext } from "../../../context/AuthContext";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateBotResponse } from "./conversationService";
 const Chatbot = () => {

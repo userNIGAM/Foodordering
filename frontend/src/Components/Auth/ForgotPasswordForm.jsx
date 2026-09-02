@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { Mail, KeyRound, ArrowLeft, Loader2 } from "lucide-react";
 import Input from "./Input";
 import Card from "./Card";
 import api from "../../services/api";
+import { showToastSequence } from "./toastQueue";
 
 const ForgotPasswordForm = ({ onModeChange }) => {
   const [email, setEmail] = useState("");
@@ -14,17 +14,17 @@ const ForgotPasswordForm = ({ onModeChange }) => {
     e.preventDefault();
 
     if (!email) {
-      return toast.error("Please enter your email");
+      return showToastSequence([{ type: "error", message: "Please enter your email" }]);
     }
 
     try {
       setLoading(true);
       const { data } = await api.post("api/auth/forgot-password", { email });
-      toast.success("Password reset OTP sent to your email");
+      showToastSequence([{ type: "success", message: "Password reset OTP sent to your email" }]);
       onModeChange("reset", email);
     } catch (err) {
       const msg = err?.response?.data?.message || "Something went wrong";
-      toast.error(msg);
+      showToastSequence([{ type: "error", message: msg }]);
     } finally {
       setLoading(false);
     }

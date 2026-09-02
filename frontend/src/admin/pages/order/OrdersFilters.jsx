@@ -28,9 +28,14 @@ const OrdersFilters = ({ filter, setFilter, searchTerm, setSearchTerm }) => {
       >
         <option value="all">All Statuses</option>
         <option value="pending">Pending</option>
+        <option value="verified">Verified</option>
+        <option value="assigned_to_kitchen">Assigned to Kitchen</option>
         <option value="confirmed">Confirmed</option>
         <option value="preparing">Preparing</option>
-        <option value="out for delivery">Out for Delivery</option>
+        <option value="prepared">Prepared</option>
+        <option value="assigned_to_delivery">Assigned to Delivery</option>
+        <option value="picked_up">Picked Up</option>
+        <option value="out_for_delivery">Out for Delivery</option>
         <option value="delivered">Delivered</option>
         <option value="cancelled">Cancelled</option>
       </select>

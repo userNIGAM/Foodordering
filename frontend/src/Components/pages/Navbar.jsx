@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
 import Logo from "./navbar/Logo";
 import DesktopNav from "./navbar/DesktopNav";
 import MobileNav from "./navbar/MobileNav";
 import ProfileButton from "./navbar/ProfileButton";
-import CartButton from "./navbar/CartButton";
 
 const Navbar = ({
   onProfileClick,
@@ -17,16 +16,33 @@ const Navbar = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
   const location = useLocation();
 
+  // ==========================================================
+  // HANDLE SCROLL
+  // ==========================================================
+
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
+  // ==========================================================
+  // CLOSE MOBILE NAV
+  // ==========================================================
+
   const handleNavClick = () => {
-    if (isOpen) setIsOpen(false);
+    if (isOpen) {
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -39,25 +55,42 @@ const Navbar = ({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* ==================================================
+              LOGO
+          =================================================== */}
+
           <Logo />
 
-          {/* Desktop Nav */}
+          {/* ==================================================
+              DESKTOP NAVIGATION
+          =================================================== */}
+
           <DesktopNav
             location={location}
             onCartClick={onCartClick}
             cartItemsCount={cartItemsCount}
           />
 
-          {/* Profile Btn (desktop) */}
+          {/* ==================================================
+              DESKTOP PROFILE
+          =================================================== */}
+
           <div className="hidden md:block">
-            <ProfileButton onClick={onProfileClick} />
+            <ProfileButton onClick={onProfileClick} user={user} />
           </div>
 
-          {/* Mobile menu button */}
+          {/* ==================================================
+              MOBILE MENU BUTTON
+          =================================================== */}
+
           <div className="flex md:hidden">
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              type="button"
+              onClick={() => setIsOpen((previous) => !previous)}
+              aria-label={
+                isOpen ? "Close navigation menu" : "Open navigation menu"
+              }
+              aria-expanded={isOpen}
               className="inline-flex items-center justify-center p-2 rounded-md text-slate-700 hover:text-indigo-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
             >
               {isOpen ? (
@@ -70,7 +103,10 @@ const Navbar = ({
         </div>
       </div>
 
-      {/* Mobile Nav */}
+      {/* ======================================================
+          MOBILE NAVIGATION
+      ======================================================= */}
+
       <MobileNav
         isOpen={isOpen}
         location={location}

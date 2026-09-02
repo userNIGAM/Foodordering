@@ -3,6 +3,10 @@ import User from "../models/User.js";
 import MenuItem from "../models/MenuItem.js";
 import Inventory from "../models/Inventory.js";
 import nodemailer from "nodemailer";
+import { sendEmail } from "../utils/mailer.js";
+
+const normalizeOrderStatus = (status) =>
+  status === "out for delivery" ? "out_for_delivery" : status;
 
 export const getDashboardData = async (req, res) => {
   try {
@@ -227,14 +231,53 @@ export const getAllOrders = async (req, res) => {
 };
 export const updateOrderStatus = async (req, res) => {
   try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
+    const requestedStatus = normalizeOrderStatus(req.body.status);
+    const validStatuses = new Set([
+      "pending",
+      "verified",
+      "confirmed",
+      "assigned_to_kitchen",
+      "preparing",
+      "prepared",
+      "assigned_to_delivery",
+      "picked_up",
+      "out_for_delivery",
+      "delivered",
+      "cancelled",
+    ]);
+
+    if (!validStatuses.has(requestedStatus)) {
+      return res.status(400).json({ success: false, message: "Invalid order status" });
+    }
+
+    const order = await Order.findById(req.params.id);
 
     if (!order)
       return res.status(404).json({ success: false, message: "Not found" });
+
+    const previousStatus = order.status;
+    order.status = requestedStatus;
+
+    if (requestedStatus === "confirmed") {
+      order.verificationStatus = "verified";
+      order.verifiedBy = req.user?._id || null;
+    }
+
+    if (requestedStatus === "cancelled") {
+      order.verificationStatus = "rejected";
+    }
+
+    order.timeline = order.timeline || [];
+    order.timeline.push({
+      event: `admin_${requestedStatus}`,
+      changedBy: req.user?._id || null,
+      changedByRole: "admin",
+      timestamp: new Date(),
+      previousStatus,
+      notes: `Admin changed order status to ${requestedStatus}`,
+    });
+
+    await order.save();
 
     // Send status update email asynchronously
     if (order.customer?.email) {
@@ -247,42 +290,63 @@ export const updateOrderStatus = async (req, res) => {
       });
 
       const statusMessages = {
-        pending: "Your order has been received and is pending confirmation.",
-        confirmed: "Your order has been confirmed! We're preparing it now.",
+        pending: "Your order has been received and is awaiting confirmation.",
+        verified: "Your order has been reviewed by the admin team.",
+        confirmed: "Your order has been confirmed and is being prepared.",
+        assigned_to_kitchen: "Your order has been sent to the kitchen.",
         preparing: "Your order is being prepared in our kitchen.",
-        "out for delivery": "Your order is on its way to you!",
+        prepared: "Your order is ready for delivery assignment.",
+        assigned_to_delivery: "A delivery person has been assigned to your order.",
+        picked_up: "Your order has been picked up from the kitchen.",
+        out_for_delivery: "Your order is on its way to you!",
         delivered: "Your order has been delivered. Thank you for ordering!",
         cancelled: "Your order has been cancelled.",
       };
 
-      const message = statusMessages[order.status] || `Your order status has been updated to: ${order.status}`;
+      const message = statusMessages[requestedStatus] || `Your order status has been updated to: ${requestedStatus}`;
+      const html = `
+        <h2>Order Status Update</h2>
+        <p>Hi ${order.customer.name},</p>
+        <p>${message}</p>
+        <p><strong>Order ID:</strong> ${order.orderId}</p>
+        <p><strong>Status:</strong> ${requestedStatus.toUpperCase()}</p>
+        <p><strong>Total Amount:</strong> Rs.${order.total?.toFixed(2) || 0}</p>
+        <br/>
+        <p>Thank you for your order!</p>
+        <p>Best regards,<br/>Food Ordering Team</p>
+      `;
 
-      // Send email to customer
-      transporter.sendMail(
-        {
+      const adminRecipients = await User.find({ role: { $in: ["admin", "superadmin"] } }).select("name email role");
+      const chefRecipients = await User.find({ role: "chef", status: { $in: ["approved", "active", "on_break"] } }).select("name email role");
+      const deliveryRecipients = await User.find({ role: "delivery_person", status: { $in: ["approved", "active", "on_break"] } }).select("name email role");
+
+      const sendMail = (to, subject) =>
+        transporter.sendMail({
           from: `"Food Ordering" <${process.env.EMAIL_USER}>`,
-          to: order.customer.email,
-          subject: `Order ${order.orderId} - Status Update`,
-          html: `
-            <h2>Order Status Update</h2>
-            <p>Hi ${order.customer.name},</p>
-            <p>${message}</p>
-            <p><strong>Order ID:</strong> ${order.orderId}</p>
-            <p><strong>Status:</strong> ${order.status.toUpperCase()}</p>
-            <p><strong>Total Amount:</strong> Rs.${order.total?.toFixed(2) || 0}</p>
-            <br/>
-            <p>Thank you for your order!</p>
-            <p>Best regards,<br/>Food Ordering Team</p>
-          `,
-        },
-        (error) => {
-          if (error) {
-            console.error("Error sending status update email:", error);
-          } else {
-            console.log("Status update email sent successfully");
-          }
-        }
-      );
+          to,
+          subject,
+          html,
+        });
+
+      await sendMail(order.customer.email, `Order ${order.orderId} - Status Update`);
+
+      if (["pending", "verified", "confirmed", "assigned_to_kitchen"].includes(requestedStatus)) {
+        await Promise.all([
+          ...adminRecipients.map((admin) => sendMail(admin.email, `Order ${order.orderId} - Admin Update`)),
+          ...chefRecipients.map((chef) => sendMail(chef.email, `Order ${order.orderId} - Kitchen Update`)),
+          ...deliveryRecipients.map((delivery) => sendMail(delivery.email, `Order ${order.orderId} - Delivery Update`)),
+        ]);
+      } else if (requestedStatus === "prepared") {
+        await Promise.all([
+          ...adminRecipients.map((admin) => sendMail(admin.email, `Order ${order.orderId} Ready for Delivery`)),
+          ...deliveryRecipients.map((delivery) => sendMail(delivery.email, `Order ${order.orderId} Ready for Pickup`)),
+        ]);
+      } else if (["assigned_to_delivery", "picked_up", "out_for_delivery", "delivered", "cancelled"].includes(requestedStatus)) {
+        await Promise.all([
+          ...adminRecipients.map((admin) => sendMail(admin.email, `Order ${order.orderId} - Delivery Update`)),
+          ...deliveryRecipients.map((delivery) => sendMail(delivery.email, `Order ${order.orderId} - Delivery Update`)),
+        ]);
+      }
     }
 
     res.json({ success: true, data: order });
@@ -604,6 +668,20 @@ export const createStaff = async (req, res) => {
     });
 
     await user.save();
+
+    await sendEmail({
+      to: user.email,
+      subject: `Your ${role} account has been created`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Welcome to Food Ordering</h2>
+          <p>Hi ${user.name},</p>
+          <p>Your <strong>${role}</strong> account has been created by the admin team.</p>
+          <p>You can now log in using your email address.</p>
+          <p>If you need to reset your password, use the forgot password flow.</p>
+        </div>
+      `,
+    });
 
     res.status(201).json({
       message: `${role} account created successfully`,

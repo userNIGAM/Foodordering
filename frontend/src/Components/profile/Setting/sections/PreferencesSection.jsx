@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import ToggleSwitch from "../ui/ToggleSwitch";
 import SelectField from "../ui/SelectField";
-import { ThemeContext } from "../../../../context/ThemeContext";
+import { ThemeContext } from "../../../../contexts/ThemeContext";
 
 export default function PreferencesSection({ data, onChange, isEditing }) {
   const { theme, toggleTheme } = useContext(ThemeContext);

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { KeyRound, ArrowLeft, Loader2 } from "lucide-react";
 import Input from "./Input";
 import Card from "./Card";
 import api from "../../services/api";
+import { showToastSequence } from "./toastQueue";
 
 const VerifyEmailForm = ({ email, onModeChange }) => {
   const [otp, setOtp] = useState("");
@@ -14,7 +14,7 @@ const VerifyEmailForm = ({ email, onModeChange }) => {
     e.preventDefault();
 
     if (!otp || otp.length !== 6) {
-      return toast.error("Please enter a valid 6-digit OTP");
+      return showToastSequence([{ type: "error", message: "Please enter a valid 6-digit OTP" }]);
     }
 
     try {
@@ -23,11 +23,11 @@ const VerifyEmailForm = ({ email, onModeChange }) => {
         email,
         otp,
       });
-      toast.success("Email verified successfully");
+      showToastSequence([{ type: "success", message: "Email verified successfully" }]);
       onModeChange("login");
     } catch (err) {
       const msg = err?.response?.data?.message || "Something went wrong";
-      toast.error(msg);
+      showToastSequence([{ type: "error", message: msg }]);
     } finally {
       setLoading(false);
     }
@@ -37,11 +37,11 @@ const VerifyEmailForm = ({ email, onModeChange }) => {
     try {
       setLoading(true);
       await api.post("api/auth/resend-verification", { email });
-      toast.success("Verification OTP sent. Check your inbox.");
+      showToastSequence([{ type: "success", message: "Verification OTP sent. Check your inbox." }]);
     } catch (err) {
       const msg =
         err?.response?.data?.message || "Failed to resend verification";
-      toast.error(msg);
+      showToastSequence([{ type: "error", message: msg }]);
     } finally {
       setLoading(false);
     }

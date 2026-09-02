@@ -12,7 +12,8 @@ import AuthHeader from "./AuthHeader";
 import AuthSidebar from "./AuthSidebar";
 import GradientBackdrop from "./GradientBackdrop";
 
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../contexts/AuthContext";
+import { roleRedirects } from "./roleRedirects";
 
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
@@ -24,11 +25,7 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/");
-      }
+      navigate(roleRedirects[user.role] || "/", { replace: true });
     }
   }, [user, loading, navigate]);
 

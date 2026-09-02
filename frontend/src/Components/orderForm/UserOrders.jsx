@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../contexts/AuthContext";
 import { ChevronDown, ChevronUp, Package, Clock, CheckCircle, AlertCircle } from "lucide-react";
 
 const UserOrders = () => {

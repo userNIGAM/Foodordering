@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../../services/api.js";
 import { useCart } from "../../../contexts/CartContext.jsx";
+import { showToastSequence } from "../../../utils/toastQueue";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -51,6 +52,7 @@ const PaymentSuccess = () => {
         if (response.data.success) {
           setMessage("Payment successful! Redirecting...");
           clearCart();
+          showToastSequence([{ type: "success", message: "Payment verified successfully" }]);
           navigate("/order-success", {
             replace: true,
             state: {
@@ -60,6 +62,7 @@ const PaymentSuccess = () => {
           });
         } else {
           setMessage("Verification failed.");
+          showToastSequence([{ type: "error", message: "Payment verification failed" }]);
           navigate("/order-failed", {
             replace: true,
             state: { error: "Payment verification failed" },
@@ -68,6 +71,7 @@ const PaymentSuccess = () => {
       } catch (error) {
         console.error("Payment verification error:", error);
         setMessage("An error occurred. Redirecting...");
+        showToastSequence([{ type: "error", message: error.response?.data?.message || error.message || "Payment verification failed" }]);
         navigate("/order-failed", {
           replace: true,
           state: {

@@ -138,6 +138,17 @@ export const pickupOrder = async (req, res) => {
       `,
     });
 
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `Order ${order.orderId} Picked Up`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Delivery Update</h2>
+          <p>Order <strong>${order.orderId}</strong> has been picked up from the kitchen.</p>
+        </div>
+      `,
+    });
+
     // 📡 Emit socket event
     emitOrderStatusChange(orderId, {
       orderId: order._id,
@@ -230,6 +241,17 @@ export const markInTransit = async (req, res) => {
           <p>Hi ${order.customer.name},</p>
           <p>Your order is on the way! We'll be there soon.</p>
           <p>You can track your order in real-time.</p>
+        </div>
+      `,
+    });
+
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `Order ${order.orderId} Out for Delivery`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Out for Delivery</h2>
+          <p>Order <strong>${order.orderId}</strong> is now out for delivery.</p>
         </div>
       `,
     });
@@ -408,6 +430,17 @@ export const deliverOrder = async (req, res) => {
       `,
     });
 
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `Order ${order.orderId} Delivered`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Order Delivered</h2>
+          <p>Order <strong>${order.orderId}</strong> has been delivered successfully.</p>
+        </div>
+      `,
+    });
+
     // 📡 Emit socket event
     emitOrderStatusChange(orderId, {
       orderId: order._id,
@@ -491,6 +524,18 @@ export const cancelDelivery = async (req, res) => {
         `,
       });
     }
+
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || "admin@example.com",
+      subject: `Order ${order.orderId} Cancelled`,
+      html: `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Order Cancelled</h2>
+          <p>Order <strong>${order.orderId}</strong> has been cancelled.</p>
+          <p>Reason: ${reason || "Not specified"}</p>
+        </div>
+      `,
+    });
 
     // 📡 Emit socket event
     emitOrderStatusChange(orderId, {

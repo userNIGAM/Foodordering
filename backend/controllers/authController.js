@@ -171,6 +171,16 @@ export const login = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
+    // Block accounts awaiting admin approval or rejected
+    if (
+      ["chef", "delivery_person"].includes(user.role) &&
+      ["pending", "rejected"].includes(user.status)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is awaiting admin approval",
+      });
+    }
     // Create JWT token regardless of verification status
     const token = signJWT({ id: user._id, role: user.role });
     setAuthCookie(res, token);

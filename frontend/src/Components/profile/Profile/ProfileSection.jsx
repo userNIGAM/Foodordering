@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../../../context/AuthContext";
+import { AuthContext } from "../../../contexts/AuthContext";
 import { getUserProfile } from "../../../services/userService";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";

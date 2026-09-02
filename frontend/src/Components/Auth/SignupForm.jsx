@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import {
   Eye,
@@ -15,6 +14,7 @@ import SocialButtons from "./SocialButtons";
 import Divider from "./Divider";
 import Card from "./Card";
 import api from "../../services/api";
+import { showToastSequence } from "./toastQueue";
 
 const SignupForm = ({ onModeChange }) => {
   const [name, setName] = useState("");
@@ -26,12 +26,17 @@ const SignupForm = ({ onModeChange }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !password) {
-      return toast.error("Please fill in all fields");
+    const validationErrors = [];
+    if (!name) validationErrors.push({ type: "error", message: "Name is required" });
+    if (!email) validationErrors.push({ type: "error", message: "Email is required" });
+    if (!password) validationErrors.push({ type: "error", message: "Password is required" });
+    if (password && password.length < 6) {
+      validationErrors.push({ type: "error", message: "Password must be at least 6 characters" });
     }
 
-    if (password.length < 6) {
-      return toast.error("Password must be at least 6 characters");
+    if (validationErrors.length) {
+      showToastSequence(validationErrors);
+      return;
     }
 
     try {
@@ -41,11 +46,11 @@ const SignupForm = ({ onModeChange }) => {
         email,
         password,
       });
-      toast.success("We sent a verification OTP to your email");
+      showToastSequence([{ type: "success", message: "We sent a verification OTP to your email" }]);
       onModeChange("verify", email);
     } catch (err) {
       const msg = err?.response?.data?.message || "Something went wrong";
-      toast.error(msg);
+      showToastSequence([{ type: "error", message: msg }]);
     } finally {
       setLoading(false);
     }

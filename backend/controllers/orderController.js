@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import { updateInventoryOnOrder } from "../middleware/inventoryMiddleware.js";
 import { protect } from "../middleware/auth.js";
 import { emitOrderAssignedToChef } from "../utils/socketEvents.js";
+import { emitOrderStatusChange } from "../utils/socketEvents.js";
 
 /**
  * Find an available chef with lowest current capacity
@@ -124,148 +125,93 @@ export const placeOrder = async (req, res) => {
     // Update inventory based on ordered items
     await updateInventoryOnOrder(order);
 
-    // Auto-verify order
-    order.status = "verified";
-    order.verificationStatus = "verified";
-    order.estimatedPrepTime = 30;
     order.timeline.push({
-      event: "order_verified",
-      changedByRole: "system",
+      event: "order_created",
+      changedByRole: userId ? "user" : "system",
       timestamp: new Date(),
-      notes: "Order verified automatically",
-      previousStatus: "pending",
+      notes: "Order created and waiting for admin confirmation",
+      previousStatus: null,
     });
 
-    // Auto-assign to available chef
-    const availableChef = await findAvailableChef();
-    const kitchen = await getDefaultKitchen();
+    await OrderTimeline.create({
+      orderId: order._id,
+      events: [
+        {
+          event: "order_created",
+          status: "pending",
+          timestamp: order.createdAt,
+          notes: "Order created and waiting for admin confirmation",
+        },
+      ],
+    });
 
-    if (availableChef && kitchen) {
-      order.status = "assigned_to_kitchen";
-      order.chefId = availableChef._id;
-      order.kitchenId = kitchen._id;
-      order.timeline.push({
-        event: "assigned_to_kitchen",
-        changedByRole: "system",
-        timestamp: new Date(),
-        notes: `Auto-assigned to Chef ${availableChef.name}`,
-        previousStatus: "verified",
-      });
+    // Notify admin, chefs, and delivery staff about the incoming order
+    const adminRecipients = await User.find({
+      role: { $in: ["admin", "superadmin"] },
+    }).select("name email role");
 
-      await order.save();
+    const staffRecipients = await User.find({
+      role: { $in: ["chef", "delivery_person"] },
+      status: { $in: ["approved", "active", "on_break"] },
+    }).select("name email role");
 
-      // Create chef assignment
-      await ChefAssignment.create({
-        orderId: order._id,
-        chefId: availableChef._id,
-        kitchenId: kitchen._id,
-        assignedBy: "system",
-        estimatedPrepTime: 30,
-      });
+    const incomingOrderHtml = (label, personName) => `
+      <div style="font-family: Arial, sans-serif;">
+        <h2>${label}</h2>
+        <p>Hi ${personName},</p>
+        <p>Order <strong>${order.orderId}</strong> has been placed and is waiting for admin confirmation.</p>
+        <p><strong>Customer:</strong> ${customer.name}</p>
+        <p><strong>Items:</strong> ${order.items.map((i) => `${i.name} x${i.quantity}`).join(", ")}</p>
+        <p><strong>Total:</strong> ₹${calculatedTotal.toFixed(2)}</p>
+        <p><strong>Status:</strong> pending</p>
+      </div>
+    `;
 
-      // Create timeline record
-      await OrderTimeline.create({
-        orderId: order._id,
-        events: [
-          {
-            event: "order_created",
-            status: "pending",
-            timestamp: order.createdAt,
-          },
-          {
-            event: "order_verified",
-            status: "verified",
-            timestamp: new Date(),
-            notes: "Order verified automatically",
-          },
-          {
-            event: "assigned_to_kitchen",
-            status: "assigned_to_kitchen",
-            changedBy: {
-              name: "System",
-              role: "system",
-            },
-            timestamp: new Date(),
-            metadata: {
-              chefId: availableChef._id,
-              kitchenId: kitchen._id,
-            },
-          },
-        ],
-      });
+    await Promise.all([
+      ...adminRecipients.map((admin) =>
+        sendOrderEmail(
+          admin.email,
+          `New Order Received - ${order.orderId}`,
+          incomingOrderHtml("New Order Received", admin.name || "Admin")
+        )
+      ),
+      ...staffRecipients.map((staff) =>
+        sendOrderEmail(
+          staff.email,
+          `Incoming Order Alert - ${order.orderId}`,
+          incomingOrderHtml(
+            staff.role === "chef" ? "Incoming Order for Kitchen" : "Incoming Delivery Alert",
+            staff.name || "Team Member"
+          )
+        )
+      ),
+    ]);
 
-      // Send notification to chef
-      await sendOrderEmail(
-        availableChef.email,
-        `New Order Assigned - ${order.orderId}`,
-        `
-          <div style="font-family: Arial, sans-serif;">
-            <h2>New Order Assigned</h2>
-            <p>Hi ${availableChef.name},</p>
-            <p>New order <strong>${order.orderId}</strong> has been assigned to you.</p>
-            <p><strong>Customer:</strong> ${customer.name}</p>
-            <p><strong>Items:</strong> ${order.items.map((i) => `${i.name} x${i.quantity}`).join(", ")}</p>
-            <p><strong>Total:</strong> ₹${calculatedTotal.toFixed(2)}</p>
-            <p><strong>Estimated Prep Time:</strong> 30 minutes</p>
-            <p>Please confirm the order in your kitchen dashboard.</p>
-          </div>
-        `
-      );
+    // Notify customer and admins that the order is pending
+    await sendOrderEmail(
+      customer.email,
+      "Order Received - Food Ordering",
+      `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Order Received!</h2>
+          <p>Hi ${customer.name},</p>
+          <p>Your order <strong>${order.orderId}</strong> has been received and is waiting for admin confirmation.</p>
+          <p><strong>Total Amount:</strong> ₹${calculatedTotal.toFixed(2)}</p>
+          <p><strong>Payment Method:</strong> ${paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod}</p>
+          <p>We will notify you as it moves through the kitchen and delivery stages.</p>
+        </div>
+      `
+    );
 
-      // Emit socket event to notify chef
-      try {
-        emitOrderAssignedToChef(order._id, availableChef._id, {
-          orderId: order._id,
-          chefId: availableChef._id,
-          chefName: availableChef.name,
-          kitchenId: kitchen._id,
-          items: order.items,
-          estimatedPrepTime: 30,
-          message: `New order ${order.orderId} assigned to you`,
-        });
-      } catch (err) {
-        console.log("Socket emission completed or skipped");
-      }
-    } else {
-      await order.save();
-    }
+    emitOrderStatusChange(order._id, {
+      status: "pending",
+      customerId: customer.email,
+      message: "Your order has been received and is waiting for admin confirmation.",
+      estimatedTime: 30,
+    });
 
     // Respond with order confirmation
     res.status(201).json({ success: true, orderId: order.orderId });
-
-    // Send customer confirmation email asynchronously
-    await sendOrderEmail(
-      customer.email,
-      "Order Confirmed - Food Ordering",
-      `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>Order Confirmed!</h2>
-          <p>Hi ${customer.name},</p>
-          <p>Your order <strong>${order.orderId}</strong> has been received and is being prepared.</p>
-          <p><strong>Total Amount:</strong> ₹${calculatedTotal.toFixed(2)}</p>
-          <p><strong>Payment Method:</strong> ${paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod}</p>
-          <p>Estimated preparation time: 30 minutes</p>
-          <p>We will notify you once your order is ready for delivery.</p>
-          <p>Thank you for your order!</p>
-        </div>
-      `
-    );
-
-    // Send admin notification
-    await sendOrderEmail(
-      process.env.ADMIN_EMAIL,
-      `New Order Received - ${order.orderId}`,
-      `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>New Order Alert</h2>
-          <p>New order from ${customer.name}</p>
-          <p><strong>Order ID:</strong> ${order.orderId}</p>
-          <p><strong>Total:</strong> ₹${calculatedTotal.toFixed(2)}</p>
-          <p><strong>Status:</strong> ${order.status}</p>
-          ${availableChef ? `<p><strong>Assigned Chef:</strong> ${availableChef.name}</p>` : ""}
-        </div>
-      `
-    );
   } catch (err) {
     console.error("Order Error:", err);
     res.status(500).json({ success: false, message: "Order failed: " + err.message });

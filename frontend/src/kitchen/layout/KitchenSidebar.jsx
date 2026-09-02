@@ -9,7 +9,7 @@ import {
   Search,
   ChefHat,
 } from "lucide-react";
-import Logout from "../../logout/Logout";
+import Logout from "../../Components/shared/Logout";
 
 const KitchenSidebar = ({
   activeSection,

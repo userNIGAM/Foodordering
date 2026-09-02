@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../../../services/api";
+import { showToastSequence } from "../../../utils/toastQueue";
 
 export default function CreateStaff() {
   const [form, setForm] = useState({
@@ -83,6 +84,7 @@ export default function CreateStaff() {
       const res = await api.post("/api/admin/staff", form);
 
       setMessage(res.data.message);
+      showToastSequence([{ type: "success", message: res.data.message || "Staff account created successfully" }]);
 
       setForm({
         name: "",
@@ -95,7 +97,9 @@ export default function CreateStaff() {
       });
 
     } catch (err) {
-      setMessage(err.response?.data?.message || "Something went wrong");
+      const msg = err.response?.data?.message || "Something went wrong";
+      setMessage(msg);
+      showToastSequence([{ type: "error", message: msg }]);
     } finally {
       setLoading(false);
     }

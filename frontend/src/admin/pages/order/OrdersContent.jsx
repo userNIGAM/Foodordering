@@ -5,6 +5,7 @@ import OrdersFilters from "./OrdersFilters";
 import OrdersTable from "./OrdersTable";
 import Alerts from "./Alerts";
 import Loader from "./Loader";
+import { showToastSequence } from "../../../utils/toastQueue";
 
 const OrdersContent = () => {
   const [orders, setOrders] = useState([]);
@@ -27,9 +28,12 @@ const OrdersContent = () => {
         setOrders(res.data.data);
       } else {
         setError("Failed to load orders: Invalid response format");
+        showToastSequence([{ type: "error", message: "Failed to load orders: Invalid response format" }]);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Error fetching orders");
+      const msg = err.response?.data?.message || "Error fetching orders";
+      setError(msg);
+      showToastSequence([{ type: "error", message: msg }]);
     } finally {
       setLoading(false);
     }
@@ -42,9 +46,12 @@ const OrdersContent = () => {
         prev.map((o) => (o._id === id ? { ...o, status } : o))
       );
       setSuccess("Order status updated successfully");
+      showToastSequence([{ type: "success", message: "Order status updated successfully" }]);
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || "Error updating order");
+      const msg = err.response?.data?.message || "Error updating order";
+      setError(msg);
+      showToastSequence([{ type: "error", message: msg }]);
       setTimeout(() => setError(""), 5000);
     }
   };

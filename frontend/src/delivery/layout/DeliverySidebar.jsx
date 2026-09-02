@@ -10,7 +10,7 @@ import {
   Truck,
   MapPin,
 } from "lucide-react";
-import Logout from "../../logout/Logout";
+import Logout from "../../Components/shared/Logout";
 
 const DeliverySidebar = ({
   activeSection,

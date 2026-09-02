@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { showToastSequence } from "../../utils/toastQueue";
 
 import MenuList from "./MenuList";
 import Cart from "./Cart";
@@ -68,7 +69,18 @@ const OrderForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!cart.length) return alert("Please add items first.");
+
+    const validationErrors = [];
+    if (!cart.length) validationErrors.push({ type: "error", message: "Please add items first." });
+    if (!customerInfo.name) validationErrors.push({ type: "error", message: "Customer name is required" });
+    if (!customerInfo.email) validationErrors.push({ type: "error", message: "Customer email is required" });
+    if (!customerInfo.phone) validationErrors.push({ type: "error", message: "Customer phone is required" });
+    if (!customerInfo.address) validationErrors.push({ type: "error", message: "Customer address is required" });
+
+    if (validationErrors.length) {
+      showToastSequence(validationErrors);
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -82,7 +94,7 @@ const OrderForm = () => {
       const res = await api.post("/api/orders", payload);
 
       if (res.data.success) {
-        alert("Order placed successfully!");
+        showToastSequence([{ type: "success", message: "Order placed successfully!" }]);
         setCart([]);
         setCustomerInfo({
           name: "",
@@ -97,7 +109,7 @@ const OrderForm = () => {
       }
     } catch (e) {
       console.error(e);
-      alert("Error placing order — try again.");
+      showToastSequence([{ type: "error", message: "Error placing order — try again." }]);
     } finally {
       setIsSubmitting(false);
     }

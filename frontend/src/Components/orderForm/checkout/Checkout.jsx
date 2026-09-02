@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../../../services/api";
 import { useCart } from "../../../contexts/CartContext";
+import { showToastSequence } from "../../../utils/toastQueue";
 
 import EmptyCartMessage from "./EmptyCartMessage";
 import CustomerForm from "./CustomerForm";
@@ -49,6 +50,19 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
   e.preventDefault();
+
+  const validationErrors = [];
+  if (!customerInfo.name) validationErrors.push({ type: "error", message: "Name is required" });
+  if (!customerInfo.email) validationErrors.push({ type: "error", message: "Email is required" });
+  if (!customerInfo.phone) validationErrors.push({ type: "error", message: "Phone is required" });
+  if (!customerInfo.address) validationErrors.push({ type: "error", message: "Address is required" });
+  if (!cart.length) validationErrors.push({ type: "error", message: "Your cart is empty" });
+
+  if (validationErrors.length) {
+    showToastSequence(validationErrors);
+    return;
+  }
+
   setIsSubmitting(true);
 
   try {
@@ -70,6 +84,8 @@ const Checkout = () => {
 
     if (!response.data.success) throw new Error("Order creation failed");
 
+    showToastSequence([{ type: "success", message: "Order created successfully" }]);
+
     const orderId = response.data.orderId;
 
     // 2️⃣ If payment method is eSewa
@@ -83,6 +99,7 @@ const Checkout = () => {
       );
 
       if (paymentResponse.data.success) {
+        showToastSequence([{ type: "success", message: "Redirecting to eSewa payment" }]);
         redirectToEsewa(paymentResponse.data.payment);
       }
 
@@ -91,6 +108,7 @@ const Checkout = () => {
 
     // 3️⃣ COD flow
     clearCart();
+    showToastSequence([{ type: "success", message: "Checkout complete. Redirecting to success page" }]);
     navigate("/order-success", {
       state: {
         orderId: orderId,
@@ -99,6 +117,8 @@ const Checkout = () => {
     });
   } catch (error) {
     console.error("Error placing order:", error);
+
+    showToastSequence([{ type: "error", message: error.response?.data?.message || "Failed to place order" }]);
 
     navigate("/order-failed", {
       state: {
