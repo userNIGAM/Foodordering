@@ -101,18 +101,35 @@ const AdminDashboard = () => {
     }
 
     const socket = io("http://localhost:5000", {
+      auth: { token: localStorage.getItem("token") },
       withCredentials: true,
     });
 
-    socket.on("orderUpdate", (updatedOrder) => {
+    const updateRecentOrder = (updatedOrder) => {
+      const orderId = updatedOrder._id || updatedOrder.orderId;
       setDashboardData((prev) => ({
         ...prev,
 
         recentOrders: prev.recentOrders.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order,
+          order._id === orderId || order._id === updatedOrder.orderId
+            ? { ...order, ...updatedOrder, _id: order._id }
+            : order,
         ),
       }));
-    });
+    };
+
+    const addAssignedOrder = ({ orderData, orderId }) => {
+      const assignedOrder = { ...(orderData || {}), _id: orderData?._id || orderId };
+      if (!assignedOrder._id) return;
+      setDashboardData((prev) => ({
+        ...prev,
+        recentOrders: [assignedOrder, ...prev.recentOrders.filter((order) => order._id !== assignedOrder._id).slice(0, 9)],
+      }));
+    };
+
+    socket.on("order:status_changed", updateRecentOrder);
+    socket.on("order:assigned", addAssignedOrder);
+    socket.on("orderUpdate", updateRecentOrder);
 
     socket.on("newOrder", (newOrder) => {
       setDashboardData((prev) => ({
@@ -137,7 +154,9 @@ const AdminDashboard = () => {
     });
 
     return () => {
-      socket.off("orderUpdate");
+      socket.off("order:status_changed", updateRecentOrder);
+      socket.off("order:assigned", addAssignedOrder);
+      socket.off("orderUpdate", updateRecentOrder);
       socket.off("newOrder");
       socket.disconnect();
     };

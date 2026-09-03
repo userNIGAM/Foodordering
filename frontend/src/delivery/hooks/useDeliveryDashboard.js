@@ -11,6 +11,7 @@ const useDeliveryDashboard = () => {
   const [stats, setStats] = useState(null);
   const [deliveries, setDeliveries] = useState([]);
   const [pendingPickups, setPendingPickups] = useState([]);
+  const [preparingOrders, setPreparingOrders] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -168,7 +169,39 @@ const useDeliveryDashboard = () => {
       );
     });
 
-    return unsubscribe;
+    const unsubscribeAssigned = on("order:assigned", ({ orderData, orderId }) => {
+      const assignedOrder = {
+        ...(orderData || {}),
+        _id: orderData?._id || orderId,
+        status: "assigned_to_delivery",
+      };
+      if (!assignedOrder._id) return;
+      setDeliveries((prev) => [
+        assignedOrder,
+        ...prev.filter((delivery) => delivery._id !== assignedOrder._id),
+      ]);
+      setPendingPickups((prev) => prev.filter((order) => order._id !== assignedOrder._id));
+      setPreparingOrders((prev) => prev.filter((order) => order._id !== assignedOrder._id));
+    });
+
+    const unsubscribePreparing = on("order:preparing", (data) => {
+      const preparingOrder = {
+        ...data,
+        _id: data.orderId || data._id,
+        status: "preparing",
+      };
+      if (!preparingOrder._id) return;
+      setPreparingOrders((prev) => [
+        preparingOrder,
+        ...prev.filter((order) => order._id !== preparingOrder._id),
+      ]);
+    });
+
+    return () => {
+      unsubscribe?.();
+      unsubscribeAssigned?.();
+      unsubscribePreparing?.();
+    };
   }, [isConnected, on]);
 
   /* --------------------------------
@@ -190,7 +223,10 @@ const useDeliveryDashboard = () => {
         }),
       });
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || `Pickup request failed (${res.status})`);
+      }
 
       const data = await res.json();
 
@@ -200,7 +236,7 @@ const useDeliveryDashboard = () => {
 
     } catch (err) {
       console.error("Pickup error:", err);
-      alert("Failed to pickup order");
+      alert(err.message || "Failed to pickup order");
     } finally {
       setActionLoading(false);
     }
@@ -360,7 +396,7 @@ const useDeliveryDashboard = () => {
     deliveryPerson,
     stats,
     deliveries,
-    pendingPickups,
+    pendingPickups: [...preparingOrders, ...pendingPickups],
     loading,
     actionLoading,
 

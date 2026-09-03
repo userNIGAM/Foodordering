@@ -3,8 +3,11 @@ import User from "../models/User.js";
 import MenuItem from "../models/MenuItem.js";
 import Inventory from "../models/Inventory.js";
 import Promotion from "../models/Promotion.js";
+import Kitchen from "../models/Kitchen.js";
+import ChefAssignment from "../models/ChefAssignment.js";
 import nodemailer from "nodemailer";
 import { sendEmail } from "../utils/mailer.js";
+import { emitOrderAssignedToChef } from "../utils/socketEvents.js";
 
 const normalizeOrderStatus = (status) =>
   status === "out for delivery" ? "out_for_delivery" : status;
@@ -258,7 +261,47 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Not found" });
 
     const previousStatus = order.status;
-    order.status = requestedStatus;
+    let effectiveStatus = requestedStatus;
+
+    if (["confirmed", "assigned_to_kitchen"].includes(requestedStatus)) {
+      const chef = await User.findOne({
+        role: "chef",
+        status: { $ne: "inactive" },
+        $expr: { $lt: ["$currentCapacity", "$maxCapacity"] },
+      }).sort({ currentCapacity: 1 }) || await User.findOne({
+        role: "chef",
+        status: { $ne: "inactive" },
+      }).sort({ currentCapacity: 1 });
+      const kitchen = await Kitchen.findOne({
+        status: "active",
+        "operatingHours.isOpen": true,
+      }) || await Kitchen.findOne({ status: "active" });
+
+      if (!chef || !kitchen) {
+        return res.status(400).json({
+          success: false,
+          message: "No available chef or active kitchen found",
+        });
+      }
+
+      effectiveStatus = "assigned_to_kitchen";
+      order.kitchenId = kitchen._id;
+      order.chefId = chef._id;
+      await ChefAssignment.findOneAndUpdate(
+        { orderId: order._id },
+        {
+          orderId: order._id,
+          chefId: chef._id,
+          kitchenId: kitchen._id,
+          assignedBy: req.user?._id,
+          estimatedPrepTime: order.estimatedPrepTime || 30,
+          status: "assigned",
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+      );
+    }
+
+    order.status = effectiveStatus;
 
     if (requestedStatus === "confirmed") {
       order.verificationStatus = "verified";
@@ -271,15 +314,29 @@ export const updateOrderStatus = async (req, res) => {
 
     order.timeline = order.timeline || [];
     order.timeline.push({
-      event: `admin_${requestedStatus}`,
+      event: `admin_${effectiveStatus}`,
       changedBy: req.user?._id || null,
       changedByRole: "admin",
       timestamp: new Date(),
       previousStatus,
-      notes: `Admin changed order status to ${requestedStatus}`,
+      notes: `Admin changed order status to ${effectiveStatus}`,
     });
 
     await order.save();
+
+    if (effectiveStatus === "assigned_to_kitchen") {
+      try {
+        emitOrderAssignedToChef(order._id, order.chefId, {
+          orderId: order._id,
+          chefId: order.chefId,
+          kitchenId: order.kitchenId,
+          items: order.items,
+          estimatedPrepTime: order.estimatedPrepTime || 30,
+        });
+      } catch (socketError) {
+        console.error("Kitchen assignment notification failed:", socketError);
+      }
+    }
 
     // Send status update email asynchronously
     if (order.customer?.email) {
@@ -305,13 +362,13 @@ export const updateOrderStatus = async (req, res) => {
         cancelled: "Your order has been cancelled.",
       };
 
-      const message = statusMessages[requestedStatus] || `Your order status has been updated to: ${requestedStatus}`;
+      const message = statusMessages[effectiveStatus] || `Your order status has been updated to: ${effectiveStatus}`;
       const html = `
         <h2>Order Status Update</h2>
         <p>Hi ${order.customer.name},</p>
         <p>${message}</p>
         <p><strong>Order ID:</strong> ${order.orderId}</p>
-        <p><strong>Status:</strong> ${requestedStatus.toUpperCase()}</p>
+        <p><strong>Status:</strong> ${effectiveStatus.toUpperCase()}</p>
         <p><strong>Total Amount:</strong> Rs.${order.total?.toFixed(2) || 0}</p>
         <br/>
         <p>Thank you for your order!</p>
@@ -332,18 +389,18 @@ export const updateOrderStatus = async (req, res) => {
 
       await sendMail(order.customer.email, `Order ${order.orderId} - Status Update`);
 
-      if (["pending", "verified", "confirmed", "assigned_to_kitchen"].includes(requestedStatus)) {
+      if (["pending", "verified", "confirmed", "assigned_to_kitchen"].includes(effectiveStatus)) {
         await Promise.all([
           ...adminRecipients.map((admin) => sendMail(admin.email, `Order ${order.orderId} - Admin Update`)),
           ...chefRecipients.map((chef) => sendMail(chef.email, `Order ${order.orderId} - Kitchen Update`)),
           ...deliveryRecipients.map((delivery) => sendMail(delivery.email, `Order ${order.orderId} - Delivery Update`)),
         ]);
-      } else if (requestedStatus === "prepared") {
+      } else if (effectiveStatus === "prepared") {
         await Promise.all([
           ...adminRecipients.map((admin) => sendMail(admin.email, `Order ${order.orderId} Ready for Delivery`)),
           ...deliveryRecipients.map((delivery) => sendMail(delivery.email, `Order ${order.orderId} Ready for Pickup`)),
         ]);
-      } else if (["assigned_to_delivery", "picked_up", "out_for_delivery", "delivered", "cancelled"].includes(requestedStatus)) {
+      } else if (["assigned_to_delivery", "picked_up", "out_for_delivery", "delivered", "cancelled"].includes(effectiveStatus)) {
         await Promise.all([
           ...adminRecipients.map((admin) => sendMail(admin.email, `Order ${order.orderId} - Delivery Update`)),
           ...deliveryRecipients.map((delivery) => sendMail(delivery.email, `Order ${order.orderId} - Delivery Update`)),

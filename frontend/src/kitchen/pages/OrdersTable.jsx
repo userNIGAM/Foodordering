@@ -66,7 +66,7 @@ const OrdersTable = ({
                       <EyeIcon size={16} />
                       View
                     </button>
-                    {order.status === 'confirmed' && (
+                    {(order.status === 'assigned_to_kitchen' || order.status === 'confirmed') && (
                       <button
                         onClick={() => onStartPreparing(order._id)}
                         disabled={actionLoading}

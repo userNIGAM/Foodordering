@@ -1,7 +1,7 @@
-import React from "react";
 import StatusBadge from "./StatusBadge";
 
 const OrderRow = ({ order, updateStatus }) => {
+
   return (
     <tr className="hover:bg-gray-50 transition-colors">
       <td className="px-6 py-4 text-sm font-medium">#{order.orderId}</td>
@@ -24,11 +24,12 @@ const OrderRow = ({ order, updateStatus }) => {
       </td>
 
       <td className="px-6 py-4">
-        <select
+        <div className="flex flex-col gap-2 min-w-52">
+          <select
           value={order.status}
           onChange={(e) => updateStatus(order._id, e.target.value)}
           className="border rounded-lg px-3 py-1 focus:ring-2 focus:ring-blue-500"
-        >
+          >
           <option value="pending">Pending</option>
           <option value="verified">Verified</option>
           <option value="assigned_to_kitchen">Assigned to Kitchen</option>
@@ -40,7 +41,8 @@ const OrderRow = ({ order, updateStatus }) => {
           <option value="out_for_delivery">Out for Delivery</option>
           <option value="delivered">Delivered</option>
           <option value="cancelled">Cancelled</option>
-        </select>
+          </select>
+        </div>
       </td>
     </tr>
   );

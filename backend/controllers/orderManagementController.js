@@ -13,6 +13,11 @@ import {
 } from "../utils/socketEvents.js";
 import { notifyUser, notifyAdmins } from "../sockets/socket.js";
 
+const formatKitchenAddress = (address = {}) =>
+  [address.street, address.city, address.state, address.zipCode]
+    .filter(Boolean)
+    .join(", ") || "Address not provided";
+
 /**
  * Get pending orders (awaiting verification)
  */
@@ -325,24 +330,19 @@ export const assignToKitchen = async (req, res) => {
       await timeline.save();
     }
 
-    // Send notification to chef
-    await sendEmail({
-      to: chef.email,
-      subject: `New Order Assigned - ${order.orderId}`,
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>New Order Assigned</h2>
-          <p>Hi ${chef.name},</p>
-          <p>New order <strong>${order.orderId}</strong> has been assigned to you.</p>
-          <p><strong>Items:</strong> ${order.items.map((i) => `${i.name} x${i.quantity}`).join(", ")}</p>
-          <p><strong>Estimated Prep Time:</strong> ${order.estimatedPrepTime} minutes</p>
-          <p>Please confirm the order in your dashboard.</p>
-        </div>
-      `,
-    });
+    // Send notification to chef without blocking the socket assignment event.
+    try {
+      await sendEmail({
+        to: chef.email,
+        subject: `New Order Assigned - ${order.orderId}`,
+        html: `<h2>New Order Assigned</h2><p>Hi ${chef.name},</p><p>New order <strong>${order.orderId}</strong> has been assigned to you.</p><p><strong>Items:</strong> ${order.items.map((i) => `${i.name} x${i.quantity}`).join(", ")}</p><p><strong>Estimated Prep Time:</strong> ${order.estimatedPrepTime} minutes</p>`,
+      });
+    } catch (notificationError) {
+      console.error("Chef assignment email failed:", notificationError);
+    }
 
     // 📡 Emit socket event
-    emitOrderAssignedToChef(chefId, {
+    emitOrderAssignedToChef(order._id, chefId, {
       orderId: order._id,
       chefId,
       chefName: chef.name,
@@ -410,9 +410,18 @@ export const assignDeliveryPerson = async (req, res) => {
       });
     }
 
+    const kitchen = await Kitchen.findById(order.kitchenId);
+    if (!kitchen) {
+      return res.status(400).json({
+        success: false,
+        message: "Order has no valid pickup kitchen",
+      });
+    }
+
     // Update order
     order.status = "assigned_to_delivery";
     order.deliveryPersonId = deliveryPersonId;
+    order.timeline = order.timeline || [];
     order.timeline.push({
       event: "assigned_to_delivery",
       changedBy: adminId,
@@ -431,8 +440,7 @@ export const assignDeliveryPerson = async (req, res) => {
       estimatedDeliveryTime: order.estimatedDeliveryTime || 45,
     });
 
-    // Send notification to delivery person
-    await sendEmail({
+    const deliveryNotification = sendEmail({
       to: deliveryPerson.email,
       subject: `Delivery Assigned - Order ${order.orderId}`,
       html: `
@@ -441,6 +449,8 @@ export const assignDeliveryPerson = async (req, res) => {
           <p>Hi ${deliveryPerson.name},</p>
           <p>You have been assigned delivery for order <strong>${order.orderId}</strong>.</p>
           <p><strong>Customer:</strong> ${order.customer.name}</p>
+          <p><strong>Pickup kitchen:</strong> ${kitchen.name}, ${kitchen.location || ""}</p>
+          <p><strong>Pickup address:</strong> ${formatKitchenAddress(kitchen.address)}</p>
           <p><strong>Address:</strong> ${order.customer.address}</p>
           <p><strong>Total:</strong> ₹${order.total}</p>
           <p>Please pick up the order from the kitchen.</p>
@@ -448,16 +458,34 @@ export const assignDeliveryPerson = async (req, res) => {
       `,
     });
 
-    // 📡 Emit socket event
-    emitOrderAssignedToDelivery(deliveryPersonId, {
+    const deliveryEvent = {
       orderId: order._id,
       deliveryPersonId,
+      customerId: order.userId || order.customer.email,
       deliveryPersonName: deliveryPerson.name,
       customerName: order.customer.name,
+      pickup: {
+        kitchenId: kitchen._id,
+        kitchenName: kitchen.name,
+        location: kitchen.location,
+        address: kitchen.address,
+      },
+      deliveryAddress: order.customer.address,
       address: order.customer.address,
       total: order.total,
       estimatedDeliveryTime: order.estimatedDeliveryTime || 45,
       message: `New delivery assigned: Order ${order.orderId}`,
+    };
+
+    // Socket delivery is independent of email availability.
+    try {
+      emitOrderAssignedToDelivery(order._id, deliveryPersonId, deliveryEvent);
+    } catch (socketError) {
+      console.error("Delivery assignment socket notification failed:", socketError);
+    }
+
+    deliveryNotification.catch((emailError) => {
+      console.error("Delivery assignment email failed:", emailError);
     });
 
     return res.status(200).json({
@@ -535,6 +563,7 @@ export const getAllOrders = async (req, res) => {
     }
 
     const orders = await Order.find(filter)
+      .populate("kitchenId", "name location address")
       .populate("chefId", "name")
       .populate("deliveryPersonId", "name")
       .sort({ createdAt: -1 });

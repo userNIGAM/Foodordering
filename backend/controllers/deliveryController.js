@@ -18,6 +18,7 @@ export const getAssignedOrders = async (req, res) => {
     const deliveryPersonId = req.user._id;
 
     const orders = await Order.find({ deliveryPersonId })
+      .populate("kitchenId", "name location address")
       .lean()
       .sort({ createdAt: -1 });
 
@@ -50,8 +51,9 @@ export const getAssignedOrders = async (req, res) => {
  */
 export const getPendingPickups = async (req, res) => {
   try {
-    const orders = await Order.find({ status: "prepared" })
-      .select("orderId customer total estimatedDeliveryTime items")
+    const orders = await Order.find({ status: "prepared", deliveryPersonId: null })
+      .populate("kitchenId", "name location address")
+      .select("orderId customer total estimatedDeliveryTime items kitchenId")
       .sort({ createdAt: 1 })
       .limit(20);
 
@@ -79,7 +81,7 @@ export const pickupOrder = async (req, res) => {
     const deliveryPersonId = req.user._id;
     const { notes } = req.body;
 
-    const order = await Order.findById(orderId).populate("deliveryPersonId");
+    const order = req.order || await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -87,7 +89,7 @@ export const pickupOrder = async (req, res) => {
       });
     }
 
-    if (!order.deliveryPersonId || order.deliveryPersonId._id.toString() !== deliveryPersonId.toString()) {
+    if (!order.deliveryPersonId || order.deliveryPersonId.toString() !== deliveryPersonId.toString()) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to pickup this order",
@@ -104,6 +106,7 @@ export const pickupOrder = async (req, res) => {
     // Update order
     order.status = "picked_up";
     order.pickupTime = new Date();
+    order.timeline = order.timeline || [];
     order.timeline.push({
       event: "picked_up",
       changedBy: deliveryPersonId,
@@ -123,41 +126,47 @@ export const pickupOrder = async (req, res) => {
       }
     );
 
-    // Send notification to customer
-    await sendEmail({
-      to: order.customer.email,
-      subject: `Your Order ${order.orderId} is On The Way`,
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>Order Picked Up</h2>
-          <p>Hi ${order.customer.name},</p>
-          <p>Your order <strong>${order.orderId}</strong> has been picked up from the kitchen.</p>
-          <p>It will be delivered to you shortly.</p>
-          <p>Delivery person will contact you soon.</p>
-        </div>
-      `,
+    // Notifications must not turn a successful pickup into an API error.
+    Promise.allSettled([
+      sendEmail({
+        to: order.customer.email,
+        subject: `Your Order ${order.orderId} is On The Way`,
+        html: `
+          <div style="font-family: Arial, sans-serif;">
+            <h2>Order Picked Up</h2>
+            <p>Hi ${order.customer.name},</p>
+            <p>Your order <strong>${order.orderId}</strong> has been picked up from the kitchen.</p>
+            <p>It will be delivered to you shortly.</p>
+            <p>Delivery person will contact you soon.</p>
+          </div>
+        `,
+      }),
+      sendEmail({
+        to: process.env.ADMIN_EMAIL || "admin@example.com",
+        subject: `Order ${order.orderId} Picked Up`,
+        html: `
+          <div style="font-family: Arial, sans-serif;">
+            <h2>Delivery Update</h2>
+            <p>Order <strong>${order.orderId}</strong> has been picked up from the kitchen.</p>
+          </div>
+        `,
+      }),
+    ]).catch((notificationError) => {
+      console.error("Pickup notification error:", notificationError);
     });
 
-    await sendEmail({
-      to: process.env.ADMIN_EMAIL || "admin@example.com",
-      subject: `Order ${order.orderId} Picked Up`,
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>Delivery Update</h2>
-          <p>Order <strong>${order.orderId}</strong> has been picked up from the kitchen.</p>
-        </div>
-      `,
-    });
-
-    // 📡 Emit socket event
-    emitOrderStatusChange(orderId, {
-      orderId: order._id,
-      status: "picked_up",
-      deliveryPersonId,
-      customerId: order.customer.email,
-      pickupTime: order.pickupTime,
-      message: "Your order has been picked up and is on the way",
-    });
+    try {
+      emitOrderStatusChange(orderId, {
+        orderId: order._id,
+        status: "picked_up",
+        deliveryPersonId,
+        customerId: order.customer.email,
+        pickupTime: order.pickupTime,
+        message: "Your order has been picked up and is on the way",
+      });
+    } catch (socketError) {
+      console.error("Pickup socket notification error:", socketError);
+    }
 
     return res.status(200).json({
       success: true,

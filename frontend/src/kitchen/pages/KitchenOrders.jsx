@@ -21,7 +21,7 @@ const KitchenOrders = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
 
-  const [filter, setFilter] = useState("assigned_to_kitchen");
+  const [filter, setFilter] = useState("all");
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -45,7 +45,7 @@ const KitchenOrders = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(`${apiUrl}/api/orders/chef`, {
+      const response = await fetch(`${apiUrl}/api/kitchen/orders`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -59,7 +59,7 @@ const KitchenOrders = () => {
         throw new Error(result.message || "Failed to fetch orders");
       }
 
-      const orderList = result.data || result;
+      const orderList = result.data || [];
 
       setOrders(orderList);
       calculateStats(orderList);
@@ -85,6 +85,25 @@ const KitchenOrders = () => {
   useEffect(() => {
     if (!isConnected) return;
 
+    const addAssignedOrder = (payload) => {
+      const assignedOrder = {
+        ...(payload?.orderData || payload?.order || payload),
+        _id:
+          payload?.orderData?._id ||
+          payload?.order?._id ||
+          payload?.orderId,
+        status: "assigned_to_kitchen",
+      };
+      if (!assignedOrder?._id) return;
+
+      setOrders((prev) => {
+        if (prev.some((order) => order._id === assignedOrder._id)) return prev;
+        const newOrders = [assignedOrder, ...prev];
+        calculateStats(newOrders);
+        return newOrders;
+      });
+    };
+
     const unsubscribeOrderUpdate = on("orderUpdate", (updatedOrder) => {
       setOrders((prev) => {
         const newOrders = prev.map((order) =>
@@ -107,9 +126,32 @@ const KitchenOrders = () => {
       });
     });
 
+    const unsubscribeAssigned = on("order:assigned", addAssignedOrder);
+    const unsubscribeAssignedToKitchen = on(
+      "order:assigned_to_kitchen",
+      addAssignedOrder,
+    );
+
+    const unsubscribeStatusChanged = on("order:status_changed", (updatedOrder) => {
+      const orderId = updatedOrder?._id || updatedOrder?.orderId;
+      if (!orderId) return;
+      setOrders((prev) => {
+        const newOrders = prev.map((order) =>
+          order._id === orderId
+            ? { ...order, ...updatedOrder, _id: order._id }
+            : order,
+        );
+        calculateStats(newOrders);
+        return newOrders;
+      });
+    });
+
     return () => {
       unsubscribeOrderUpdate?.();
       unsubscribeNewOrder?.();
+      unsubscribeAssigned?.();
+      unsubscribeAssignedToKitchen?.();
+      unsubscribeStatusChanged?.();
     };
   }, [isConnected, on]);
 
@@ -151,13 +193,17 @@ const KitchenOrders = () => {
       case "issue":
         return orders.filter((order) => order.status === "issue");
 
-      default:
+      case "all":
         return orders.filter(
           (order) =>
+            order.status === "assigned_to_kitchen" ||
             order.status === "confirmed" ||
             order.status === "preparing" ||
+            order.status === "prepared" ||
             order.status === "issue",
         );
+      default:
+        return orders;
     }
   };
 
@@ -200,7 +246,8 @@ const KitchenOrders = () => {
 
         setSelectedOrder(null);
       } else {
-        alert("Failed to start preparation");
+        const error = await response.json().catch(() => ({}));
+        alert(error.message || "Failed to start preparation");
       }
     } catch (error) {
       console.error("Error starting preparation:", error);
@@ -280,8 +327,8 @@ const KitchenOrders = () => {
           },
 
           body: JSON.stringify({
-            notes: issueDescription,
-            issue: issueDescription,
+            description: issueDescription,
+            severity: "high",
           }),
         },
       );
@@ -302,7 +349,8 @@ const KitchenOrders = () => {
         setShowIssueModal(false);
         setSelectedOrder(null);
       } else {
-        alert("Failed to report issue");
+        const error = await response.json().catch(() => ({}));
+        alert(error.message || "Failed to report issue");
       }
     } catch (error) {
       console.error("Error reporting issue:", error);

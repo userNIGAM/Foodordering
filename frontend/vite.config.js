@@ -5,4 +5,20 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          animation: ["framer-motion", "gsap"],
+          charts: ["recharts"],
+          three: ["three", "@react-three/fiber", "@react-three/drei"],
+          maps: ["leaflet", "react-leaflet"],
+          ui: ["lucide-react", "react-icons", "react-hot-toast", "react-toastify"],
+          data: ["axios", "date-fns", "socket.io-client"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+  },
 });

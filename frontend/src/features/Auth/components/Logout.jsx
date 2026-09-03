@@ -1,28 +1,21 @@
 // src/components/auth/Logout.jsx
-import axios from "axios";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { AuthContext } from "../AuthContext";
 
 const Logout = ({ className = "" }) => {
   const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "http://localhost:5000/api/auth/logout",
-        {},
-        { withCredentials: true } // send cookies
-      );
-
-      // Clear any stored user/admin info
-      localStorage.removeItem("admin");
-      localStorage.removeItem("chef");
-      localStorage.removeItem("delivery");
-      // Redirect to login page
-      navigate("/auth");
+      await logout();
     } catch (err) {
       console.error("Logout error:", err);
+    } finally {
+      navigate("/auth", { replace: true });
     }
   };
 

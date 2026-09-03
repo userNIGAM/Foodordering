@@ -41,9 +41,10 @@ const OrdersContent = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await api.put(`/api/admin/orders/${id}`, { status });
+      const response = await api.put(`/api/admin/orders/${id}`, { status });
+      const updatedOrder = response.data?.data;
       setOrders((prev) =>
-        prev.map((o) => (o._id === id ? { ...o, status } : o))
+        prev.map((o) => (o._id === id ? updatedOrder || { ...o, status } : o))
       );
       setSuccess("Order status updated successfully");
       showToastSequence([{ type: "success", message: "Order status updated successfully" }]);

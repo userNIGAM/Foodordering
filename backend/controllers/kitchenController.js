@@ -2,6 +2,7 @@
 import Kitchen from "../models/Kitchen.js";
 import User from "../models/User.js";
 import Order from "../models/Order.js";
+import ChefAssignment from "../models/ChefAssignment.js";
 import { sendEmail } from "../utils/mailer.js";
 
 /**
@@ -82,9 +83,18 @@ export const getAllKitchens = async (req, res) => {
 
 export const getKitchenOrders = async (req, res) => {
   try {
-    const query = req.user.role === "chef"
-      ? { chefId: req.user._id }
-      : { status: { $in: ["assigned_to_kitchen", "confirmed", "preparing", "prepared"] } };
+    let query;
+    if (req.user.role === "chef") {
+      const assignments = await ChefAssignment.find({ chefId: req.user._id }).select("orderId");
+      query = {
+        $or: [
+          { chefId: req.user._id },
+          { _id: { $in: assignments.map((assignment) => assignment.orderId) } },
+        ],
+      };
+    } else {
+      query = { status: { $in: ["assigned_to_kitchen", "confirmed", "preparing", "prepared"] } };
+    }
 
     const orders = await Order.find(query).sort({ createdAt: -1 });
 

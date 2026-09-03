@@ -18,7 +18,12 @@ export const getAssignedOrders = async (req, res) => {
   try {
     const chefId = req.user._id;
 
-    const orders = await Order.find({ chefId })
+    const assignments = await ChefAssignment.find({ chefId }).select("orderId");
+    const assignmentOrderIds = assignments.map((assignment) => assignment.orderId);
+
+    const orders = await Order.find({
+      $or: [{ chefId }, { _id: { $in: assignmentOrderIds } }],
+    })
       .select("-customer.email -customer.phone") // Hide sensitive data
       .sort({ createdAt: -1 });
 
@@ -85,9 +90,12 @@ export const confirmOrder = async (req, res) => {
     chef.currentCapacity += 1;
     await chef.save();
 
+    order.timeline = order.timeline || [];
+
     // Update order
     order.status = "confirmed";
     order.actualPrepStartTime = new Date();
+    order.timeline = order.timeline || [];
     order.timeline.push({
       event: "chef_confirmed",
       changedBy: chefId,
@@ -196,21 +204,25 @@ export const startPreparing = async (req, res) => {
       });
     }
 
-    if (order.status !== "confirmed") {
+    if (!["assigned_to_kitchen", "confirmed"].includes(order.status)) {
       return res.status(400).json({
         success: false,
-        message: "Can only start preparing confirmed orders",
+        message: "Can only start preparing assigned or confirmed orders",
       });
     }
 
+    order.timeline = order.timeline || [];
+    const previousStatus = order.status;
+
     // Update order
     order.status = "preparing";
+    order.actualPrepStartTime = new Date();
     order.timeline.push({
       event: "preparation_started",
       changedBy: chefId,
       changedByRole: "chef",
       timestamp: new Date(),
-      previousStatus: "confirmed",
+      previousStatus,
     });
     await order.save();
 
@@ -225,37 +237,36 @@ export const startPreparing = async (req, res) => {
     );
 
     // 📡 Emit socket event
-    emitOrderStatusChange(orderId, {
-      orderId: order._id,
-      status: "preparing",
-      chefId,
-      kitchenId: order.kitchenId,
-      customerId: order.customer.email,
-      message: "Chef started preparing your order",
-    });
+    try {
+      emitOrderStatusChange(orderId, {
+        orderId: order._id,
+        status: "preparing",
+        chefId,
+        kitchenId: order.kitchenId,
+        customerId: order.customer.email,
+        message: "Chef started preparing your order",
+      });
+    } catch (socketError) {
+      console.error("Preparation socket notification failed:", socketError);
+    }
 
-    await sendEmail({
-      to: order.customer.email,
-      subject: `Order ${order.orderId} Is Being Prepared`,
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>Preparing Your Order</h2>
-          <p>Hi ${order.customer.name},</p>
-          <p>Your order <strong>${order.orderId}</strong> is now being prepared.</p>
-        </div>
-      `,
-    });
+    const notifications = [
+      sendEmail({
+        to: order.customer.email,
+        subject: `Order ${order.orderId} Is Being Prepared`,
+        html: `<h2>Preparing Your Order</h2><p>Hi ${order.customer.name},</p><p>Your order <strong>${order.orderId}</strong> is now being prepared.</p>`,
+      }),
+      sendEmail({
+        to: process.env.ADMIN_EMAIL || "admin@example.com",
+        subject: `Order ${order.orderId} Preparing`,
+        html: `<h2>Kitchen Update</h2><p>Order <strong>${order.orderId}</strong> is now being prepared by ${chef?.name || "the kitchen team"}.</p>`,
+      }),
+    ];
 
-    await sendEmail({
-      to: process.env.ADMIN_EMAIL || "admin@example.com",
-      subject: `Order ${order.orderId} Preparing`,
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h2>Kitchen Update</h2>
-          <p>Order <strong>${order.orderId}</strong> is now being prepared by ${chef.name}.</p>
-        </div>
-      `,
-    });
+    const notificationResults = await Promise.allSettled(notifications);
+    notificationResults
+      .filter((result) => result.status === "rejected")
+      .forEach((result) => console.error("Preparation notification failed:", result.reason));
 
     return res.status(200).json({
       success: true,
@@ -306,6 +317,7 @@ export const markAsPrepared = async (req, res) => {
     // Update order
     order.status = "prepared";
     order.actualPrepEndTime = new Date();
+    order.timeline = order.timeline || [];
     order.timeline.push({
       event: "preparation_completed",
       changedBy: chefId,
@@ -456,32 +468,31 @@ export const reportIssue = async (req, res) => {
     }
 
     // Notify admin
-    const chef = await User.findById(chefId);
-    await sendEmail({
-      to: process.env.ADMIN_EMAIL || "admin@example.com",
-      subject: `ISSUE REPORTED - Order ${order.orderId}`,
-      html: `
-        <div style="font-family: Arial, sans-serif;">
-          <h2 style="color: red;">Issue Reported</h2>
-          <p><strong>Order ID:</strong> ${order.orderId}</p>
-          <p><strong>Chef:</strong> ${chef.name}</p>
-          <p><strong>Severity:</strong> ${severity || "medium"}</p>
-          <p><strong>Description:</strong> ${description}</p>
-          <p>Please take immediate action.</p>
-        </div>
-      `,
-    });
+    const chef = await User.findById(chefId).select("name");
+    try {
+      await sendEmail({
+        to: process.env.ADMIN_EMAIL || "admin@example.com",
+        subject: `ISSUE REPORTED - Order ${order.orderId}`,
+        html: `<h2>Issue Reported</h2><p><strong>Order ID:</strong> ${order.orderId}</p><p><strong>Chef:</strong> ${chef?.name || "Kitchen team"}</p><p><strong>Severity:</strong> ${severity || "medium"}</p><p><strong>Description:</strong> ${description}</p>`,
+      });
+    } catch (notificationError) {
+      console.error("Issue notification failed:", notificationError);
+    }
 
     // 📡 Emit socket event for urgent admin notification
-    emitIssueReported(orderId, {
-      orderId: order._id,
-      chefId,
-      chefName: chef.name,
-      kitchenId: order.kitchenId,
-      severity: severity || "medium",
-      description,
-      message: `Issue reported in order ${order.orderId} by ${chef.name}`,
-    });
+    try {
+      emitIssueReported(orderId, {
+        orderId: order._id,
+        chefId,
+        chefName: chef?.name || "Kitchen team",
+        kitchenId: order.kitchenId,
+        severity: severity || "medium",
+        description,
+        message: `Issue reported in order ${order.orderId} by ${chef?.name || "the kitchen team"}`,
+      });
+    } catch (socketError) {
+      console.error("Issue socket notification failed:", socketError);
+    }
 
     return res.status(200).json({
       success: true,

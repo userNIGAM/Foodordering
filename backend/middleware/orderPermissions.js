@@ -22,6 +22,13 @@ export const chefCanUpdateOrder = async (req, res, next) => {
     }
 
     // Check if order is assigned to this chef
+    if (!order.chefId) {
+      return res.status(403).json({
+        success: false,
+        message: "This order is not assigned to a chef",
+      });
+    }
+
     if (order.chefId.toString() !== chefId.toString()) {
       return res.status(403).json({
         success: false,
@@ -73,6 +80,13 @@ export const deliveryCanUpdateOrder = async (req, res, next) => {
     }
 
     // Check if order is assigned to this delivery person
+    if (!order.deliveryPersonId) {
+      return res.status(403).json({
+        success: false,
+        message: "This order is not assigned to a delivery person",
+      });
+    }
+
     if (order.deliveryPersonId.toString() !== deliveryPersonId.toString()) {
       return res.status(403).json({
         success: false,

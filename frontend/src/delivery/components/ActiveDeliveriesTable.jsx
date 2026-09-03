@@ -13,13 +13,20 @@ const ActiveDeliveriesTable = ({ deliveries, actions }) => {
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-50 text-left text-gray-500">
-              <tr><th className="px-5 py-3">Order</th><th className="px-5 py-3">Customer</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Action</th></tr>
+              <tr><th className="px-5 py-3">Order</th><th className="px-5 py-3">Pickup</th><th className="px-5 py-3">Deliver to</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Action</th></tr>
             </thead>
             <tbody className="divide-y">
               {deliveries.map((delivery) => (
                 <tr key={delivery._id}>
                   <td className="px-5 py-4 font-medium">{delivery.orderId || delivery._id}</td>
-                  <td className="px-5 py-4">{delivery.customer?.name || "-"}</td>
+                  <td className="px-5 py-4">
+                    <div className="font-medium">{delivery.kitchenId?.name || "Kitchen"}</div>
+                    <div className="text-xs text-gray-500">{delivery.kitchenId?.location || delivery.kitchenId?.address?.city || "Pickup address unavailable"}</div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="font-medium">{delivery.customer?.name || "-"}</div>
+                    <div className="text-xs text-gray-500">{delivery.customer?.address || "Delivery address unavailable"}</div>
+                  </td>
                   <td className="px-5 py-4">{delivery.status.replaceAll("_", " ")}</td>
                   <td className="px-5 py-4"><DeliveryActions delivery={delivery} actions={actions} /></td>
                 </tr>

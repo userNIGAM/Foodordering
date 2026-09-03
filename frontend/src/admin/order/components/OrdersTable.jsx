@@ -18,7 +18,7 @@ const OrdersTable = ({ orders, totalOrders, filter, searchTerm, updateStatus }) 
 
           <tbody className="bg-white divide-y">
             {orders.length > 0 ? (
-              orders.map((order) => (
+                orders.map((order) => (
                 <OrderRow key={order._id} order={order} updateStatus={updateStatus} />
               ))
             ) : (

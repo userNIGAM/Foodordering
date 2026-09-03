@@ -75,6 +75,7 @@ export function initSocket(server) {
     // 🚚 DELIVERY PERSON ROOM MANAGEMENT
     if (socket.userRole === "delivery_person") {
       socket.join(`delivery:${socket.userId}`);
+      socket.join("delivery_team");
     }
 
     // 👨‍🍳 CUSTOMER ROOM MANAGEMENT
@@ -313,6 +314,12 @@ export function notifyCustomer(userId, eventName, data) {
 export function notifyDelivery(userId, eventName, data) {
   if (io) {
     io.to(`delivery:${userId}`).emit(eventName, data);
+  }
+}
+
+export function notifyDeliveryTeam(eventName, data) {
+  if (io) {
+    io.to("delivery_team").emit(eventName, data);
   }
 }
 

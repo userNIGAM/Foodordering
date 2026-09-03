@@ -5,6 +5,7 @@ import {
   notifyKitchen,
   notifyCustomer,
   notifyDelivery,
+  notifyDeliveryTeam,
   getIO,
 } from "../sockets/socket.js";
 
@@ -50,6 +51,15 @@ export const emitOrderStatusChange = (orderId, orderData) => {
     });
   }
 
+  if (orderData.status === "preparing") {
+    notifyDeliveryTeam("order:preparing", {
+      orderId,
+      ...orderData,
+      message: "An order is being prepared and will be ready for delivery soon",
+      timestamp: new Date(),
+    });
+  }
+
   // Emit to kitchen
   if (orderData.kitchenId) {
     notifyKitchen(orderData.kitchenId, "order:status_changed", {
@@ -63,7 +73,7 @@ export const emitOrderStatusChange = (orderId, orderData) => {
 /**
  * Emit order assignment to chef
  */
-export const emitOrderAssignedToChef = (orderId, chefId, orderData) => {
+export const emitOrderAssignedToChef = (orderId, chefId, orderData, options = {}) => {
   const io = getIO();
 
   // Notify the specific chef
@@ -74,8 +84,7 @@ export const emitOrderAssignedToChef = (orderId, chefId, orderData) => {
     timestamp: new Date(),
   });
 
-  // Notify kitchen
-  if (orderData.kitchenId) {
+  if (options.notifyKitchen !== false && orderData.kitchenId) {
     notifyKitchen(orderData.kitchenId, "order:assigned", {
       orderId,
       chefId,

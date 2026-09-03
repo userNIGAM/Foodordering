@@ -111,7 +111,7 @@ const useChefOrders = () => {
     setActionLoading(true);
 
     try {
-      const response = await fetch(`${apiUrl}/api/chef/order/${orderId}/prepared`, {
+      const response = await fetch(`${apiUrl}${isChef ? `/api/chef/order/${orderId}/prepared` : `/api/admin/orders/${orderId}`}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

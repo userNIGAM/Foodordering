@@ -4,7 +4,6 @@ import {
   BarChart3,
   ShoppingCart,
   Settings,
-  LogOut,
   X,
   Search,
   Truck,
@@ -129,10 +128,7 @@ const DeliverySidebar = ({
             </div>
 
             <div className="absolute bottom-0 w-full p-4 border-t border-gray-100">
-              <button className="flex items-center w-full px-3 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
-                <LogOut className="w-5 h-5 mr-3" />
-                <span className="font-medium">Logout</span>
-              </button>
+              <Logout />
             </div>
           </motion.aside>
         )}
