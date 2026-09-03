@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import api from "../../../services/api.js";
-import { useCart } from "../../../contexts/CartContext.jsx";
+import api from "../../../services/api";
+import { useCart } from "../../cart/CartContext";
 import { showToastSequence } from "../../../utils/toastQueue.js";
 
 const PaymentSuccess = () => {

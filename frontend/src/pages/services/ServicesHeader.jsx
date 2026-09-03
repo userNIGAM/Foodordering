@@ -1,4 +1,4 @@
-import AnimatedSection from "../../AnimatedSection";
+import AnimatedSection from "../../components/common/AnimatedSection";
 const headingVariant = {
   hidden: { y: -40, scale: 0.95, opacity: 0 },
   visible: {

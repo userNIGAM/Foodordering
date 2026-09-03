@@ -1,6 +1,6 @@
-import LoadingSpinner from "../../UI/LoadingSpinner";
-import ErrorMessage from "../../UI/ErrorMessage";
-import FoodGrid from "../FoodGrid";
+import LoadingSpinner from "../../../components/ui/LoadingSpinner";
+import ErrorMessage from "../../../components/ui/ErrorMessage";
+import FoodGrid from "./FoodGrid";
 
 export default function FoodMenuContent({
   loading,

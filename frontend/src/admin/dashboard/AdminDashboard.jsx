@@ -4,26 +4,26 @@ import { io } from "socket.io-client";
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext } from "../../features/Auth/AuthContext";
 
 // Layout
-import Sidebar from "./layout/Sidebar";
-import Topbar from "./layout/Topbar";
+import Sidebar from "../components/AdminSidebar";
+import Topbar from "../components/AdminTopbar";
 
 // Pages
 import DashboardContent from "./DashboardContent";
-import ProductsContent from "../pages/products/ProductsContent";
-import OrdersContent from "../pages/order/OrdersContent";
-import CustomersContent from "../pages/customers/CustomersContent";
-import AnalyticsContent from "../pages/analytics/AnalyticsContent";
-import InventoryContent from "../pages/inventory/InventoryContent";
-import PromotionsContent from "../pages/promotions/PromotionsContent";
-import SettingsContent from "../pages/setting/SettingsContent";
-import ChefDashboard from "../pages/kitchen/ChefDashboard";
-import KitchenManagement from "../pages/kitchen/KitchenManagement";
-import KitchenDisplaySystem from "../pages/kitchen/KitchenDisplaySystem";
-import DeliveryDashboard from "../../delivery/dashboard/DeliveryDashboard";
-import CreateStaff from "../pages/createstaff/CreateStaff";
+import ProductsContent from "../products/ProductsContent";
+import OrdersContent from "../order/components/OrdersContent";
+import CustomersContent from "../customers/CustomersContent";
+import AnalyticsContent from "../analytics/AnalyticsContent";
+import InventoryContent from "../inventory/components/InventoryContent";
+import PromotionsContent from "../promotions/PromotionsContent";
+import SettingsContent from "../setting/SettingsContent";
+import ChefDashboard from "../kitchen/ChefDashboard/ChefDashboard";
+import KitchenManagement from "../kitchen/KitchenManagement";
+import KitchenDisplaySystem from "../kitchen/KitchenDisplaySystem";
+import DeliveryDashboard from "../../delivery/pages/DeliveryDashboard";
+import CreateStaff from "../createstaff/CreateStaff";
 
 axios.defaults.withCredentials = true;
 

@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
-import StatsCardGrid from "./StatsCardGrid";
-import SalesChart from "./SalesChart";
-import RecentOrders from "./RecentOrders";
+import StatsCardGrid from "./components/StatsCardGrid";
+import SalesChart from "./components/SalesChart";
+import RecentOrders from "./components/RecentOrders";
 
 const containerVariants = {
   hidden: { opacity: 0 },

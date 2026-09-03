@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
 import { FaUtensils, FaShippingFast, FaHeadset, FaAward } from "react-icons/fa";
-import ServiceCard from "./ServiceCard";
+import ServiceCard from "../../common/ServiceCard";
 
 const ServicesHighlight = () => {
   const [visibleServices, setVisibleServices] = useState([]);

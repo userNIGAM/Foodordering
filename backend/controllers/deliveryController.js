@@ -87,7 +87,7 @@ export const pickupOrder = async (req, res) => {
       });
     }
 
-    if (order.deliveryPersonId._id.toString() !== deliveryPersonId.toString()) {
+    if (!order.deliveryPersonId || order.deliveryPersonId._id.toString() !== deliveryPersonId.toString()) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to pickup this order",
@@ -370,7 +370,7 @@ export const deliverOrder = async (req, res) => {
       });
     }
 
-    if (order.deliveryPersonId._id.toString() !== deliveryPersonId.toString()) {
+    if (!order.deliveryPersonId || order.deliveryPersonId._id.toString() !== deliveryPersonId.toString()) {
       return res.status(403).json({
         success: false,
         message: "Not authorized",
@@ -399,8 +399,10 @@ export const deliverOrder = async (req, res) => {
 
     // Update delivery person stats
     const deliveryPerson = await User.findById(deliveryPersonId);
-    deliveryPerson.completedDeliveries += 1;
-    await deliveryPerson.save();
+    if (deliveryPerson) {
+      deliveryPerson.completedDeliveries = (deliveryPerson.completedDeliveries || 0) + 1;
+      await deliveryPerson.save();
+    }
 
     // Update delivery assignment
     const deliveryAssignment = await DeliveryAssignment.findOneAndUpdate(
@@ -490,6 +492,7 @@ export const cancelDelivery = async (req, res) => {
     }
 
     // Update order
+    const previousStatus = order.status;
     order.status = "cancelled";
     order.timeline.push({
       event: "cancelled_by_user",
@@ -497,7 +500,7 @@ export const cancelDelivery = async (req, res) => {
       changedByRole: "user",
       timestamp: new Date(),
       notes: reason || "Cancelled by user",
-      previousStatus: order.status,
+      previousStatus,
     });
     await order.save();
 
@@ -579,8 +582,8 @@ export const getDeliveryDashboard = async (req, res) => {
       inTransit: orders.filter((o) => o.status === "out_for_delivery").length,
       pickedUp: orders.filter((o) => o.status === "picked_up").length,
       cancelled: orders.filter((o) => o.status === "cancelled").length,
-      completedDeliveries: deliveryPerson.completedDeliveries,
-      rating: deliveryPerson.deliveryRating,
+      completedDeliveries: deliveryPerson?.completedDeliveries || 0,
+      rating: deliveryPerson?.deliveryRating || null,
     };
 
     // 📡 Emit socket event for real-time dashboard update
@@ -597,10 +600,10 @@ export const getDeliveryDashboard = async (req, res) => {
       success: true,
       data: {
         deliveryPerson: {
-          name: deliveryPerson.name,
-          zone: deliveryPerson.deliveryZone,
-          rating: deliveryPerson.deliveryRating,
-          completedDeliveries: deliveryPerson.completedDeliveries,
+          name: deliveryPerson?.name || "",
+          zone: deliveryPerson?.deliveryZone || "",
+          rating: deliveryPerson?.deliveryRating || null,
+          completedDeliveries: deliveryPerson?.completedDeliveries || 0,
         },
         stats,
       },

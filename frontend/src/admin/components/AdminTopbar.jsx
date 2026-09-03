@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Plus, ChevronDown, Bell, Search } from "lucide-react";
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext } from "../../features/Auth/AuthContext";
 
 const Topbar = ({ activeSection, setSidebarOpen }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);

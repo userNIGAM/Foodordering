@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 import { Star, StarHalf, Heart } from "lucide-react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import { useCart } from "../../contexts/CartContext";
-import { useWishlist } from "../../contexts/WishlistContext";
+import { useCart } from "../../features/cart/CartContext";
+import { useWishlist } from "../../features/wishlist/WishlistContext";
 import api from "../../services/api";
-import Image from "../UI/Image";
-import useScrollAnimationsList from "../hooks/useScrollAnimation";
-import useInView from "../hook/useInView";
-import AnimatedSection from "../AnimatedSection";
+import Image from "../../components/ui/Image";
+import useScrollAnimationsList from "../../hooks/useScrollAnimation";
+import useInView from "../../hooks/useInView";
+import AnimatedSection from "../../components/common/AnimatedSection";
 
 const headingVariant = {
   hidden: { y: -40, scale: 0.95, opacity: 0 },

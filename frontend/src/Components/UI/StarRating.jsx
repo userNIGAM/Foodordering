@@ -1,48 +1,68 @@
-import { useState } from "react";
 import { Star } from "lucide-react";
 
-export default function StarRating({ rating: initialRating = 0, onSubmit }) {
-  const [rating, setRating] = useState(initialRating);
+export default function StarRating({
+  rating = 0,
+  interactive = false,
+  onSubmit,
+  size = 20,
+}) {
+  const [currentRating, setCurrentRating] = useState(rating);
   const [hover, setHover] = useState(null);
-  const [expanded, setExpanded] = useState(false);
+
+  const displayRating = hover ?? currentRating;
 
   const handleClick = async (value) => {
-    setRating(value);
-    setExpanded(false);
+    if (!interactive) return;
+
+    setCurrentRating(value);
+
     if (onSubmit) {
-      await onSubmit(value); // send to backend
+      await onSubmit(value);
     }
   };
 
+  const fullStars = Math.floor(displayRating);
+  const hasHalfStar = displayRating - fullStars >= 0.5;
+
   return (
     <div
-      className="flex space-x-1 cursor-pointer"
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
+      className={`flex items-center gap-1 ${
+        interactive ? "cursor-pointer" : ""
+      }`}
+      onMouseLeave={() => interactive && setHover(null)}
     >
-      {expanded ? (
-        [1, 2, 3, 4, 5].map((star) => (
-          <Star
+      {[1, 2, 3, 4, 5].map((star) => {
+        const isFull = star <= fullStars;
+        const isHalf = star === fullStars + 1 && hasHalfStar;
+
+        return (
+          <div
             key={star}
-            size={18}
-            className={`transition-colors ${
-              (hover || rating) >= star
-                ? "text-yellow-500 fill-yellow-500"
-                : "text-gray-300"
-            }`}
-            onMouseEnter={() => setHover(star)}
-            onMouseLeave={() => setHover(null)}
-            onClick={() => handleClick(star)}
-          />
-        ))
-      ) : (
-        <Star
-          size={18}
-          className={`transition-colors ${
-            rating > 0 ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
-          }`}
-        />
-      )}
+            className="relative"
+            onMouseEnter={() => interactive && setHover(star)}
+            onClick={() => interactive && handleClick(star)}
+          >
+            {/* Background / Empty Star */}
+            <Star size={size} className="text-gray-300" />
+
+            {/* Filled Star */}
+            {(isFull || isHalf) && (
+              <div
+                className="absolute inset-0 overflow-hidden"
+                style={{
+                  width: isHalf ? "50%" : "100%",
+                }}
+              >
+                <Star
+                  size={size}
+                  fill="currentColor"
+                  className="text-yellow-500"
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

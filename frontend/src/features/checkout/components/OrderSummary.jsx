@@ -1,5 +1,5 @@
 import React from "react";
-import { useCart } from "../../../contexts/CartContext";
+import { useCart } from "../../cart/CartContext";
 
 const getItemId = (item) => item.id || item._id;
 

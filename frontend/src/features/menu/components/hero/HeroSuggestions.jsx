@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import Image from "../../UI/Image";
+import Image from "../../../../components/ui/Image";
 
 export default function HeroSuggestions({
   suggestions,

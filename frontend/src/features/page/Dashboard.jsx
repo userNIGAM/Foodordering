@@ -9,16 +9,16 @@ import {
 } from "lucide-react";
 import api from "../../services/api";
 
-import ProfileSection from "../profile/Profile/ProfileSection/";
-import SecuritySection from "../profile/Security/SecuritySection";
-import NotificationsSection from "../profile/Notification/NotificationsSection";
-import BillingSection from "../profile/Billing/BillingSection";
-import SettingsSection from "../profile/Setting/SettingsSection";
-import LogoutSection from "../profile/Logout/LogoutSection";
+import ProfileSection from "../profile/components/ProfileSection";
+import SecuritySection from "../profile/components/SecuritySection";
+import NotificationsSection from "../profile/components/NotificationsSection";
+import BillingSection from "../profile/components/billing/BillingSection";
+import SettingsSection from "../profile/setting/PreferencesSection";
+import LogoutSection from "../profile/components/LogoutSection";
 
-import Sidebar from "../profile/Sidebar/Sidebar";
-import MobileSidebar from "../profile/Mobile/MobileSidebar";
-import HeaderSection from "../profile/Header/HeaderSection";
+import Sidebar from "../profile/components/Sidebar";
+import MobileSidebar from "../profile/components/MobileSidebar";
+import HeaderSection from "../profile/components/HeaderSection";
 
 const Dashboard = ({ user, onLogout }) => {
   const [activeSection, setActiveSection] = useState("profile");

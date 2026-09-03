@@ -5,6 +5,7 @@ import { roleAuth } from "../middleware/roleAuth.js";
 import {
   createKitchen,
   getAllKitchens,
+  getKitchenOrders,
   getKitchenById,
   updateKitchen,
   assignChefToKitchen,
@@ -17,6 +18,8 @@ const router = express.Router();
 
 // Get all kitchens (accessible to admin and chefs)
 router.get("/", roleAuth("admin", "chef"), getAllKitchens);
+
+router.get("/orders", roleAuth("admin", "chef"), getKitchenOrders);
 
 // Get kitchen status (accessible to admin and chefs)
 router.get("/:kitchenId/status", roleAuth("admin", "chef"), getKitchenStatus);

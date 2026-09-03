@@ -1,6 +1,6 @@
 // src/components/layout/Layout.jsx
 import React from "react";
-import Navbar from "../pages/Navbar";
+import Navbar from "./Navbar";
 
 export default function Layout({ children }) {
   return (

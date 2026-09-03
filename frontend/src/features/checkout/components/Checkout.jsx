@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../../../services/api";
-import { useCart } from "../../../contexts/CartContext";
+import { useCart } from "../../cart/CartContext";
 import { showToastSequence } from "../../../utils/toastQueue";
 
 import EmptyCartMessage from "./EmptyCartMessage";

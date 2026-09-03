@@ -2,11 +2,11 @@ import React, { useEffect, useState, useCallback, useContext } from "react";
 import { ChefHat, User, LogOut, ChevronDown } from "lucide-react";
 
 import useSocket from "../../hooks/useSocket";
-import StatsCards from "./components/StatsCards";
-import OrdersTable from "./components/OrdersTable";
-import OrderDetailModal from "./components/OrderDetailModal";
-import IssueModal from "./components/IssueModal";
-import { AuthContext } from "../../contexts/AuthContext";
+import StatsCards from "./StatsCards";
+import OrdersTable from "./OrdersTable";
+import OrderDetailModal from "./OrderDetailModal";
+import IssueModal from "./IssueModal";
+import { AuthContext } from "../../features/Auth/AuthContext";
 
 const KitchenOrders = () => {
   const { isConnected, on } = useSocket();

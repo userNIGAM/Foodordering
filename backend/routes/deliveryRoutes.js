@@ -35,11 +35,13 @@ router.put("/order/:orderId/in-transit", deliveryCanUpdateOrder, markInTransit);
 
 // Update location during transit
 router.put("/order/:orderId/location", updateLocation);
+router.put("/order/:orderId/location", deliveryCanUpdateOrder, updateLocation);
 
 // Deliver order
 router.put("/order/:orderId/deliver", deliveryCanUpdateOrder, deliverOrder);
 
 // Cancel delivery
 router.put("/order/:orderId/cancel", cancelDelivery);
+router.put("/order/:orderId/cancel", deliveryCanUpdateOrder, cancelDelivery);
 
 export default router;

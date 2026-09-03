@@ -1,7 +1,7 @@
 import ServicesHighlight from "./footer/ServicesHighlight";
 import FoodConcierge from "./footer/FoodConcierge";
 import FooterMain from "./footer/FooterMain";
-import Newsletter from "./footer/Newsletter";
+import Newsletter from "../common/Newsletter";
 import BottomBar from "./footer/BottomBar";
 // import AppBadges from "./AppBadges";
 

@@ -179,6 +179,7 @@ export const startPreparing = async (req, res) => {
   try {
     const { orderId } = req.params;
     const chefId = req.user._id;
+    const chef = await User.findById(chefId).select("name");
 
     const order = await Order.findById(orderId);
     if (!order) {
@@ -422,6 +423,8 @@ export const reportIssue = async (req, res) => {
       });
     }
 
+    const previousStatus = order.status;
+
     // Update order
     order.status = "issue";
     order.issue = {
@@ -437,7 +440,7 @@ export const reportIssue = async (req, res) => {
       changedByRole: "chef",
       timestamp: new Date(),
       notes: description,
-      previousStatus: order.status,
+      previousStatus,
     });
     await order.save();
 

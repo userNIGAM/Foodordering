@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, Star } from "lucide-react";
-import Image from "../../UI/Image";
+import Image from "../../../../components/ui/Image";
 
 export default function RelatedItems({ relatedItems }) {
   return (

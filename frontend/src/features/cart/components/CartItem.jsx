@@ -1,5 +1,5 @@
 import { Plus, Minus, Trash2 } from "lucide-react";
-import Image from "../../UI/Image";
+import Image from "../../../components/ui/Image";
 
 const getItemId = (item) => item._id || item.id;
 

@@ -1,6 +1,6 @@
 // HowItWorks.jsx
 import { ShoppingBag, CreditCard, Utensils } from "lucide-react";
-import useInView from "../../hook/useInView";
+import useInView from "../../hooks/useInView";
 
 const HowItWorks = () => {
   const steps = [

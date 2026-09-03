@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import { showToastSequence } from "../../../utils/toastQueue";
 
-import MenuList from "./MenuList";
-import Cart from "./Cart";
-import CustomerForm from "./CustomerForm";
+import MenuList from "../../menu/components/MenuList";
+import Cart from "../../cart/components/CartPage";
+import CustomerForm from "../../checkout/components/CustomerForm";
 
 const OrderForm = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -127,10 +127,12 @@ const OrderForm = () => {
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <Cart
-              cart={cart}
-              updateQuantity={updateQuantity}
-              removeFromCart={removeFromCart}
-              total={calculateTotal()}
+              isOpen={true}
+              onClose={() => {}}
+              cartItems={cart}
+              increaseQty={(id) => updateQuantity(id, cart.find((item) => item._id === id)?.quantity + 1 || 1)}
+              decreaseQty={(id) => updateQuantity(id, Math.max((cart.find((item) => item._id === id)?.quantity || 1) - 1, 1))}
+              removeItem={removeFromCart}
             />
 
             {cart.length > 0 && (

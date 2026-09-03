@@ -2,14 +2,14 @@
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, LogIn, Loader2 } from "lucide-react";
-import Input from "../UI/Input";
+import Input from "../../../components/ui/Input";
 import SocialButtons from "./SocialButtons";
-import Divider from "../UI/Divider";
-import Card from "../UI/Card";
-import { AuthContext } from "../../contexts/AuthContext";
+import Divider from "../../../components/ui/Divider";
+import Card from "../../../components/ui/Card";
+import { AuthContext } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
-import { roleRedirects } from "./roleRedirects";
-import { showToastSequence } from "./toastQueue";
+import { roleRedirects } from "../roleRedirects";
+import { showToastSequence } from "../../../utils/toastQueue";
 
 const LoginForm = ({ onModeChange }) => {
   const [email, setEmail] = useState("");

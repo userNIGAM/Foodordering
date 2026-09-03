@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext } from "../../features/Auth/AuthContext";
 import { Loader2 } from "lucide-react";
 
 const MainLayout = ({ children }) => {

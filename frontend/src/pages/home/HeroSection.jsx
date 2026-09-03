@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ShoppingCart, ChevronRight, Star, Clock, Shield, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import AnimatedSection from "../AnimatedSection";
+import AnimatedSection from "../../components/common/AnimatedSection";
 
 const headingVariant = {
   hidden: { y: -40, scale: 0.95, opacity: 0 },

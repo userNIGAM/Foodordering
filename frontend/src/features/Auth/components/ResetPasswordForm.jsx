@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, KeyRound, ArrowLeft, Loader2 } from "lucide-react";
-import Input from "../UI/Input";
-import Card from "../UI/Card";
-import api from "../../services/api";
-import { showToastSequence } from "./toastQueue";
+import Input from "../../../components/ui/Input";
+import Card from "../../../components/ui/Card";
+import api from "../../../services/api";
+import { showToastSequence } from "../../../utils/toastQueue";
 const ResetPasswordForm = ({ email, onModeChange }) => {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");

@@ -1,6 +1,6 @@
 import { Truck, Shield, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-import AnimatedSection from "../../AnimatedSection";
+import AnimatedSection from "../../../../components/common/AnimatedSection";
 import { badgeVariant } from "./variants";
 
 const features = [

@@ -3,16 +3,15 @@ import React, { useState, useContext, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-import LoginForm from "../LoginForm";
-import SignupForm from "../SignupForm";
-import VerifyEmailForm from "../VerifyEmailForm";
-import ForgotPasswordForm from "../ForgotPasswordForm";
-import ResetPasswordForm from "../ResetPasswordForm";
+import LoginForm from "./LoginForm";
+import SignupForm from "./SignupForm";
+import VerifyEmailForm from "./VerifyEmailForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
+import ResetPasswordForm from "./ResetPasswordForm";
 import AuthHeader from "./AuthHeader";
 import AuthSidebar from "./AuthSidebar";
-import GradientBackdrop from "../GradientBackdrop";
 
-import { AuthContext } from "../../../contexts/AuthContext";
+import { AuthContext } from "../AuthContext";
 import { roleRedirects } from "../roleRedirects";
 
 const AuthPage = () => {
@@ -79,8 +78,8 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="relative grid min-h-screen place-items-center bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 px-4 py-10">
-      <GradientBackdrop />
+    <div className="relative grid min-h-screen justify-center place-items-center bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 px-4 py-10">
+      {/* <GradientBackdrop /> */}
 
       <div className="mx-auto w-full max-w-6xl">
         <AuthHeader />

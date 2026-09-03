@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import Hero from "./Hero";
 import Stats from "./Stats";
 import Intro from "./Intro";
-import Problems from "./About/Problems";
+import Problems from "./Problems";
 import Features from "./Features";
-import Partners from "./About/Partners";
+import Partners from "./Partners";
 import CTA from "./CTA";
 import { partners } from "./data";
 

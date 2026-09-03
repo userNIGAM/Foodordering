@@ -13,7 +13,7 @@ import {
   X,
   Search,
 } from "lucide-react";
-import { AuthContext } from "../../contexts/AuthContext";
+import { AuthContext } from "../../features/Auth/AuthContext";
 
 const Sidebar = ({
   activeSection,

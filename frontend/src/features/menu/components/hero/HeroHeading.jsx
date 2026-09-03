@@ -1,4 +1,4 @@
-import AnimatedSection from "../../AnimatedSection";
+import AnimatedSection from "../../../../components/common/AnimatedSection";
 import { headingVariant, textVariant } from "./variants";
 
 export default function HeroHeading() {

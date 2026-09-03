@@ -2,10 +2,10 @@ import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import { Star, Heart, Clock, StarHalf } from "lucide-react";
 import PropTypes from "prop-types";
-import { useCart } from "../../contexts/CartContext";
-import { useWishlist } from "../../contexts/WishlistContext";
-import Image from "../UI/Image";
-import { getImageUrl } from "../../services/api";
+import { useCart } from "../../cart/CartContext";
+import { useWishlist } from "../../wishlist/WishlistContext";
+import Image from "../../../components/ui/Image";
+import { getImageUrl } from "../../../services/api";
 
 const FoodCard = memo(({ item }) => {
   const { addToCart } = useCart();

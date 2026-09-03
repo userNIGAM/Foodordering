@@ -1,6 +1,6 @@
 import React from "react";
 import { Heart } from "lucide-react";
-import Image from "../../UI/Image";
+import Image from "../../../../components/ui/Image";
 
 export default function FoodImages({
   item,

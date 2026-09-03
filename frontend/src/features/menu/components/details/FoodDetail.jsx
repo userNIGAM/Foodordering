@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../../../services/api";
-import { useCart } from "../../../../contexts/CartContext";
-import { useWishlist } from "../../../../contexts/WishlistContext";
+import { useCart } from "../../../cart/CartContext";
+import { useWishlist } from "../../../wishlist/WishlistContext";
 import Breadcrumb from "./Breadcrumb";
 import FoodImages from "./FoodImages";
 import FoodInfo from "./FoodInfo";
@@ -11,9 +11,9 @@ import AddToCartButton from "./AddToCartButton";
 import Benefits from "./Benefits";
 import Reviews from "./Reviews";
 import RelatedItems from "./RelatedItems";
-import StarRating from "../../UI/StarRating"; // ✅ Import star rating
-import { useRating } from "../../hooks/useRating"; // ✅ Import hook
-import StarRatingdynamic from "../../UI/StarRatingdynamic";
+import StarRating from "../../../../components/ui/StarRating";
+import { useRating } from "../../hooks/useRating";
+import StarRatingdynamic from "../../../../components/ui/StarRating";
 
 export default function FoodDetail() {
   const { id } = useParams();

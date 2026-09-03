@@ -1,12 +1,9 @@
 import React from "react";
-import HeroSection from "../../Components/pages/HeroSection";
-import ProductsGrid from "../../Components/pages/products/ProductsGrid";
-import ServicesSection from "../../Components/pages/services/ServicesSection";
-import ContactSection from "../contact/Contact";
-import Chatbot from "../../Components/pages/chat/Chatbot";
-import AnimatedSection from "../../Components/AnimatedSection";
-import Footer from "../../Components/layout/Footer";
-import HomeFoodSection from "../../Components/pages/HeroMenu";
+import HeroSection from "./HeroSection";
+import Chatbot from "../../features/chat/Chatbot";
+import AnimatedSection from "../../components/common/AnimatedSection";
+import Footer from "../../components/layout/Footer";
+import HomeFoodSection from "./HeroMenu";
 
 const Home = () => {
   return (

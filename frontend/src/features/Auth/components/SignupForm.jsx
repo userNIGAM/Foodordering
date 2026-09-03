@@ -9,12 +9,12 @@ import {
   UserPlus,
   Loader2,
 } from "lucide-react";
-import Input from "../UI/Input";
+import Input from "../../../components/ui/Input";
 import SocialButtons from "./SocialButtons";
-import Divider from "../UI/Divider";
-import Card from "../UI/Card";
-import api from "../../services/api";
-import { showToastSequence } from "./toastQueue";
+import Divider from "../../../components/ui/Divider";
+import Card from "../../../components/ui/Card";
+import api from "../../../services/api";
+import { showToastSequence } from "../../../utils/toastQueue";
 
 const SignupForm = ({ onModeChange }) => {
   const [name, setName] = useState("");

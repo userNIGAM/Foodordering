@@ -2,6 +2,7 @@ import Order from "../models/Order.js";
 import User from "../models/User.js";
 import MenuItem from "../models/MenuItem.js";
 import Inventory from "../models/Inventory.js";
+import Promotion from "../models/Promotion.js";
 import nodemailer from "nodemailer";
 import { sendEmail } from "../utils/mailer.js";
 
@@ -243,6 +244,7 @@ export const updateOrderStatus = async (req, res) => {
       "picked_up",
       "out_for_delivery",
       "delivered",
+      "issue",
       "cancelled",
     ]);
 

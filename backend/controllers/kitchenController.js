@@ -1,6 +1,7 @@
 // backend/controllers/kitchenController.js
 import Kitchen from "../models/Kitchen.js";
 import User from "../models/User.js";
+import Order from "../models/Order.js";
 import { sendEmail } from "../utils/mailer.js";
 
 /**
@@ -71,6 +72,29 @@ export const getAllKitchens = async (req, res) => {
     });
   } catch (error) {
     console.error("Get All Kitchens Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+export const getKitchenOrders = async (req, res) => {
+  try {
+    const query = req.user.role === "chef"
+      ? { chefId: req.user._id }
+      : { status: { $in: ["assigned_to_kitchen", "confirmed", "preparing", "prepared"] } };
+
+    const orders = await Order.find(query).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    console.error("Get Kitchen Orders Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -372,6 +396,7 @@ export const deleteKitchen = async (req, res) => {
 export default {
   createKitchen,
   getAllKitchens,
+  getKitchenOrders,
   getKitchenById,
   updateKitchen,
   assignChefToKitchen,
